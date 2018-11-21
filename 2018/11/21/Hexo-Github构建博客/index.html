@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="在开始构建博客前，你需要在Github拥有一个账号,之后新建一个存储库(比如:zhijiansd.github.io),这里我就不再赘述了.接下来,我们需要为GitHub添加SSH key.">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-11-21T11:31:28.085Z">
+<meta property="og:updated_time" content="2018-11-21T11:36:23.384Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo+Github构建博客">
 <meta name="twitter:description" content="在开始构建博客前，你需要在Github拥有一个账号,之后新建一个存储库(比如:zhijiansd.github.io),这里我就不再赘述了.接下来,我们需要为GitHub添加SSH key.">
@@ -406,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2018-11-21 13:29:18 / 修改时间：19:31:28" itemprop="dateCreated datePublished" datetime="2018-11-21T13:29:18+08:00">2018-11-21</time>
+              <time title="创建时间：2018-11-21 13:29:18 / 修改时间：19:36:23" itemprop="dateCreated datePublished" datetime="2018-11-21T13:29:18+08:00">2018-11-21</time>
             
 
             
@@ -555,7 +555,9 @@
 </li>
 </ul>
 <h3 id="修改标签样式"><a href="#修改标签样式" class="headerlink" title="修改标签样式"></a>修改标签样式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim themes/next/layout/_macro/post.swig</span></span><br><span class="line">&lt;a href=<span class="string">"&#123;&#123; url_for(tag.path) &#125;&#125;"</span> rel=<span class="string">"tag"</span>&gt;&lt;i class=<span class="string">"fa fa-tag"</span>&gt;&lt;/i&gt; &#123;&#123; tag.name &#125;&#125;&lt;/a&gt;</span><br></pre></td></tr></table></figure>
-<p>注:在文件中搜索 rel=”tag”&gt;#，将 # 换成<i class="fa fa-tag"></i></p>
+<blockquote>
+<p>在文件中搜索 rel=”tag”&gt;#，将 # 换成 <i class="fa fa-tag"></i>.</p>
+</blockquote>
 <h2 id="生成Hexo"><a href="#生成Hexo" class="headerlink" title="生成Hexo"></a>生成Hexo</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># hexo g</span></span><br></pre></td></tr></table></figure>
 <h2 id="开启预览访问端口"><a href="#开启预览访问端口" class="headerlink" title="开启预览访问端口"></a>开启预览访问端口</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># hexo server -i 192.168.100.122</span></span><br><span class="line">INFO  Start processing</span><br><span class="line">INFO  Hexo is running at http://192.168.100.122:4000 . Press Ctrl+C to stop.</span><br></pre></td></tr></table></figure>
 <blockquote>
