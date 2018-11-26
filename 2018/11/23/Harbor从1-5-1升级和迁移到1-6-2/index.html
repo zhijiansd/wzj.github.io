@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="这次升级还算比较顺利，以前我从1.2版本升级到1.5版本没有升级成功，镜像全洗白了，所以这次升级我及其谨慎，官方文档看了又看(主要是文档排版太糟糕了)，生怕又给洗白了，当然结果是好的，成功升级。  官方改了三次数据库，从最早使用的MySQL迁移到MariaDB，从1.6.0开始又迁移到了Postgresql 在1.5.1版中我并没有安装运行Notary和Clair这两个组件 升级到1.6.2">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-11-24T10:31:24.073Z">
+<meta property="og:updated_time" content="2018-11-26T03:20:06.769Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Harbor从1.5.1升级和迁移到1.6.2">
 <meta name="twitter:description" content="这次升级还算比较顺利，以前我从1.2版本升级到1.5版本没有升级成功，镜像全洗白了，所以这次升级我及其谨慎，官方文档看了又看(主要是文档排版太糟糕了)，生怕又给洗白了，当然结果是好的，成功升级。  官方改了三次数据库，从最早使用的MySQL迁移到MariaDB，从1.6.0开始又迁移到了Postgresql 在1.5.1版中我并没有安装运行Notary和Clair这两个组件 升级到1.6.2">
@@ -423,7 +423,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-24 18:31:24" itemprop="dateModified" datetime="2018-11-24T18:31:24+08:00">2018-11-24</time>
+                <time title="修改时间：2018-11-26 11:20:06" itemprop="dateModified" datetime="2018-11-26T11:20:06+08:00">2018-11-26</time>
               
             
           </span>
@@ -475,7 +475,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">7.7k</span>
+                <span title="本文字数">7.8k</span>
               
 
               
@@ -552,7 +552,7 @@
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker push 192.168.100.100/google_containers/kubernetes-dashboard-amd64:v1.10.0</span></span><br><span class="line">The push refers to repository [192.168.100.100/google_containers/kubernetes-dashboard-amd64]</span><br><span class="line">5f222ffea122: Pushed </span><br><span class="line">v1.10.0: digest: sha256:1d2e1229a918f4bc38b5a3f9f5f11302b3e71f8397b492afac7f273a0008776a size: 529</span><br><span class="line">Signing and pushing trust metadata</span><br><span class="line">You are about to create a new root signing key passphrase. This passphrase</span><br><span class="line">will be used to protect the most sensitive key <span class="keyword">in</span> your signing system. Please</span><br><span class="line">choose a long, complex passphrase and be careful to keep the password and the</span><br><span class="line">key file itself secure and backed up. It is highly recommended that you use a</span><br><span class="line">password manager to generate the passphrase and keep it safe. There will be no</span><br><span class="line">way to recover this key. You can find the key <span class="keyword">in</span> your config directory.</span><br><span class="line"></span><br><span class="line"><span class="comment">## 第一次push镜像，系统将要求您输入根密钥密码</span></span><br><span class="line">Enter passphrase <span class="keyword">for</span> new root key with ID 7ffe68f: </span><br><span class="line">Repeat passphrase <span class="keyword">for</span> new root key with ID 7ffe68f: </span><br><span class="line"></span><br><span class="line"><span class="comment">## 密码设置弱系统会进行提示</span></span><br><span class="line">Enter passphrase <span class="keyword">for</span> new repository key with ID e8c208d: </span><br><span class="line">Passphrase is too short. Please use a password manager to generate and store a good random passphrase.</span><br><span class="line">Enter passphrase <span class="keyword">for</span> new repository key with ID e8c208d: </span><br><span class="line">Repeat passphrase <span class="keyword">for</span> new repository key with ID e8c208d: </span><br><span class="line">Finished initializing <span class="string">"192.168.100.100/google_containers/kubernetes-dashboard-amd64"</span></span><br><span class="line">Successfully signed 192.168.100.100/google_containers/kubernetes-dashboard-amd64:v1.10.0</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>注1: 根密钥生成于: /root/.docker/trust/private/<br>镜像密码生成于: /root/.docker/trust/tuf/[registry name]/[imagepath]<br>注2: 要使用notary，必须在Harbor中启用HTTPS.<br>注3: 当镜像被签名时，它在UI中显示勾号; 否则，显示交叉符号（X）。</p>
+<p>注1: 根密钥生成于: /root/.docker/trust/private/<br>镜像密码生成于: /root/.docker/trust/tuf/[registry name]/[imagepath]<br>注2: 要使用notary，必须在Harbor中启用HTTPS.<br>注3: 当镜像被签名时，它在UI中显示勾号; 否则，显示交叉符号（X）。<br>注4:如果您省略标签，则跳过内容信任。提示”No tag specified, skipping trust metadata push”，所以即便是 latest 也需要提供镜像 tag 值。</p>
 </blockquote>
 <h2 id="通过Clair进行漏洞扫描"><a href="#通过Clair进行漏洞扫描" class="headerlink" title="通过Clair进行漏洞扫描"></a>通过Clair进行漏洞扫描</h2><p>Clair依靠漏洞元数据来完成分析过程。第一次初始安装后，Clair将自动开始从不同的漏洞存储库更新元数据数据库。更新过程可能需要一段时间，具体取决于数据大小和网络连接。如果数据库尚未完全填充，则存储库数据网格视图的页脚会显示警告消息。 </p>
 <p>数据库准备就绪后，整个数据库更新的时间戳将显示在“管理”下“ 配置”部分的“漏洞”选项卡中。这时候就可以进行漏洞扫描了。</p>
