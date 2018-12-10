@@ -127,7 +127,7 @@
 <meta property="og:image" content="https://zhijiansd.github.io/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne08.png">
 <meta property="og:image" content="https://zhijiansd.github.io/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne09.png">
 <meta property="og:image" content="https://zhijiansd.github.io/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne10.png">
-<meta property="og:updated_time" content="2018-12-10T14:57:28.602Z">
+<meta property="og:updated_time" content="2018-12-10T15:06:46.103Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne">
 <meta name="twitter:description" content="Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。">
@@ -418,7 +418,7 @@
                 
               
 
-              <time title="创建时间：2018-12-10 11:07:09 / 修改时间：22:57:28" itemprop="dateCreated datePublished" datetime="2018-12-10T11:07:09+08:00">2018-12-10</time>
+              <time title="创建时间：2018-12-10 11:07:09 / 修改时间：23:06:46" itemprop="dateCreated datePublished" datetime="2018-12-10T11:07:09+08:00">2018-12-10</time>
             
 
             
@@ -475,7 +475,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">3.6k</span>
+                <span title="本文字数">3.9k</span>
               
 
               
@@ -489,7 +489,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">6 分钟</span>
+                <span title="阅读时长">7 分钟</span>
               
             </div>
           
@@ -554,7 +554,8 @@
 <p><img src="/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne01.png" alt="kubeconfig"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl create namespace test</span></span><br><span class="line">namespace/<span class="built_in">test</span> created</span><br></pre></td></tr></table></figure>
 <p><img src="/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne02.png" alt="namespaces"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">    A[管理员] --&gt; B[进入后台]</span><br><span class="line">    B --&gt;  C[集群] </span><br><span class="line">    B --&gt;  D[命名空间]</span><br><span class="line">    C --&gt;  |列表| F[创建集群]</span><br><span class="line">    D --&gt;  |列表| G[创建命名空间]</span><br></pre></td></tr></table></figure>
+<div id="flowchart-0" class="flow-chart"></div>
+
 <p><img src="/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne03.png" alt="all"></p>
 <blockquote>
 <p>配置完成,在左侧边栏的 kubernetes 菜单栏可以查看当前集群的相关 node 信息、deployment 信息以及 PV 信息。</p>
@@ -590,6 +591,11 @@
 <ul>
 <li>更多详情请访问 Wayne 官方 wiki: <a href="https://github.com/Qihoo360/wayne/wiki" target="_blank" rel="noopener">wayne</a></li>
 </ul>
+<p><script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">    A[管理员] --> B[进入后台]
+    B -->  C[集群] 
+    B -->  D[命名空间]
+    C -->  |列表| F[创建集群]
+    D -->  |列表| G[创建命名空间]</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script></p>
 
       
     </div>
@@ -888,7 +894,7 @@
     
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
     
-    <span title="站点阅读时长">39 分钟</span>
+    <span title="站点阅读时长">40 分钟</span>
   
 </div>
 
