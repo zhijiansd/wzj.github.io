@@ -127,7 +127,7 @@
 <meta property="og:image" content="https://zhijiansd.github.io/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne08.png">
 <meta property="og:image" content="https://zhijiansd.github.io/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne09.png">
 <meta property="og:image" content="https://zhijiansd.github.io/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne10.png">
-<meta property="og:updated_time" content="2018-12-10T12:38:17.136Z">
+<meta property="og:updated_time" content="2018-12-10T14:57:28.602Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne">
 <meta name="twitter:description" content="Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。">
@@ -418,7 +418,7 @@
                 
               
 
-              <time title="创建时间：2018-12-10 11:07:09 / 修改时间：20:38:17" itemprop="dateCreated datePublished" datetime="2018-12-10T11:07:09+08:00">2018-12-10</time>
+              <time title="创建时间：2018-12-10 11:07:09 / 修改时间：22:57:28" itemprop="dateCreated datePublished" datetime="2018-12-10T11:07:09+08:00">2018-12-10</time>
             
 
             
@@ -554,18 +554,13 @@
 <p><img src="/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne01.png" alt="kubeconfig"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl create namespace test</span></span><br><span class="line">namespace/<span class="built_in">test</span> created</span><br></pre></td></tr></table></figure>
 <p><img src="/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne02.png" alt="namespaces"></p>
-<pre><code>graph TD
-    A[管理员] --&gt; B[进入后台]
-    B --&gt;  C[集群] 
-    B --&gt;  D[命名空间]
-    C --&gt;  |列表| F[创建集群]
-    D --&gt;  |列表| G[创建命名空间]
-</code></pre><p><img src="/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne03.png" alt="all"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">    A[管理员] --&gt; B[进入后台]</span><br><span class="line">    B --&gt;  C[集群] </span><br><span class="line">    B --&gt;  D[命名空间]</span><br><span class="line">    C --&gt;  |列表| F[创建集群]</span><br><span class="line">    D --&gt;  |列表| G[创建命名空间]</span><br></pre></td></tr></table></figure>
+<p><img src="/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne03.png" alt="all"></p>
 <blockquote>
 <p>配置完成,在左侧边栏的 kubernetes 菜单栏可以查看当前集群的相关 node 信息、deployment 信息以及 PV 信息。</p>
 </blockquote>
 <h2 id="应用-Wayne"><a href="#应用-Wayne" class="headerlink" title="应用 Wayne"></a>应用 Wayne</h2><h3 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h3><blockquote>
-<p>返回前台，切换至当前集群的选项卡创建项目</p>
+<p>返回前台，切换至当前集群的选项卡”创建项目”</p>
 </blockquote>
 <p><img src="/2018/12/10/部署基于-Web-的-Kubernetes-多集群管理平台-360-Wayne/wayne04.png" alt="app"></p>
 <h3 id="创建部署"><a href="#创建部署" class="headerlink" title="创建部署"></a>创建部署</h3><blockquote>
