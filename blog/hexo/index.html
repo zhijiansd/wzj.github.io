@@ -116,12 +116,10 @@
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="在开始构建博客前，你需要在Github拥有一个账号,之后新建一个存储库(比如:zhijiansd.github.io),这里我就不再赘述了.接下来,我们需要为GitHub添加SSH key.">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/hexo/abcd/name.png">
-<meta property="og:updated_time" content="2018-12-11T14:36:14.639Z">
+<meta property="og:updated_time" content="2018-12-11T14:59:06.802Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo+Github构建博客">
 <meta name="twitter:description" content="在开始构建博客前，你需要在Github拥有一个账号,之后新建一个存储库(比如:zhijiansd.github.io),这里我就不再赘述了.接下来,我们需要为GitHub添加SSH key.">
-<meta name="twitter:image" content="https://zhijiansd.github.io/blog/hexo/abcd/name.png">
 
 
 
@@ -425,7 +423,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-12-11 22:36:14" itemprop="dateModified" datetime="2018-12-11T22:36:14+08:00">2018-12-11</time>
+                <time title="修改时间：2018-12-11 22:59:06" itemprop="dateModified" datetime="2018-12-11T22:59:06+08:00">2018-12-11</time>
               
             
           </span>
@@ -577,13 +575,16 @@
 </blockquote>
 <h3 id="在文章中插入图片"><a href="#在文章中插入图片" class="headerlink" title="在文章中插入图片"></a>在文章中插入图片</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># npm install hexo-asset-image --save</span></span><br><span class="line"><span class="comment"># vim _config.yml</span></span><br><span class="line">post_asset_folder: <span class="literal">true</span></span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>如输入[hexo new post “abcd”]新建文章,/source/_posts文件夹内除了abcd.md文件还有一个同名的文件夹，在文章中输入”<img src="/blog/hexo/abcd/name.png" alt="name">“即可在文章中插入图片</p>
+<p>新建文章,/source/_posts文件夹内除了abcd.md文件还有一个同名的文件夹，在文章中按照默认格式即可在文章中插入图片(图片地址使用相对地址即可)</p>
 </blockquote>
 <h3 id="绘制流程图"><a href="#绘制流程图" class="headerlink" title="绘制流程图"></a>绘制流程图</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># npm install --save hexo-filter-mermaid-diagrams</span></span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>实验很多遍都没绘制出来,在这里只是想告诉大家 hexo 可以绘制流程图.详询:<a href="https://github.com/knsv/mermaid" target="_blank" rel="noopener">mermaid</a></p>
 </blockquote>
 <h3 id="修改永久链接的默认格式"><a href="#修改永久链接的默认格式" class="headerlink" title="修改永久链接的默认格式"></a>修改永久链接的默认格式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># npm install hexo-abbrlink --save</span></span><br><span class="line"><span class="comment"># vim _config.yml</span></span><br><span class="line"><span class="comment">#permalink: :year/:month/:day/:title/</span></span><br><span class="line"><span class="comment">#permalink_defaults:</span></span><br><span class="line">permalink: blog/:abbrlink.html</span><br><span class="line">abbrlink:</span><br><span class="line">  alg: crc32  <span class="comment"># 算法：crc16(default) and crc32</span></span><br><span class="line">  rep: hex    <span class="comment"># 进制：dec(default) and hex</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用了该插件的话，同时使用了本地图片插件，注意图片路径的变化.</p>
+</blockquote>
 <h2 id="生成Hexo"><a href="#生成Hexo" class="headerlink" title="生成Hexo"></a>生成Hexo</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># hexo g</span></span><br></pre></td></tr></table></figure>
 <h2 id="开启预览访问端口"><a href="#开启预览访问端口" class="headerlink" title="开启预览访问端口"></a>开启预览访问端口</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># hexo server -i 192.168.100.122</span></span><br><span class="line">INFO  Start processing</span><br><span class="line">INFO  Hexo is running at http://192.168.100.122:4000 . Press Ctrl+C to stop.</span><br></pre></td></tr></table></figure>
 <blockquote>
