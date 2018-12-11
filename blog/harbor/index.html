@@ -108,37 +108,25 @@
 
 
 
-  <meta name="description" content="Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。">
-<meta name="keywords" content="kubernetes,wayne">
+  <meta name="description" content="这次升级还算比较顺利，以前我从1.2版本升级到1.5版本没有升级成功，镜像全洗白了，所以这次升级我及其谨慎，官方文档看了又看(主要是文档排版太糟糕了)，生怕又给洗白了，当然结果是好的，成功升级。  官方改了三次数据库，从最早使用的MySQL迁移到MariaDB，从1.6.0开始又迁移到了Postgresql 在1.5.1版中我并没有安装运行Notary和Clair这两个组件 升级到1.6.2">
+<meta name="keywords" content="harbor,docker,registry,notary,clair">
 <meta property="og:type" content="article">
-<meta property="og:title" content="部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne">
-<meta property="og:url" content="https://zhijiansd.github.io/blog/360wayne/index.html">
+<meta property="og:title" content="Harbor从1.5.1升级和迁移到1.6.2">
+<meta property="og:url" content="https://zhijiansd.github.io/blog/harbor/index.html">
 <meta property="og:site_name" content="ZhiJian">
-<meta property="og:description" content="Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。">
+<meta property="og:description" content="这次升级还算比较顺利，以前我从1.2版本升级到1.5版本没有升级成功，镜像全洗白了，所以这次升级我及其谨慎，官方文档看了又看(主要是文档排版太糟糕了)，生怕又给洗白了，当然结果是好的，成功升级。  官方改了三次数据库，从最早使用的MySQL迁移到MariaDB，从1.6.0开始又迁移到了Postgresql 在1.5.1版中我并没有安装运行Notary和Clair这两个组件 升级到1.6.2">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne01.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne02.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne03.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne04.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne05.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne06.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne07.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne08.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne09.png">
-<meta property="og:image" content="https://zhijiansd.github.io/blog/360wayne/wayne10.png">
-<meta property="og:updated_time" content="2018-12-11T14:04:44.827Z">
+<meta property="og:updated_time" content="2018-12-11T14:38:27.137Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne">
-<meta name="twitter:description" content="Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。">
-<meta name="twitter:image" content="https://zhijiansd.github.io/blog/360wayne/wayne.png">
+<meta name="twitter:title" content="Harbor从1.5.1升级和迁移到1.6.2">
+<meta name="twitter:description" content="这次升级还算比较顺利，以前我从1.2版本升级到1.5版本没有升级成功，镜像全洗白了，所以这次升级我及其谨慎，官方文档看了又看(主要是文档排版太糟糕了)，生怕又给洗白了，当然结果是好的，成功升级。  官方改了三次数据库，从最早使用的MySQL迁移到MariaDB，从1.6.0开始又迁移到了Postgresql 在1.5.1版中我并没有安装运行Notary和Clair这两个组件 升级到1.6.2">
 
 
 
 
 
 
-  <link rel="canonical" href="https://zhijiansd.github.io/blog/360wayne/">
+  <link rel="canonical" href="https://zhijiansd.github.io/blog/harbor/">
 
 
 
@@ -148,7 +136,7 @@
   };
 </script>
 
-  <title>部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne | ZhiJian</title>
+  <title>Harbor从1.5.1升级和迁移到1.6.2 | ZhiJian</title>
   
 
 
@@ -376,7 +364,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://zhijiansd.github.io/blog/360wayne/">
+    <link itemprop="mainEntityOfPage" href="https://zhijiansd.github.io/blog/harbor/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ZhiJian">
@@ -393,7 +381,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne
+          <h1 class="post-title" itemprop="name headline">Harbor从1.5.1升级和迁移到1.6.2
               
             
           </h1>
@@ -418,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2018-12-10 11:07:09" itemprop="dateCreated datePublished" datetime="2018-12-10T11:07:09+08:00">2018-12-10</time>
+              <time title="创建时间：2018-11-23 22:09:02" itemprop="dateCreated datePublished" datetime="2018-11-23T22:09:02+08:00">2018-11-23</time>
             
 
             
@@ -435,7 +423,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-12-11 22:04:44" itemprop="dateModified" datetime="2018-12-11T22:04:44+08:00">2018-12-11</time>
+                <time title="修改时间：2018-12-11 22:38:27" itemprop="dateModified" datetime="2018-12-11T22:38:27+08:00">2018-12-11</time>
               
             
           </span>
@@ -452,7 +440,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/kubernetes/" itemprop="url" rel="index"><span itemprop="name">kubernetes</span></a></span>
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/镜像仓库/" itemprop="url" rel="index"><span itemprop="name">镜像仓库</span></a></span>
 
                 
                 
@@ -487,7 +475,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">3.6k</span>
+                <span title="本文字数">7.8k</span>
               
 
               
@@ -501,7 +489,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">6 分钟</span>
+                <span title="阅读时长">13 分钟</span>
               
             </div>
           
@@ -521,89 +509,74 @@
       
 
       
-        <p>Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。</p>
-<a id="more"></a>
-<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><ul>
-<li><p>基于 RBAC（Role based access control）的权限管理：用户通过角色与部门和项目关联，拥有部门角色允许操作部门资源，拥有项目角色允许操作项目资源，更加适合多租户场景。</p>
-</li>
-<li><p>简化 Kubernetes 对象创建：提供基础 Kubernetes 对象配置文件添加方式，同时支持高级模式直接编辑 Json/Yaml文件创建 Kubernetes 对象。</p>
-</li>
-<li><p>LDAP/OAuth 2.0/DB 多种登录模式支持：集成企业级 LDAP 登录及 DB 登录模式，同时还可以实现 OAuth2 登录。</p>
-</li>
-<li><p>支持多集群、多租户：可以同时管理多个 Kubernetes 集群，并针对性添加特定配置，更方便的多集群、多租户管理。</p>
-</li>
-<li><p>提供完整审计模块：每次操作都会有完整的审计功能，追踪用于操作历史，同时支持用户自定义 webhook。</p>
-</li>
-<li><p>提供基于 APIKey 的开放接口调用：用户可自主申请相关 APIKey 并管理自己的部门和项目，运维人员也可以申请全局 APIKey 进行特定资源的全局管理。</p>
-</li>
-<li><p>保留完整的发布历史：用户可以便捷的找到任何一次历史发布，并可轻松进行回滚，以及基于特定历史版本更新 Kubernetes 资源。</p>
-</li>
-<li><p>具备完善的资源报表：用户可以轻松获取各项目的资源使用占比和历史上线频次（天级）以及其他基础数据的报表和图表。</p>
-</li>
-<li><p>提供基于严密权限校验的 Web shell：用户可以通过 Web shell 的形式进入发布的 Pod 进行操作，自带完整的权限校验。</p>
-</li>
-<li><p>提供站内通知系统：方便管理员推送集群、业务通知和故障处理报告等。</p>
-</li>
-</ul>
-<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="/blog/360wayne/wayne.png" alt="wayne"></p>
-<h2 id="部署-Wayne"><a href="#部署-Wayne" class="headerlink" title="部署 Wayne"></a>部署 Wayne</h2><h3 id="下载相关文件并部署"><a href="#下载相关文件并部署" class="headerlink" title="下载相关文件并部署"></a>下载相关文件并部署</h3><blockquote>
-<p>Wayne 依赖 MySQL 和 RabbitMQ，其中 MySQL 是必须的服务，用户存储系统的各种数据，RabbitMQ 是可选的，主要用户扩展审计功能使用。</p>
-</blockquote>
-<blockquote>
-<p>这里使用了 ceph 进行数据持久化</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git clone https://github.com/Qihoo360/wayne.git</span></span><br><span class="line"><span class="comment"># cd wayne/hack/kubernetes/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># vim dependency/mysql-pvc.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: mysql-wayne-pvc</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    app: mysql-wayne</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: default-rbd</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="string">"10Gi"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># vim dependency/rabbitmq-pvc.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: rabbitmq-wayne-pvc</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    app: rabbitmq-wayne</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: default-rbd</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="string">"5Gi"</span></span><br><span class="line">      </span><br><span class="line"><span class="comment"># kubectl apply -f dependency/</span></span><br><span class="line">persistentvolumeclaim/mysql-wayne-pvc created</span><br><span class="line">deployment.extensions/mysql-wayne created</span><br><span class="line">service/mysql-wayne created</span><br><span class="line">persistentvolumeclaim/rabbitmq-wayne-pvc created</span><br><span class="line">deployment.extensions/rabbitmq-wayne created</span><br><span class="line">service/rabbitmq-wayne created</span><br><span class="line"><span class="comment"># kubectl get pod</span></span><br><span class="line">NAME                              READY   STATUS    RESTARTS   AGE</span><br><span class="line">mysql-wayne-75947575d-mc972       1/1     Running   0          107s</span><br><span class="line">rabbitmq-wayne-7c6dd8f475-l4pqj   1/1     Running   0          106s</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl apply -f wayne/</span></span><br><span class="line">configmap/infra-wayne created</span><br><span class="line">deployment.extensions/infra-wayne created</span><br><span class="line">deployment.extensions/infra-wayne-woker created</span><br><span class="line">deployment.extensions/infra-wayne-webhook created</span><br><span class="line">service/infra-wayne created</span><br><span class="line"><span class="comment"># kubectl get pod</span></span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">infra-wayne-5d84cf49b4-lggzs           1/1     Running   0          7m44s</span><br><span class="line">infra-wayne-webhook-85dcf87c48-w4tcj   1/1     Running   0          7m44s</span><br><span class="line">infra-wayne-woker-84bff6f8c9-mt7h5     1/1     Running   0          7m44s</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>现在可以通过 <a href="http://yourip:NodePort" target="_blank" rel="noopener">http://yourip:NodePort</a> 访问 Wayne 平台，默认管理员账号 密码admin:admin。</p>
-</blockquote>
-<blockquote>
-<p>注: 项目启动后还需要配置集群和 Namespace 等信息才可正常使用。</p>
-</blockquote>
-<h3 id="配置集群和-Namespace"><a href="#配置集群和-Namespace" class="headerlink" title="配置集群和 Namespace"></a>配置集群和 Namespace</h3><h4 id="配置集群"><a href="#配置集群" class="headerlink" title="配置集群"></a>配置集群</h4><blockquote>
-<p>进入后台创建集群并将 .kube/config 复制并粘贴至该集群下</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat .kube/config</span></span><br></pre></td></tr></table></figure>
-<p><img src="/blog/360wayne/wayne01.png" alt="kubeconfig"></p>
-<h4 id="配置-namespace"><a href="#配置-namespace" class="headerlink" title="配置 namespace"></a>配置 namespace</h4><blockquote>
-<p>在 wayne 后台创建命名空间(需在 kubernetes 集群中进行创建,然后与 wayne 进行绑定)</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl create namespace test</span></span><br><span class="line">namespace/<span class="built_in">test</span> created</span><br></pre></td></tr></table></figure>
-<p><img src="/blog/360wayne/wayne02.png" alt="namespaces"></p>
-<h4 id="查看资源状况"><a href="#查看资源状况" class="headerlink" title="查看资源状况"></a>查看资源状况</h4><p><img src="/blog/360wayne/wayne03.png" alt="all"></p>
-<blockquote>
-<p>配置完成,在左侧边栏的 kubernetes 菜单栏可以查看当前集群的相关 node 信息、deployment 信息以及 PV 信息。</p>
-</blockquote>
-<h2 id="应用-Wayne"><a href="#应用-Wayne" class="headerlink" title="应用 Wayne"></a>应用 Wayne</h2><h3 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h3><blockquote>
-<p>返回前台，切换至当前集群的选项卡”创建项目”</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne04.png" alt="app"></p>
-<h3 id="创建部署"><a href="#创建部署" class="headerlink" title="创建部署"></a>创建部署</h3><blockquote>
-<p>进入该项目部署页“创建部署”进行部署，之后“创建部署模板”，之后点击“发布”，在弹出的选择框中选择需要部署的机房并“确认”即可部署到kubernetes。</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne05.png" alt="deployment"></p>
-<blockquote>
-<p>部署成功后，可以选择“重启”、“下线”:</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne06.png" alt="pod1"></p>
-<blockquote>
-<p>点击上线机房，通过弹出的选择框可以“进入容器”、“查看日志”:</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne07.png" alt="pod2"></p>
-<h3 id="创建负载均衡"><a href="#创建负载均衡" class="headerlink" title="创建负载均衡"></a>创建负载均衡</h3><blockquote>
-<p>点击该项目下左侧边栏的“负载均衡”项，之后“创建负载均衡”，配置“名称”和“机房”并提交。之后“创建负载均衡模板”,之后点击“发布”，在弹出的选择框中选择需要部署的机房并“确认”即可部署到kubernetes。</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne08.png" alt="service"></p>
-<h3 id="创建ingress"><a href="#创建ingress" class="headerlink" title="创建ingress"></a>创建ingress</h3><blockquote>
-<p>点击该项目下左侧边栏的“ingress”项，之后“创建ingress”，配置“名称”和“机房”并提交。之后“创建ingress模板”,之后点击“发布”，在弹出的选择框中选择需要部署的机房并“确认”即可部署到kubernetes。</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne09.png" alt="ingress"></p>
-<h3 id="确认部署情况"><a href="#确认部署情况" class="headerlink" title="确认部署情况"></a>确认部署情况</h3><p><img src="/blog/360wayne/wayne10.png" alt="nginx"></p>
-<blockquote>
-<p>注: 这里使用了 https 是因为我之前部署了 TLS 认证的 traefik。</p>
-</blockquote>
+        <p>   这次升级还算比较顺利，以前我从1.2版本升级到1.5版本没有升级成功，镜像全洗白了，所以这次升级我及其谨慎，官方文档看了又看(主要是文档排版太糟糕了)，生怕又给洗白了，当然结果是好的，成功升级。</p>
 <ul>
-<li>更多详情请访问 Wayne 官方 wiki: <a href="https://github.com/Qihoo360/wayne/wiki" target="_blank" rel="noopener">wayne</a></li>
+<li>官方改了三次数据库，从最早使用的MySQL迁移到MariaDB，从1.6.0开始又迁移到了Postgresql</li>
+<li>在1.5.1版中我并没有安装运行Notary和Clair这两个组件</li>
+<li>升级到1.6.2版后我新部署了Notary，Clair和Helm Chart这3个组件</li>
 </ul>
+<a id="more"></a>
+<h2 id="备份Harbor"><a href="#备份Harbor" class="headerlink" title="备份Harbor"></a>备份Harbor</h2><h3 id="停止Harbor"><a href="#停止Harbor" class="headerlink" title="停止Harbor"></a>停止Harbor</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cd harbor</span></span><br><span class="line"><span class="comment"># docker-compose down</span></span><br></pre></td></tr></table></figure>
+<h3 id="备份Harbor的当前文件-以便在必要时回滚到当前版本"><a href="#备份Harbor的当前文件-以便在必要时回滚到当前版本" class="headerlink" title="备份Harbor的当前文件,以便在必要时回滚到当前版本"></a>备份Harbor的当前文件,以便在必要时回滚到当前版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cd ..</span></span><br><span class="line"><span class="comment"># mv harbor harbor-backup</span></span><br></pre></td></tr></table></figure>
+<h3 id="下载迁移工具"><a href="#下载迁移工具" class="headerlink" title="下载迁移工具"></a>下载迁移工具</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker pull goharbor/harbor-migrator:v1.6.0</span></span><br><span class="line">goharbor/harbor-migrator  v1.6.0   22775c4e4066   2 months ago   803MB</span><br></pre></td></tr></table></figure>
+<h3 id="备份数据"><a href="#备份数据" class="headerlink" title="备份数据"></a>备份数据</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mkdir backup</span></span><br><span class="line"><span class="comment"># docker run -it --rm -e DB_USR=root -e DB_PWD=root123 -v /data/database:/var/lib/mysql -v /root/harbor-backup/harbor.cfg:/harbor-migration/harbor-cfg/harbor.cfg -v /root/backup:/harbor-migration/backup goharbor/harbor-migrator:v1.6.0 backup</span></span><br><span class="line">......</span><br><span class="line">Backup performed.</span><br><span class="line">Success to backup harbor.cfg.</span><br><span class="line"><span class="comment"># ls backup</span></span><br><span class="line">harbor.cfg  registry.sql</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>命令参考: docker run -it –rm -e DB_USR=root -e DB_PWD={db_pwd} -v ${harbor_db_path}:/var/lib/mysql -v ${harbor_cfg}:/harbor-migration/harbor-cfg/harbor.cfg -v ${backup_path}:/harbor-migration/backup goharbor/harbor-migrator:[tag] backup</p>
+</blockquote>
+<h2 id="升级数据库架构、harbor-cfg并迁移数据"><a href="#升级数据库架构、harbor-cfg并迁移数据" class="headerlink" title="升级数据库架构、harbor.cfg并迁移数据"></a>升级数据库架构、harbor.cfg并迁移数据</h2><blockquote>
+<p>注意：您必须在启动Harbor之前运行Notary和Clair的DB的迁移。<br>注意：在v1.6.0中，您需要执行三个连续步骤才能完全迁移Harbor，Notary和Clair的DB。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run -it --rm -e DB_USR=root -e DB_PWD=root123 -v /data/database:/var/lib/mysql -v /root/backup/harbor.cfg:/harbor-migration/harbor-cfg/harbor.cfg goharbor/harbor-migrator:v1.6.0 up</span></span><br><span class="line">Please backup before upgrade, </span><br><span class="line">Enter y to <span class="built_in">continue</span> updating or n to abort: y</span><br><span class="line">Trying to start mysql server...</span><br><span class="line">Waiting <span class="keyword">for</span> MySQL start...</span><br><span class="line">......</span><br><span class="line">server stopped</span><br><span class="line">The path of the migrated harbor.cfg is not <span class="built_in">set</span>, the input file will be overwritten.</span><br><span class="line">input version: 1.5.0, migrator chain: [<span class="string">'1.6.0'</span>]</span><br><span class="line">migrating to version 1.6.0</span><br><span class="line">Written new values to /harbor-migration/harbor-cfg/harbor.cfg</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>命令参考: docker run -it –rm -e DB_USR=root -e DB_PWD={db_pwd} -v ${harbor_db_path}:/var/lib/mysql -v ${harbor_cfg}:/harbor-migration/harbor-cfg/harbor.cfg -v ${backup_path}:/harbor-migration/backup goharbor/harbor-migrator:[tag] backup</p>
+</blockquote>
+<h2 id="将harbor-cfg迁移至新版本的安装目录"><a href="#将harbor-cfg迁移至新版本的安装目录" class="headerlink" title="将harbor.cfg迁移至新版本的安装目录"></a>将harbor.cfg迁移至新版本的安装目录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run -it --rm -v /root/backup/harbor.cfg:/harbor-migration/harbor-cfg/harbor.cfg goharbor/harbor-migrator:v1.6.0 --cfg up</span></span><br><span class="line"><span class="comment"># grep ^[a-z] backup/harbor.cfg</span></span><br><span class="line"><span class="comment"># tar -zxvf harbor-offline-installer-v1.6.2.tgz </span></span><br><span class="line"><span class="comment"># cd harbor</span></span><br><span class="line"><span class="comment"># mv harbor.cfg harbor.cfg.bak</span></span><br><span class="line"><span class="comment"># cp /root/backup/harbor.cfg /root/harbor</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>命令参考: docker run -it –rm -v ${harbor_cfg}:/harbor-migration/harbor-cfg/harbor.cfg goharbor/harbor-migrator:[tag] –cfg up</p>
+</blockquote>
+<h2 id="安装Harbor"><a href="#安装Harbor" class="headerlink" title="安装Harbor"></a>安装Harbor</h2><h3 id="载入镜像"><a href="#载入镜像" class="headerlink" title="载入镜像"></a>载入镜像</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker load -i harbor.v1.6.2.tar.gz</span></span><br><span class="line"><span class="comment"># docker images|grep 1.6.2</span></span><br></pre></td></tr></table></figure>
+<h3 id="安装Notary，Clair和Helm-Chart服务"><a href="#安装Notary，Clair和Helm-Chart服务" class="headerlink" title="安装Notary，Clair和Helm Chart服务"></a>安装Notary，Clair和Helm Chart服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ./install.sh --with-notary --with-clair --with-chartmuseum</span></span><br><span class="line"></span><br><span class="line">......</span><br><span class="line">✔ ----Harbor has been installed and started successfully.----</span><br><span class="line"></span><br><span class="line">Now you should be able to visit the admin portal at https://192.168.100.100. </span><br><span class="line">For more details, please visit https://github.com/goharbor/harbor .</span><br></pre></td></tr></table></figure>
+<h3 id="在安装升级过程中我又重新使用docker-compose命令安装了一次，供参考"><a href="#在安装升级过程中我又重新使用docker-compose命令安装了一次，供参考" class="headerlink" title="在安装升级过程中我又重新使用docker-compose命令安装了一次，供参考"></a>在安装升级过程中我又重新使用docker-compose命令安装了一次，供参考</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker-compose -f ./docker-compose.yml -f ./docker-compose.notary.yml -f ./docker-compose.clair.yml -f ./docker-compose.chartmuseum.yml down -v</span></span><br><span class="line"><span class="comment"># vim harbor.cfg</span></span><br><span class="line"><span class="comment"># ./prepare --with-notary --with-clair --with-chartmuseum</span></span><br><span class="line">......</span><br><span class="line">The configuration files are ready, please use docker-compose to start the service.</span><br><span class="line"><span class="comment"># docker-compose -f ./docker-compose.yml -f ./docker-compose.notary.yml -f ./docker-compose.clair.yml -f ./docker-compose.chartmuseum.yml up -d</span></span><br><span class="line"><span class="comment"># docker-compose -f ./docker-compose.yml -f ./docker-compose.notary.yml -f ./docker-compose.clair.yml -f ./docker-compose.chartmuseum.yml ps</span></span><br><span class="line">Name                  Command                       State          Ports      </span><br><span class="line">-----------------------------------------------------------------------------</span><br><span class="line">chartmuseum       /docker-entrypoint.sh           Up (healthy)   9999/tcp                                                        </span><br><span class="line">clair             /docker-entrypoint.sh           Up (healthy)   6060/tcp, 6061/tcp                                              </span><br><span class="line">harbor-adminserver   /harbor/start.sh             Up (healthy)                                                                   </span><br><span class="line">harbor-db         /entrypoint.sh postgres         Up (healthy)   5432/tcp                                                        </span><br><span class="line">harbor-jobservice    /harbor/start.sh             Up                                                                             </span><br><span class="line">harbor-log        /bin/sh -c /usr/<span class="built_in">local</span>/bin/ ...  Up (healthy)   127.0.0.1:1514-&gt;10514/tcp                                       </span><br><span class="line">harbor-ui            /harbor/start.sh             Up (healthy)                                                                   </span><br><span class="line">nginx                nginx -g daemon off;         Up (healthy)   0.0.0.0:443-&gt;443/tcp, 0.0.0.0:4443-&gt;4443/tcp, 0.0.0.0:80-&gt;80/tcp</span><br><span class="line">notary-server        /bin/server-start.sh         Up                                                                             </span><br><span class="line">notary-signer        /bin/signer-start.sh         Up                                                                             </span><br><span class="line">redis             docker-entrypoint.sh redis ...  Up             6379/tcp                                                        </span><br><span class="line">registry          /entrypoint.sh /etc/regist ...  Up (healthy)   5000/tcp</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要同时安装Notary，Clair和Helm Chart服务，则应在docker-compose和prepare命令中包含所有组件.</p>
+</blockquote>
+<blockquote>
+<p>如上，harbor已经完成升级，可使用浏览器登陆harbor查看是否成功升级.</p>
+</blockquote>
+<h2 id="Notary-使用"><a href="#Notary-使用" class="headerlink" title="Notary 使用"></a>Notary 使用</h2><blockquote>
+<p>如果要启用内容信任以确保图像已签名，请在推送或拉取任何图像之前在命令行中设置两个环境变量：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># export DOCKER_CONTENT_TRUST=1</span></span><br><span class="line"><span class="comment"># export DOCKER_CONTENT_TRUST_SERVER=https://192.168.100.100:4443</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里以上传kubernetes-dashboard为例子说明notary的使用.</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker push 192.168.100.100/google_containers/kubernetes-dashboard-amd64:v1.10.0</span></span><br><span class="line">The push refers to repository [192.168.100.100/google_containers/kubernetes-dashboard-amd64]</span><br><span class="line">5f222ffea122: Pushed </span><br><span class="line">v1.10.0: digest: sha256:1d2e1229a918f4bc38b5a3f9f5f11302b3e71f8397b492afac7f273a0008776a size: 529</span><br><span class="line">Signing and pushing trust metadata</span><br><span class="line">You are about to create a new root signing key passphrase. This passphrase</span><br><span class="line">will be used to protect the most sensitive key <span class="keyword">in</span> your signing system. Please</span><br><span class="line">choose a long, complex passphrase and be careful to keep the password and the</span><br><span class="line">key file itself secure and backed up. It is highly recommended that you use a</span><br><span class="line">password manager to generate the passphrase and keep it safe. There will be no</span><br><span class="line">way to recover this key. You can find the key <span class="keyword">in</span> your config directory.</span><br><span class="line"></span><br><span class="line"><span class="comment">## 第一次push镜像，系统将要求您输入根密钥密码</span></span><br><span class="line">Enter passphrase <span class="keyword">for</span> new root key with ID 7ffe68f: </span><br><span class="line">Repeat passphrase <span class="keyword">for</span> new root key with ID 7ffe68f: </span><br><span class="line"></span><br><span class="line"><span class="comment">## 密码设置弱系统会进行提示</span></span><br><span class="line">Enter passphrase <span class="keyword">for</span> new repository key with ID e8c208d: </span><br><span class="line">Passphrase is too short. Please use a password manager to generate and store a good random passphrase.</span><br><span class="line">Enter passphrase <span class="keyword">for</span> new repository key with ID e8c208d: </span><br><span class="line">Repeat passphrase <span class="keyword">for</span> new repository key with ID e8c208d: </span><br><span class="line">Finished initializing <span class="string">"192.168.100.100/google_containers/kubernetes-dashboard-amd64"</span></span><br><span class="line">Successfully signed 192.168.100.100/google_containers/kubernetes-dashboard-amd64:v1.10.0</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注1: 根密钥生成于: /root/.docker/trust/private/<br>镜像密码生成于: /root/.docker/trust/tuf/[registry name]/[imagepath]<br>注2: 要使用notary，必须在Harbor中启用HTTPS.<br>注3: 当镜像被签名时，它在UI中显示勾号; 否则，显示交叉符号（X）。<br>注4:如果您省略标签，则跳过内容信任。提示”No tag specified, skipping trust metadata push”，所以即便是 latest 也需要提供镜像 tag 值。</p>
+</blockquote>
+<h2 id="通过Clair进行漏洞扫描"><a href="#通过Clair进行漏洞扫描" class="headerlink" title="通过Clair进行漏洞扫描"></a>通过Clair进行漏洞扫描</h2><p>Clair依靠漏洞元数据来完成分析过程。第一次初始安装后，Clair将自动开始从不同的漏洞存储库更新元数据数据库。更新过程可能需要一段时间，具体取决于数据大小和网络连接。如果数据库尚未完全填充，则存储库数据网格视图的页脚会显示警告消息。 </p>
+<p>数据库准备就绪后，整个数据库更新的时间戳将显示在“管理”下“ 配置”部分的“漏洞”选项卡中。这时候就可以进行漏洞扫描了。</p>
+<blockquote>
+<p>注意：只有具有“项目管理员”角色的用户才有权启动分析过程。</p>
+</blockquote>
+<h3 id="分析过程可能显示如下状态："><a href="#分析过程可能显示如下状态：" class="headerlink" title="分析过程可能显示如下状态："></a>分析过程可能显示如下状态：</h3><ul>
+<li>未扫描：标签从未被扫描过。</li>
+<li>排队：扫描任务已安排但尚未执行。</li>
+<li>扫描：扫描过程正在进行中。</li>
+<li>错误：扫描过程未能完成。</li>
+<li>完成：扫描过程已成功完成。</li>
+</ul>
+<h3 id="关于漏洞的严重级别"><a href="#关于漏洞的严重级别" class="headerlink" title="关于漏洞的严重级别:"></a>关于漏洞的严重级别:</h3><ul>
+<li>红色： 高安全漏洞的级别</li>
+<li>橙色： 中等级别的漏洞</li>
+<li>黄色： 漏洞程度低</li>
+<li>灰色： 未知级别的漏洞</li>
+<li>绿色： 没有漏洞 </li>
+</ul>
+<p>由于Harbor是由VMware中国的团队研发并开源的，对中文支持友好，对于使用问题无需过多担心。</p>
+<blockquote>
+<p>附:<br>有关Notary和Docker Content Trust的更多信息，请参阅Docker的文档：<br><a href="https://docs.docker.com/engine/security/trust/content_trust/" target="_blank" rel="noopener">https://docs.docker.com/engine/security/trust/content_trust/</a><br>关于Clair:<a href="https://github.com/coreos/clair" target="_blank" rel="noopener">https://github.com/coreos/clair</a><br>Harbor用户指南: <a href="https://github.com/goharbor/harbor/blob/master/docs/user_guide.md" target="_blank" rel="noopener">https://github.com/goharbor/harbor/blob/master/docs/user_guide.md</a></p>
+</blockquote>
 
       
     </div>
@@ -638,9 +611,15 @@
       
         <div class="post-tags">
           
-            <a href="/tags/kubernetes/" rel="tag"><i class="fa fa-tag"></i> kubernetes</a>
+            <a href="/tags/harbor/" rel="tag"><i class="fa fa-tag"></i> harbor</a>
           
-            <a href="/tags/wayne/" rel="tag"><i class="fa fa-tag"></i> wayne</a>
+            <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
+          
+            <a href="/tags/registry/" rel="tag"><i class="fa fa-tag"></i> registry</a>
+          
+            <a href="/tags/notary/" rel="tag"><i class="fa fa-tag"></i> notary</a>
+          
+            <a href="/tags/clair/" rel="tag"><i class="fa fa-tag"></i> clair</a>
           
         </div>
       
@@ -653,8 +632,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/819d304e/" rel="next" title="对etcd集群及kubernetes集群进行升级">
-                <i class="fa fa-chevron-left"></i> 对etcd集群及kubernetes集群进行升级
+              <a href="/blog/hexo/" rel="next" title="Hexo+Github构建博客">
+                <i class="fa fa-chevron-left"></i> Hexo+Github构建博客
               </a>
             
           </div>
@@ -662,6 +641,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/819d304e/" rel="prev" title="对etcd集群及kubernetes集群进行升级">
+                对etcd集群及kubernetes集群进行升级 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -857,7 +840,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#特性"><span class="nav-number">1.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-Wayne"><span class="nav-number">3.</span> <span class="nav-text">部署 Wayne</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#下载相关文件并部署"><span class="nav-number">3.1.</span> <span class="nav-text">下载相关文件并部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置集群和-Namespace"><span class="nav-number">3.2.</span> <span class="nav-text">配置集群和 Namespace</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置集群"><span class="nav-number">3.2.1.</span> <span class="nav-text">配置集群</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-namespace"><span class="nav-number">3.2.2.</span> <span class="nav-text">配置 namespace</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看资源状况"><span class="nav-number">3.2.3.</span> <span class="nav-text">查看资源状况</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用-Wayne"><span class="nav-number">4.</span> <span class="nav-text">应用 Wayne</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建项目"><span class="nav-number">4.1.</span> <span class="nav-text">创建项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建部署"><span class="nav-number">4.2.</span> <span class="nav-text">创建部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建负载均衡"><span class="nav-number">4.3.</span> <span class="nav-text">创建负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建ingress"><span class="nav-number">4.4.</span> <span class="nav-text">创建ingress</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#确认部署情况"><span class="nav-number">4.5.</span> <span class="nav-text">确认部署情况</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#备份Harbor"><span class="nav-number">1.</span> <span class="nav-text">备份Harbor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#停止Harbor"><span class="nav-number">1.1.</span> <span class="nav-text">停止Harbor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份Harbor的当前文件-以便在必要时回滚到当前版本"><span class="nav-number">1.2.</span> <span class="nav-text">备份Harbor的当前文件,以便在必要时回滚到当前版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下载迁移工具"><span class="nav-number">1.3.</span> <span class="nav-text">下载迁移工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份数据"><span class="nav-number">1.4.</span> <span class="nav-text">备份数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#升级数据库架构、harbor-cfg并迁移数据"><span class="nav-number">2.</span> <span class="nav-text">升级数据库架构、harbor.cfg并迁移数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将harbor-cfg迁移至新版本的安装目录"><span class="nav-number">3.</span> <span class="nav-text">将harbor.cfg迁移至新版本的安装目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Harbor"><span class="nav-number">4.</span> <span class="nav-text">安装Harbor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#载入镜像"><span class="nav-number">4.1.</span> <span class="nav-text">载入镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装Notary，Clair和Helm-Chart服务"><span class="nav-number">4.2.</span> <span class="nav-text">安装Notary，Clair和Helm Chart服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在安装升级过程中我又重新使用docker-compose命令安装了一次，供参考"><span class="nav-number">4.3.</span> <span class="nav-text">在安装升级过程中我又重新使用docker-compose命令安装了一次，供参考</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Notary-使用"><span class="nav-number">5.</span> <span class="nav-text">Notary 使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通过Clair进行漏洞扫描"><span class="nav-number">6.</span> <span class="nav-text">通过Clair进行漏洞扫描</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#分析过程可能显示如下状态："><span class="nav-number">6.1.</span> <span class="nav-text">分析过程可能显示如下状态：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于漏洞的严重级别"><span class="nav-number">6.2.</span> <span class="nav-text">关于漏洞的严重级别:</span></a></li></ol></li></ol></div>
             
 
           </div>
