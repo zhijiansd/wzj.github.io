@@ -497,7 +497,7 @@
       
 
       
-        <p>  在开始构建博客前，你需要在<a href="https://github.com/" target="_blank" rel="noopener">Github</a>拥有一个账号,之后新建一个存储库(比如:zhijiansd.github.io),这里我就不再赘述了.接下来,我们需要为GitHub添加SSH key.<br><a id="more"></a></p>
+        <p>  在开始构建博客前，你需要在<a href="https://github.com/">Github</a>拥有一个账号,之后新建一个存储库(比如:zhijiansd.github.io),这里我就不再赘述了.接下来,我们需要为GitHub添加SSH key.<br><a id="more"></a></p>
 <h2 id="配置SSH-key"><a href="#配置SSH-key" class="headerlink" title="配置SSH key"></a>配置SSH key</h2><h3 id="在本地创建秘钥-并将该秘钥复制下来"><a href="#在本地创建秘钥-并将该秘钥复制下来" class="headerlink" title="在本地创建秘钥,并将该秘钥复制下来"></a>在本地创建秘钥,并将该秘钥复制下来</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ssh-keygen -t rsa -C "wangzhijiansd@qq.com"</span></span><br><span class="line"><span class="comment"># cat /root/.ssh/id_rsa.pub</span></span><br></pre></td></tr></table></figure>
 <h3 id="登录GitHub进行配置"><a href="#登录GitHub进行配置" class="headerlink" title="登录GitHub进行配置"></a>登录GitHub进行配置</h3><h4 id="打开Github主页，依次点击Settings-gt-SSH-and-GPG-keys-gt-New-SSH-key设置-自定义好Title-然后将上面复制的秘钥粘贴在Key下"><a href="#打开Github主页，依次点击Settings-gt-SSH-and-GPG-keys-gt-New-SSH-key设置-自定义好Title-然后将上面复制的秘钥粘贴在Key下" class="headerlink" title="打开Github主页，依次点击Settings -&gt; SSH and GPG keys -&gt; New SSH key设置,自定义好Title,然后将上面复制的秘钥粘贴在Key下."></a>打开Github主页，依次点击Settings -&gt; SSH and GPG keys -&gt; New SSH key设置,自定义好Title,然后将上面复制的秘钥粘贴在Key下.</h4><h3 id="进行测试"><a href="#进行测试" class="headerlink" title="进行测试"></a>进行测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ssh -T git@github.com</span></span><br></pre></td></tr></table></figure>
 <blockquote>
@@ -506,7 +506,7 @@
 <h2 id="配置用户信息"><a href="#配置用户信息" class="headerlink" title="配置用户信息"></a>配置用户信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git config --global user.name "zhijiansd"</span></span><br><span class="line"><span class="comment"># git config --global user.email  "wangzhijiansd@qq.com"</span></span><br></pre></td></tr></table></figure>
 <h2 id="安装Hexo并下载Next主题"><a href="#安装Hexo并下载Next主题" class="headerlink" title="安装Hexo并下载Next主题"></a>安装Hexo并下载Next主题</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install git nodejs	 </span></span><br><span class="line"><span class="comment"># npm install hexo-cli -g</span></span><br><span class="line"><span class="comment"># hexo init blog</span></span><br><span class="line"><span class="comment"># cd blog</span></span><br><span class="line"><span class="comment"># npm install</span></span><br><span class="line"><span class="comment"># git clone https://github.com/theme-next/hexo-theme-next themes/next</span></span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>更多主题详见<a href="https://hexo.io/themes/" target="_blank" rel="noopener">Hexo</a>.</p>
+<p>更多主题详见<a href="https://hexo.io/themes/">Hexo</a>.</p>
 </blockquote>
 <h2 id="配置Hexo"><a href="#配置Hexo" class="headerlink" title="配置Hexo"></a>配置Hexo</h2><h3 id="更改默认主题为Next"><a href="#更改默认主题为Next" class="headerlink" title="更改默认主题为Next"></a>更改默认主题为Next</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># sed -i "s/landscape/next/g" _config.yml</span></span><br></pre></td></tr></table></figure>
 <p>###更改默认语言为汉语<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># grep language _config.yml </span></span><br><span class="line">language: zh-CN</span><br></pre></td></tr></table></figure></p>
@@ -615,8 +615,8 @@
 </table>
 <p>注:</p>
 <ul>
-<li><a href="http://theme-next.iissnan.com/getting-started.html" target="_blank" rel="noopener">NexT</a>中文文档</li>
-<li><a href="https://hexo.io/zh-cn/docs/writing.html" target="_blank" rel="noopener">Hexo</a>中文文档</li>
+<li><a href="http://theme-next.iissnan.com/getting-started.html">NexT</a>中文文档</li>
+<li><a href="https://hexo.io/zh-cn/docs/writing.html">Hexo</a>中文文档</li>
 </ul>
 
       
