@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="LDAP 代表 轻量级目录访问协议。顾名思义，它是一种用于访问目录服务的基于X.500协议的轻量级目录服务。 LDAP信息模型基于条目。条目是具有全局唯一性的属性集合专有名称（DN）。DN用于明确指代条目。每个条目的属性都有一个类型和一个或多个值。这些类型通常是助记符字符串，例如“ cn ”表示公用名，或“ mail ”表示电子邮件地址。值的语法取决于属性类型。 在LDAP中，目录条目以分层树状结">
+<meta name="keywords" content="kubernetes,openldap">
+<meta property="og:type" content="article">
+<meta property="og:title" content="部署openLDAP">
+<meta property="og:url" content="https://www.flywzj.com/blog/openldap/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="LDAP 代表 轻量级目录访问协议。顾名思义，它是一种用于访问目录服务的基于X.500协议的轻量级目录服务。 LDAP信息模型基于条目。条目是具有全局唯一性的属性集合专有名称（DN）。DN用于明确指代条目。每个条目的属性都有一个类型和一个或多个值。这些类型通常是助记符字符串，例如“ cn ”表示公用名，或“ mail ”表示电子邮件地址。值的语法取决于属性类型。 在LDAP中，目录条目以分层树状结">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-12-31T15:40:42.969Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="部署openLDAP">
+<meta name="twitter:description" content="LDAP 代表 轻量级目录访问协议。顾名思义，它是一种用于访问目录服务的基于X.500协议的轻量级目录服务。 LDAP信息模型基于条目。条目是具有全局唯一性的属性集合专有名称（DN）。DN用于明确指代条目。每个条目的属性都有一个类型和一个或多个值。这些类型通常是助记符字符串，例如“ cn ”表示公用名，或“ mail ”表示电子邮件地址。值的语法取决于属性类型。 在LDAP中，目录条目以分层树状结">
+
+
+
+
+
+
+  <link rel="canonical" href="https://www.flywzj.com/blog/openldap/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>部署openLDAP | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/openldap/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">部署openLDAP
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-31 23:35:48 / 修改时间：23:40:42" itemprop="dateCreated datePublished" datetime="2018-12-31T23:35:48+08:00">2018-12-31</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/openldap/" itemprop="url" rel="index"><span itemprop="name">openldap</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">17k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">28 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>LDAP 代表 轻量级目录访问协议。顾名思义，它是一种用于访问目录服务的基于X.500协议的轻量级目录服务。</p>
+<p>LDAP信息模型基于条目。条目是具有全局唯一性的属性集合专有名称（DN）。DN用于明确指代条目。每个条目的属性都有一个类型和一个或多个值。这些类型通常是助记符字符串，例如“ cn ”表示公用名，或“ mail ”表示电子邮件地址。值的语法取决于属性类型。</p>
+<p>在LDAP中，目录条目以分层树状结构排列。此外，LDAP允许您通过使用名为objectClass的特殊属性来控制条目中所需和允许的属性。objectClass属性的值确定条目必须遵守的模式规则。</p>
+<blockquote>
+<p>更多简介请访问:<a href="http://www.openldap.org/doc/admin24/intro.html" target="_blank" rel="noopener">http://www.openldap.org/doc/admin24/intro.html</a></p>
+</blockquote>
+<a id="more"></a>
+<h2 id="部署-openLDAP"><a href="#部署-openLDAP" class="headerlink" title="部署 openLDAP"></a>部署 openLDAP</h2><h3 id="安装-openLDAP"><a href="#安装-openLDAP" class="headerlink" title="安装 openLDAP"></a>安装 openLDAP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo</span></span><br><span class="line"><span class="comment"># yum -y install openldap-servers openldap-clients openldap-devel</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>OpenLDAP 2.3及更高版本已转换为使用动态运行时配置引擎slapd-config:<br><a href="http://www.openldap.org/doc/admin24/slapdconf2.html" target="_blank" rel="noopener">http://www.openldap.org/doc/admin24/slapdconf2.html</a></p>
+</blockquote>
+<h3 id="生成LDAP密码"><a href="#生成LDAP密码" class="headerlink" title="生成LDAP密码"></a>生成LDAP密码</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># slappasswd -s zhijian</span></span><br><span class="line">&#123;SSHA&#125;pQdy+1y8IfIw9ZgIExIdOsjC/tqsmb86</span><br></pre></td></tr></table></figure>
+<h3 id="复制相关文件"><a href="#复制相关文件" class="headerlink" title="复制相关文件"></a>复制相关文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cp /usr/share/openldap-servers/slapd.ldif /etc/openldap/</span></span><br><span class="line"><span class="comment"># cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置-slapd-ldif"><a href="#配置-slapd-ldif" class="headerlink" title="配置 slapd.ldif"></a>配置 slapd.ldif</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/openldap/slapd.ldif </span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Server status monitoring</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line">dn: olcDatabase=monitor,cn=config</span><br><span class="line">objectClass: olcDatabaseConfig</span><br><span class="line">olcDatabase: monitor</span><br><span class="line">olcAccess: to * by dn.base=<span class="string">"gidNumber=0+uidNumber=0,cn=peercred,cn=external,c</span></span><br><span class="line"><span class="string"> n=auth"</span> <span class="built_in">read</span> by dn.base=<span class="string">"cn=admin,dc=openldap,dc=flywzj,dc=com"</span> <span class="built_in">read</span> by * none</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Backend database definitions</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line">dn: olcDatabase=hdb,cn=config</span><br><span class="line">objectClass: olcDatabaseConfig</span><br><span class="line">objectClass: olcHdbConfig</span><br><span class="line">olcDatabase: hdb</span><br><span class="line">olcSuffix: dc=openldap,dc=flywzj,dc=com</span><br><span class="line">olcRootDN: cn=admin,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">olcRootPW: &#123;SSHA&#125;OLvPaV6PzzgRSCDivSzY8xVwk4fEWfZ9</span><br><span class="line">olcDbDirectory: /var/lib/ldap</span><br><span class="line">olcDbIndex: objectClass eq,pres</span><br><span class="line">olcDbIndex: ou,cn,mail,surname,givenname eq,pres,sub</span><br></pre></td></tr></table></figure>
+<h3 id="测试配置"><a href="#测试配置" class="headerlink" title="测试配置"></a>测试配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># slaptest -u  </span></span><br><span class="line">config file testing succeeded</span><br></pre></td></tr></table></figure>
+<h3 id="删除原始配置文件并重置配置"><a href="#删除原始配置文件并重置配置" class="headerlink" title="删除原始配置文件并重置配置"></a>删除原始配置文件并重置配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># rm -rf /etc/openldap/slapd.d/*</span></span><br><span class="line"><span class="comment"># slapadd -n 0 -F /etc/openldap/slapd.d -l /etc/openldap/slapd.ldif</span></span><br><span class="line"><span class="comment"># chown -R ldap:ldap /etc/openldap/slapd.d/</span></span><br></pre></td></tr></table></figure>
+<h3 id="启用-openLDAP"><a href="#启用-openLDAP" class="headerlink" title="启用 openLDAP"></a>启用 openLDAP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl start slapd</span></span><br><span class="line"><span class="comment"># systemctl status slapd</span></span><br></pre></td></tr></table></figure>
+<h3 id="检查服务器是否正在运行并正确配置"><a href="#检查服务器是否正在运行并正确配置" class="headerlink" title="检查服务器是否正在运行并正确配置"></a>检查服务器是否正在运行并正确配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ldapsearch -x -b '' -s base '(objectclass=*)' namingContexts</span></span><br><span class="line"><span class="comment"># extended LDIF</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># LDAPv3</span></span><br><span class="line"><span class="comment"># base &lt;&gt; with scope baseObject</span></span><br><span class="line"><span class="comment"># filter: (objectclass=*)</span></span><br><span class="line"><span class="comment"># requesting: namingContexts </span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">dn:</span><br><span class="line">namingContexts: dc=openldap,dc=flywzj,dc=com</span><br><span class="line"></span><br><span class="line"><span class="comment"># search result</span></span><br><span class="line">search: 2</span><br><span class="line">result: 0 Success</span><br><span class="line"></span><br><span class="line"><span class="comment"># numResponses: 2</span></span><br><span class="line"><span class="comment"># numEntries: 1</span></span><br></pre></td></tr></table></figure>
+<h2 id="部署-phpldapadmin"><a href="#部署-phpldapadmin" class="headerlink" title="部署 phpldapadmin"></a>部署 phpldapadmin</h2><h3 id="安装-phpldapadmin"><a href="#安装-phpldapadmin" class="headerlink" title="安装 phpldapadmin"></a>安装 phpldapadmin</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install httpd php-ldap phpldapadmin</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置访问控制"><a href="#配置访问控制" class="headerlink" title="配置访问控制"></a>配置访问控制</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/httpd/conf.d/phpldapadmin.conf</span></span><br><span class="line">  &lt;IfModule mod_authz_core.c&gt;</span><br><span class="line">    <span class="comment"># Apache 2.4</span></span><br><span class="line">    Require <span class="built_in">local</span></span><br><span class="line">    Require ip 192.168.100</span><br><span class="line">  &lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注:如上为允许本地和192.168.100.0网段访问phpldapadmin，其他Apache Require访问控制指令请自行搜索。</p>
+</blockquote>
+<h3 id="更改登录方式"><a href="#更改登录方式" class="headerlink" title="更改登录方式"></a>更改登录方式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/phpldapadmin/config.php</span></span><br><span class="line">// line 397</span><br><span class="line"><span class="variable">$servers</span>-&gt;setValue(<span class="string">'login'</span>,<span class="string">'attr'</span>,<span class="string">'dn'</span>);</span><br><span class="line">// <span class="variable">$servers</span>-&gt;setValue(<span class="string">'login'</span>,<span class="string">'attr'</span>,<span class="string">'uid'</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="导入默认-schema-模块"><a href="#导入默认-schema-模块" class="headerlink" title="导入默认 schema 模块"></a>导入默认 schema 模块</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif</span></span><br><span class="line">SASL/EXTERNAL authentication started</span><br><span class="line">SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth</span><br><span class="line">SASL SSF: 0</span><br><span class="line">adding new entry <span class="string">"cn=cosine,cn=schema,cn=config"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif</span></span><br><span class="line">SASL/EXTERNAL authentication started</span><br><span class="line">SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth</span><br><span class="line">SASL SSF: 0</span><br><span class="line">adding new entry <span class="string">"cn=nis,cn=schema,cn=config"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif</span></span><br><span class="line">SASL/EXTERNAL authentication started</span><br><span class="line">SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth</span><br><span class="line">SASL SSF: 0</span><br><span class="line">adding new entry <span class="string">"cn=inetorgperson,cn=schema,cn=config"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ldapsearch -LLLQY EXTERNAL -H ldapi:/// -b cn=schema,cn=config "(objectClass=olcSchemaConfig)" dn</span></span><br><span class="line">dn: cn=schema,cn=config</span><br><span class="line"></span><br><span class="line">dn: cn=&#123;0&#125;core,cn=schema,cn=config</span><br><span class="line"></span><br><span class="line">dn: cn=&#123;1&#125;cosine,cn=schema,cn=config</span><br><span class="line"></span><br><span class="line">dn: cn=&#123;2&#125;nis,cn=schema,cn=config</span><br><span class="line"></span><br><span class="line">dn: cn=&#123;3&#125;inetorgperson,cn=schema,cn=config</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注1:这里的模版对应在 phpldapadmin 里 “创建一个子条目” 下的 “Select a template for the creation process”  模版。</p>
+</blockquote>
+<blockquote>
+<p>注2: 如出现 “Automatically removed objectClass from template<br>Courier Mail: Account: courierMailAccount removed from template as it is not defined in the schema” 问题，那既是没有导入相关 objectClass 模版的原因。我曾试着将余下的 schema 也导入进去，但是没有成功，余下的几个模版依然是disable的。</p>
+</blockquote>
+<h3 id="配置-DN"><a href="#配置-DN" class="headerlink" title="配置 DN"></a>配置 DN</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/openldap/base.ldif </span></span><br><span class="line">dn: dc=openldap,dc=flywzj,dc=com</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: dcObject</span><br><span class="line">objectClass: organization</span><br><span class="line">o: flywzj</span><br><span class="line">	</span><br><span class="line"><span class="comment"># ldapadd -x -D "cn=admin,dc=openldap,dc=flywzj,dc=com" -W -f /etc/openldap/base.ldif </span></span><br><span class="line">Enter LDAP Password: </span><br><span class="line">adding new entry <span class="string">"dc=openldap,dc=flywzj,dc=com"</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注:如未配置默认DC即登录 phpldapadmin 会提示 “This base cannot be created with PLA.”问题。</p>
+</blockquote>
+<h3 id="启用-phpldapadmin"><a href="#启用-phpldapadmin" class="headerlink" title="启用 phpldapadmin"></a>启用 phpldapadmin</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl start httpd</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>浏览器使用 <a href="http://yourip/ldapadmin" target="_blank" rel="noopener">http://yourip/ldapadmin</a> 进入 phpldapadmin,点击登录，在“登录DN”中输入”cn=admin,dc=openldap,dc=flywzj,dc=com”并输入相应密码即可登录创建条目。</p>
+</blockquote>
+<h3 id="使用命令创建-OU"><a href="#使用命令创建-OU" class="headerlink" title="使用命令创建 OU"></a>使用命令创建 OU</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/openldap/group.ldif </span></span><br><span class="line">dn: ou=Groups,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">ou: Groups</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line">dn: ou=People,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">ou: People</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line">dn: cn=k8s,ou=Groups,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">cn: k8s</span><br><span class="line">gidNumber: 500</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line">dn: cn=<span class="built_in">test</span>,ou=Groups,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">cn: <span class="built_in">test</span></span><br><span class="line">gidNumber: 501</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># ldapadd -x -D "cn=admin,dc=openldap,dc=flywzj,dc=com" -W -f /etc/openldap/group.ldif </span></span><br><span class="line">Enter LDAP Password: </span><br><span class="line">adding new entry <span class="string">"ou=Groups,dc=openldap,dc=flywzj,dc=com"</span></span><br><span class="line"></span><br><span class="line">adding new entry <span class="string">"ou=People,dc=openldap,dc=flywzj,dc=com"</span></span><br><span class="line"></span><br><span class="line">adding new entry <span class="string">"cn=k8s,ou=Groups,dc=openldap,dc=flywzj,dc=com"</span></span><br><span class="line"></span><br><span class="line">adding new entry <span class="string">"cn=test,ou=Groups,dc=openldap,dc=flywzj,dc=com"</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注:可使用 phpldapadmin 来创建。</p>
+</blockquote>
+<h3 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/openldap/user.ldif </span></span><br><span class="line">dn: uid=wang,ou=People,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">cn: wang</span><br><span class="line">gidnumber: 500</span><br><span class="line">givenname: wang</span><br><span class="line">homedirectory: /home/users/wang</span><br><span class="line">loginshell: /bin/sh</span><br><span class="line">mail: wangzhijiansd@qq.com</span><br><span class="line">objectclass: inetOrgPerson</span><br><span class="line">objectclass: posixAccount</span><br><span class="line">objectclass: top</span><br><span class="line">objectClass: shadowAccount</span><br><span class="line">objectClass: organizationalPerson</span><br><span class="line">sn: wang</span><br><span class="line">uid: wang</span><br><span class="line">uidnumber: 1000</span><br><span class="line">userpassword: wangzhijian</span><br><span class="line"></span><br><span class="line">dn: uid=zhi,ou=People,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">cn: zhi</span><br><span class="line">gidnumber: 501</span><br><span class="line">givenname: zhi</span><br><span class="line">homedirectory: /home/users/zhi</span><br><span class="line">loginshell: /bin/sh</span><br><span class="line">mail: wangzhijiansd@qq.com</span><br><span class="line">objectclass: inetOrgPerson</span><br><span class="line">objectclass: posixAccount</span><br><span class="line">objectclass: top</span><br><span class="line">objectClass: shadowAccount</span><br><span class="line">objectClass: organizationalPerson</span><br><span class="line">sn: zhi</span><br><span class="line">uid: zhi</span><br><span class="line">uidnumber: 1001</span><br><span class="line">userpassword: zhijian</span><br><span class="line"></span><br><span class="line"><span class="comment"># ldapadd -x -D "cn=admin,dc=openldap,dc=flywzj,dc=com" -W -f /etc/openldap/user.ldif </span></span><br><span class="line">Enter LDAP Password: </span><br><span class="line">adding new entry <span class="string">"uid=wang,ou=People,dc=openldap,dc=flywzj,dc=com"</span></span><br><span class="line"></span><br><span class="line">adding new entry <span class="string">"uid=zhi,ou=People,dc=openldap,dc=flywzj,dc=com"</span></span><br></pre></td></tr></table></figure>
+<h3 id="查看具体用户"><a href="#查看具体用户" class="headerlink" title="查看具体用户"></a>查看具体用户</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ldapsearch -x -W -D "uid=wang,ou=People,dc=openldap,dc=flywzj,dc=com" -b "uid=wang,dc=openldap,ou=People,dc=flywzj,dc=com"</span></span><br><span class="line">Enter LDAP Password: </span><br><span class="line"><span class="comment"># extended LDIF</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># LDAPv3</span></span><br><span class="line"><span class="comment"># base &lt;uid=wang,dc=openldap,ou=People,dc=flywzj,dc=com&gt; with scope subtree</span></span><br><span class="line"><span class="comment"># filter: (objectclass=*)</span></span><br><span class="line"><span class="comment"># requesting: ALL</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># search result</span></span><br><span class="line">search: 2</span><br><span class="line">result: 32 No such object</span><br><span class="line"></span><br><span class="line"><span class="comment"># numResponses: 1</span></span><br></pre></td></tr></table></figure>
+<h3 id="查看该CN下的所有条目"><a href="#查看该CN下的所有条目" class="headerlink" title="查看该CN下的所有条目"></a>查看该CN下的所有条目</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ldapsearch -x -H ldap:/// -b dc=openldap,dc=flywzj,dc=com -D "cn=admin,dc=openldap,dc=flywzj,dc=com" -W</span></span><br><span class="line">Enter LDAP Password: </span><br><span class="line"><span class="comment"># extended LDIF</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># LDAPv3</span></span><br><span class="line"><span class="comment"># base &lt;dc=openldap,dc=flywzj,dc=com&gt; with scope subtree</span></span><br><span class="line"><span class="comment"># filter: (objectclass=*)</span></span><br><span class="line"><span class="comment"># requesting: ALL</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># openldap.flywzj.com</span></span><br><span class="line">dn: dc=openldap,dc=flywzj,dc=com</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: dcObject</span><br><span class="line">objectClass: organization</span><br><span class="line">o: flywzj</span><br><span class="line">dc: openldap</span><br><span class="line"></span><br><span class="line"><span class="comment"># Groups, openldap.flywzj.com</span></span><br><span class="line">dn: ou=Groups,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">ou: Groups</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># People, openldap.flywzj.com</span></span><br><span class="line">dn: ou=People,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">ou: People</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s, Groups, openldap.flywzj.com</span></span><br><span class="line">dn: cn=k8s,ou=Groups,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">cn: k8s</span><br><span class="line">gidNumber: 500</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># test, Groups, openldap.flywzj.com</span></span><br><span class="line">dn: cn=<span class="built_in">test</span>,ou=Groups,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">cn: <span class="built_in">test</span></span><br><span class="line">gidNumber: 501</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># wang, People, openldap.flywzj.com</span></span><br><span class="line">dn: uid=wang,ou=People,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">cn: wang</span><br><span class="line">gidNumber: 500</span><br><span class="line">givenName: wang</span><br><span class="line">homeDirectory: /home/users/wang</span><br><span class="line">loginShell: /bin/sh</span><br><span class="line">mail: wangzhijiansd@qq.com</span><br><span class="line">objectClass: inetOrgPerson</span><br><span class="line">objectClass: posixAccount</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: shadowAccount</span><br><span class="line">objectClass: organizationalPerson</span><br><span class="line">sn: wang</span><br><span class="line">uid: wang</span><br><span class="line">uidNumber: 1000</span><br><span class="line">userPassword:: d2FuZ3poaWppYW4=</span><br><span class="line"></span><br><span class="line"><span class="comment"># zhi, People, openldap.flywzj.com</span></span><br><span class="line">dn: uid=zhi,ou=People,dc=openldap,dc=flywzj,dc=com</span><br><span class="line">cn: zhi</span><br><span class="line">gidNumber: 501</span><br><span class="line">givenName: zhi</span><br><span class="line">homeDirectory: /home/users/zhi</span><br><span class="line">loginShell: /bin/sh</span><br><span class="line">mail: wangzhijiansd@qq.com</span><br><span class="line">objectClass: inetOrgPerson</span><br><span class="line">objectClass: posixAccount</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: shadowAccount</span><br><span class="line">objectClass: organizationalPerson</span><br><span class="line">sn: zhi</span><br><span class="line">uid: zhi</span><br><span class="line">uidNumber: 1001</span><br><span class="line">userPassword:: emhpamlhbg==</span><br><span class="line"></span><br><span class="line"><span class="comment"># search result</span></span><br><span class="line">search: 2</span><br><span class="line">result: 0 Success</span><br><span class="line"></span><br><span class="line"><span class="comment"># numResponses: 8</span></span><br><span class="line"><span class="comment"># numEntries: 7</span></span><br></pre></td></tr></table></figure>
+<p>注: 亦可使用 phpldapadmin 创建。</p>
+<h2 id="配置-zabbix-使用-LDAP"><a href="#配置-zabbix-使用-LDAP" class="headerlink" title="配置 zabbix 使用 LDAP"></a>配置 zabbix 使用 LDAP</h2><blockquote>
+<p>这里以配置 zabbix 使用 LDAP 来进行测试。</p>
+</blockquote>
+<blockquote>
+<p>配置 zabbix 的 “管理” ===&gt; “认证” 下的 “LDAP settings”项:</p>
+</blockquote>
+<ul>
+<li>Enable LDAP authentication: √</li>
+</ul>
+<ul>
+<li>LDAP主机: yourip</li>
+</ul>
+<ul>
+<li>端口: 389(默认端口,如使用使用 ldaps 协议则为636)</li>
+</ul>
+<ul>
+<li>基于 DN: dc=openldap,dc=flywzj,dc=com</li>
+</ul>
+<ul>
+<li>搜索属性: uid </li>
+</ul>
+<ul>
+<li>绑定 DN: cn=admin,dc=openldap,dc=flywzj,dc=com</li>
+</ul>
+<ul>
+<li>绑定密码: 输入该DN的密码</li>
+</ul>
+<ul>
+<li>测试认证[必需为一个正确的LDAP用户]-登录: 如如上配置的wang</li>
+</ul>
+<ul>
+<li>测试认证[必需为一个正确的LDAP用户]-用户密码:如如上配置的wangzhijian</li>
+</ul>
+<blockquote>
+<p>点击 “测试”，成功则会提示“LDAP登录成功”。</p>
+</blockquote>
+<blockquote>
+<p>注: 如要使用 LDAP 登录 zabbix，还需在 zabbix 的 “用户群组” 下创建同名的用户并赋予其权限，之后配置”更新”默认认证方式为“LDAP”即可使用LDAP下的该用户进行登录。</p>
+</blockquote>
+<h2 id="使用-kubernetes-部署-openLDAP"><a href="#使用-kubernetes-部署-openLDAP" class="headerlink" title="使用 kubernetes 部署 openLDAP"></a>使用 kubernetes 部署 openLDAP</h2><blockquote>
+<p>详询: <a href="https://github.com/osixia/docker-openldap，在部署时请查看对比构建方的环境变量。如需进行定制构建，构建方也给了构建方法。" target="_blank" rel="noopener">https://github.com/osixia/docker-openldap，在部署时请查看对比构建方的环境变量。如需进行定制构建，构建方也给了构建方法。</a></p>
+</blockquote>
+<h3 id="配置-PVC"><a href="#配置-PVC" class="headerlink" title="配置 PVC"></a>配置 PVC</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim openldap-pvc.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap-data</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    app: ldap</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: default-rbd</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="string">"5Gi"</span></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap-config</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    app: ldap</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: default-rbd</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="string">"1Gi"</span></span><br><span class="line"><span class="comment"># kubectl create -f openldap-pvc.yaml </span></span><br><span class="line">persistentvolumeclaim/ldap-data created</span><br><span class="line">persistentvolumeclaim/ldap-config created</span><br></pre></td></tr></table></figure>
+<h3 id="配置openLDAP"><a href="#配置openLDAP" class="headerlink" title="配置openLDAP"></a>配置openLDAP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim openldap.yaml </span></span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap</span><br><span class="line">  labels:</span><br><span class="line">    app: ldap</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: ldap</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">        - name: ldap</span><br><span class="line">          image: 192.168.100.100/library/openldap:1.2.2</span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: ldap-data</span><br><span class="line">              mountPath: /var/lib/ldap</span><br><span class="line">            - name: ldap-config</span><br><span class="line">              mountPath: /etc/ldap/slapd.d</span><br><span class="line">            - name: ldap-certs</span><br><span class="line">              mountPath: /container/service/slapd/assets/certs</span><br><span class="line">          ports:</span><br><span class="line">            - containerPort: 389</span><br><span class="line">              name: openldap</span><br><span class="line">          env:</span><br><span class="line">            - name: LDAP_LOG_LEVEL</span><br><span class="line">              value: <span class="string">"256"</span></span><br><span class="line">            - name: LDAP_ORGANISATION</span><br><span class="line">              value: <span class="string">"zhi"</span></span><br><span class="line">            - name: LDAP_DOMAIN</span><br><span class="line">              value: <span class="string">"flywzj.com"</span></span><br><span class="line">            - name: LDAP_ADMIN_PASSWORD</span><br><span class="line">              value: <span class="string">"admin"</span></span><br><span class="line">            - name: LDAP_CONFIG_PASSWORD</span><br><span class="line">              value: <span class="string">"config"</span></span><br><span class="line">            - name: LDAP_READONLY_USER</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_READONLY_USER_USERNAME</span><br><span class="line">              value: <span class="string">"readonly"</span></span><br><span class="line">            - name: LDAP_READONLY_USER_PASSWORD</span><br><span class="line">              value: <span class="string">"readonly"</span></span><br><span class="line">            - name: LDAP_RFC2307BIS_SCHEMA</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_BACKEND</span><br><span class="line">              value: <span class="string">"mdb"</span></span><br><span class="line">            - name: LDAP_TLS</span><br><span class="line">              value: <span class="string">"true"</span></span><br><span class="line">            - name: LDAP_TLS_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"ldap.crt"</span></span><br><span class="line">            - name: LDAP_TLS_KEY_FILENAME</span><br><span class="line">              value: <span class="string">"ldap.key"</span></span><br><span class="line">            - name: LDAP_TLS_CA_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"ca.crt"</span></span><br><span class="line">            - name: LDAP_TLS_ENFORCE</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_TLS_CIPHER_SUITE</span><br><span class="line">              value: <span class="string">"SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"</span></span><br><span class="line">            - name: LDAP_TLS_VERIFY_CLIENT</span><br><span class="line">              value: <span class="string">"demand"</span></span><br><span class="line">            - name: LDAP_REPLICATION</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_REPLICATION_CONFIG_SYNCPROV</span><br><span class="line">              value: <span class="string">"binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=<span class="variable">$LDAP_CONFIG_PASSWORD</span> searchbase=\"cn=config\" type=refreshAndPersist retry=\"60 +\" timeout=1 starttls=critical"</span></span><br><span class="line">            - name: LDAP_REPLICATION_DB_SYNCPROV</span><br><span class="line">              value: <span class="string">"binddn=\"cn=admin,<span class="variable">$LDAP_BASE_DN</span>\" bindmethod=simple credentials=<span class="variable">$LDAP_ADMIN_PASSWORD</span> searchbase=\"<span class="variable">$LDAP_BASE_DN</span>\" type=refreshAndPersist interval=00:00:00:10 retry=\"60 +\" timeout=1 starttls=critical"</span></span><br><span class="line">            - name: LDAP_REPLICATION_HOSTS</span><br><span class="line">              value: <span class="string">"#PYTHON2BASH:['ldap://ldap-one-service', 'ldap://ldap-two-service']"</span></span><br><span class="line">            - name: KEEP_EXISTING_CONFIG</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_REMOVE_CONFIG_AFTER_SETUP</span><br><span class="line">              value: <span class="string">"true"</span></span><br><span class="line">            - name: LDAP_SSL_HELPER_PREFIX</span><br><span class="line">              value: <span class="string">"ldap"</span></span><br><span class="line">      volumes:</span><br><span class="line">        - name: ldap-data</span><br><span class="line">          persistentVolumeClaim:</span><br><span class="line">            claimName: ldap-data</span><br><span class="line">          <span class="comment">#hostPath:</span></span><br><span class="line">          <span class="comment">#  path: "/data/ldap/db"</span></span><br><span class="line">        - name: ldap-config</span><br><span class="line">          persistentVolumeClaim:</span><br><span class="line">            claimName: ldap-config</span><br><span class="line">          <span class="comment">#hostPath:</span></span><br><span class="line">          <span class="comment">#  path: "/data/ldap/config"</span></span><br><span class="line">        - name: ldap-certs</span><br><span class="line">          hostPath:</span><br><span class="line">            path: <span class="string">"/data/ldap/certs"</span></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: ldap</span><br><span class="line">  name: ldap-service</span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: NodePort</span><br><span class="line">  ports:</span><br><span class="line">    - port: 389</span><br><span class="line">      nodePort: 38989</span><br><span class="line">  selector:</span><br><span class="line">    app: ldap</span><br><span class="line"><span class="comment"># kubectl create -f openldap.yaml </span></span><br><span class="line">deployment.extensions/ldap created</span><br><span class="line">service/ldap-service created</span><br><span class="line"><span class="comment"># kubectl get pods -l app=ldap</span></span><br><span class="line">NAME                    READY   STATUS    RESTARTS   AGE</span><br><span class="line">ldap-65f5786ff8-b9dnx   1/1     Running   1          11d</span><br></pre></td></tr></table></figure>
+<h2 id="使用-kubernetes-部署-openldapadmin"><a href="#使用-kubernetes-部署-openldapadmin" class="headerlink" title="使用 kubernetes 部署 openldapadmin"></a>使用 kubernetes 部署 openldapadmin</h2><blockquote>
+<p>详询: <a href="https://github.com/osixia/docker-phpLDAPadmin，部署时请详细查看对比构建方给定的环境变量。如需进行定制构建，构建方也给出了构建方法。" target="_blank" rel="noopener">https://github.com/osixia/docker-phpLDAPadmin，部署时请详细查看对比构建方给定的环境变量。如需进行定制构建，构建方也给出了构建方法。</a></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim phpldapadmin.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ReplicationController</span><br><span class="line">metadata:</span><br><span class="line">  name: phpldapadmin-controller</span><br><span class="line">  labels:</span><br><span class="line">    app: phpldapadmin</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  selector:</span><br><span class="line">    app: phpldapadmin</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: phpldapadmin</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">        - name: phpldapadmin</span><br><span class="line">          image: 192.168.100.100/library/phpldapadmin:0.7.2</span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: phpldapadmin-certs</span><br><span class="line">              mountPath: /container/service/phpldapadmin/assets/apache2/certs</span><br><span class="line">            - name: ldap-client-certs</span><br><span class="line">              mountPath: /container/service/ldap-client/assets/certs</span><br><span class="line">          ports:</span><br><span class="line">            - containerPort: 443</span><br><span class="line">          env:</span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_HOSTS</span><br><span class="line">              <span class="comment">#value: "#PYTHON2BASH:[&#123;'ldap-service': [&#123;'server': [&#123;'tls': 'true'&#125;]&#125;]&#125;]"</span></span><br><span class="line">              value: <span class="string">"ldap-service"</span></span><br><span class="line">            - name: PHPLDAPADMIN_SERVER_ADMIN</span><br><span class="line">              value: <span class="string">"wangzhijiansd@qq.com"</span></span><br><span class="line">            - name: PHPLDAPADMIN_SERVER_PATH</span><br><span class="line">              value: <span class="string">"/phpldapadmin"</span></span><br><span class="line">            - name: PHPLDAPADMIN_HTTPS</span><br><span class="line">              value: <span class="string">"true"</span></span><br><span class="line">            - name: PHPLDAPADMIN_HTTPS_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"cert.crt"</span></span><br><span class="line">            - name: PHPLDAPADMIN_HTTPS_KEY_FILENAME</span><br><span class="line">              value: <span class="string">"cert.key"</span></span><br><span class="line">            - name: PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"ca.crt"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS</span><br><span class="line">              value: <span class="string">"true"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT</span><br><span class="line">              value: <span class="string">"demand"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"cert.crt"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS_KEY_FILENAME</span><br><span class="line">              value: <span class="string">"cert.key"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS_CA_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"ca.crt"</span></span><br><span class="line">      volumes:</span><br><span class="line">        - name: phpldapadmin-certs</span><br><span class="line">          hostPath:</span><br><span class="line">            path: <span class="string">"/data/phpldapadmin/ssl/"</span></span><br><span class="line">        - name: ldap-client-certs</span><br><span class="line">          hostPath:</span><br><span class="line">            path: <span class="string">"/data/phpldapadmin/ldap-client-certs/"</span></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: phpldapadmin</span><br><span class="line">  name: phpldapadmin-service</span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: NodePort</span><br><span class="line">  ports:</span><br><span class="line">    - port: 443</span><br><span class="line">      nodePort: 32001</span><br><span class="line">  selector:</span><br><span class="line">    app: phpldapadmin</span><br><span class="line"><span class="comment"># kubectl create -f phpldapadmin.yaml </span></span><br><span class="line">replicationcontroller/phpldapadmin-controller created</span><br><span class="line">service/phpldapadmin-service created</span><br><span class="line"><span class="comment"># kubectl get pods -l app=phpldapadmin</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE</span><br><span class="line">phpldapadmin-controller-mprjw   1/1     Running   2          14d</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>输入 <a href="https://nodeip:nodeport" target="_blank" rel="noopener">https://nodeip:nodeport</a> 点击”login”进行登陆:</p>
+</blockquote>
+<ul>
+<li>Login DN: cn=admin,dc=flywzj,dc=com</li>
+</ul>
+<ul>
+<li>Password: admin</li>
+</ul>
+<blockquote>
+<p>点击 Authenticate 登陆</p>
+</blockquote>
+<blockquote>
+<p>不在演示如何在 kubernetes 的 openLDAP 上创建用户，既然安装了 phpldapadmin ,用web来创建比较简单(phpldapadmin界面粗糙)。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kubernetes/" rel="tag"><i class="fa fa-tag"></i> kubernetes</a>
+          
+            <a href="/tags/openldap/" rel="tag"><i class="fa fa-tag"></i> openldap</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/b5448413/" rel="next" title="切换 zabbix 认证模式">
+                <i class="fa fa-chevron-left"></i> 切换 zabbix 认证模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-openLDAP"><span class="nav-number">1.</span> <span class="nav-text">部署 openLDAP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-openLDAP"><span class="nav-number">1.1.</span> <span class="nav-text">安装 openLDAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成LDAP密码"><span class="nav-number">1.2.</span> <span class="nav-text">生成LDAP密码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复制相关文件"><span class="nav-number">1.3.</span> <span class="nav-text">复制相关文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-slapd-ldif"><span class="nav-number">1.4.</span> <span class="nav-text">配置 slapd.ldif</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试配置"><span class="nav-number">1.5.</span> <span class="nav-text">测试配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除原始配置文件并重置配置"><span class="nav-number">1.6.</span> <span class="nav-text">删除原始配置文件并重置配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启用-openLDAP"><span class="nav-number">1.7.</span> <span class="nav-text">启用 openLDAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检查服务器是否正在运行并正确配置"><span class="nav-number">1.8.</span> <span class="nav-text">检查服务器是否正在运行并正确配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-phpldapadmin"><span class="nav-number">2.</span> <span class="nav-text">部署 phpldapadmin</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-phpldapadmin"><span class="nav-number">2.1.</span> <span class="nav-text">安装 phpldapadmin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置访问控制"><span class="nav-number">2.2.</span> <span class="nav-text">配置访问控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更改登录方式"><span class="nav-number">2.3.</span> <span class="nav-text">更改登录方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#导入默认-schema-模块"><span class="nav-number">2.4.</span> <span class="nav-text">导入默认 schema 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-DN"><span class="nav-number">2.5.</span> <span class="nav-text">配置 DN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启用-phpldapadmin"><span class="nav-number">2.6.</span> <span class="nav-text">启用 phpldapadmin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用命令创建-OU"><span class="nav-number">2.7.</span> <span class="nav-text">使用命令创建 OU</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建用户"><span class="nav-number">2.8.</span> <span class="nav-text">创建用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看具体用户"><span class="nav-number">2.9.</span> <span class="nav-text">查看具体用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看该CN下的所有条目"><span class="nav-number">2.10.</span> <span class="nav-text">查看该CN下的所有条目</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置-zabbix-使用-LDAP"><span class="nav-number">3.</span> <span class="nav-text">配置 zabbix 使用 LDAP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-kubernetes-部署-openLDAP"><span class="nav-number">4.</span> <span class="nav-text">使用 kubernetes 部署 openLDAP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-PVC"><span class="nav-number">4.1.</span> <span class="nav-text">配置 PVC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置openLDAP"><span class="nav-number">4.2.</span> <span class="nav-text">配置openLDAP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-kubernetes-部署-openldapadmin"><span class="nav-number">5.</span> <span class="nav-text">使用 kubernetes 部署 openldapadmin</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">43k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">1:11</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
