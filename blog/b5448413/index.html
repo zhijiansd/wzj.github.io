@@ -108,18 +108,18 @@
 
 
 
-  <meta name="description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为列。">
+  <meta name="description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为例。">
 <meta name="keywords" content="zabbix">
 <meta property="og:type" content="article">
 <meta property="og:title" content="切换 zabbix 认证模式">
 <meta property="og:url" content="https://www.flywzj.com/blog/b5448413/index.html">
 <meta property="og:site_name" content="ZhiJian">
-<meta property="og:description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为列。">
+<meta property="og:description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为例。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-12-31T07:48:08.413Z">
+<meta property="og:updated_time" content="2018-12-31T15:38:23.457Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="切换 zabbix 认证模式">
-<meta name="twitter:description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为列。">
+<meta name="twitter:description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为例。">
 
 
 
@@ -406,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2018-12-31 15:43:46 / 修改时间：15:48:08" itemprop="dateCreated datePublished" datetime="2018-12-31T15:43:46+08:00">2018-12-31</time>
+              <time title="创建时间：2018-12-31 15:43:46 / 修改时间：23:38:23" itemprop="dateCreated datePublished" datetime="2018-12-31T15:43:46+08:00">2018-12-31</time>
             
 
             
@@ -498,7 +498,7 @@
 
       
         <blockquote>
-<p>以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为列。</p>
+<p>以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为例。</p>
 </blockquote>
 <a id="more"></a>
 <h2 id="登陆数据库查看当前认证方式"><a href="#登陆数据库查看当前认证方式" class="headerlink" title="登陆数据库查看当前认证方式"></a>登陆数据库查看当前认证方式</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mysql -u root -p</span></span><br><span class="line">MariaDB [(none)]&gt; use zabbix;</span><br><span class="line">Database changed</span><br><span class="line">MariaDB [zabbix]&gt; show tables like <span class="string">'config'</span>;</span><br><span class="line">+---------------------------+</span><br><span class="line">| Tables_in_zabbix (config) |</span><br><span class="line">+---------------------------+</span><br><span class="line">| config                    |</span><br><span class="line">+---------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line">MariaDB [zabbix]&gt; select authentication_type from config ;</span><br><span class="line">+---------------------+</span><br><span class="line">| authentication_type |</span><br><span class="line">+---------------------+</span><br><span class="line">|                   1 |</span><br><span class="line">+---------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
@@ -563,6 +563,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/b5448413/" rel="prev" title="部署openLDAP">
+                部署openLDAP <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -634,7 +638,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -690,7 +694,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">11</span>
+                      
+                    
+                    <span class="site-state-item-count">12</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -796,7 +802,7 @@
     
       <span class="post-meta-item-text">站点总字数：</span>
     
-    <span title="站点总字数">26k</span>
+    <span title="站点总字数">43k</span>
   
 
   
@@ -807,7 +813,7 @@
     
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
     
-    <span title="站点阅读时长">43 分钟</span>
+    <span title="站点阅读时长">1:11</span>
   
 </div>
 
