@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Dex是一种身份服务，它使用OpenID Connect(简称OIDC)来驱动其他应用程序的身份验证。 Dex通过“connectors.”充当其他身份提供商的门户。这使得dex可以将身份验证延迟(找不到很好的词来形容，只能硬翻了)到LDAP服务器、SAML提供程序或已建立的身份提供程序（如GitHub，Google和Active Directory）。客户端编写一次身份验证逻辑与dex通信，然后">
+<meta name="keywords" content="kubernetes,dex,openldap">
+<meta property="og:type" content="article">
+<meta property="og:title" content="通过Dex和openLDAP进行Kubernetes身份验证">
+<meta property="og:url" content="https://www.flywzj.com/blog/dex/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="Dex是一种身份服务，它使用OpenID Connect(简称OIDC)来驱动其他应用程序的身份验证。 Dex通过“connectors.”充当其他身份提供商的门户。这使得dex可以将身份验证延迟(找不到很好的词来形容，只能硬翻了)到LDAP服务器、SAML提供程序或已建立的身份提供程序（如GitHub，Google和Active Directory）。客户端编写一次身份验证逻辑与dex通信，然后">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://www.flywzj.com/blog/dex/dex01.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/dex/dex02.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/dex/dex03.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/dex/dex04.png">
+<meta property="og:updated_time" content="2019-02-04T07:38:18.216Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="通过Dex和openLDAP进行Kubernetes身份验证">
+<meta name="twitter:description" content="Dex是一种身份服务，它使用OpenID Connect(简称OIDC)来驱动其他应用程序的身份验证。 Dex通过“connectors.”充当其他身份提供商的门户。这使得dex可以将身份验证延迟(找不到很好的词来形容，只能硬翻了)到LDAP服务器、SAML提供程序或已建立的身份提供程序（如GitHub，Google和Active Directory）。客户端编写一次身份验证逻辑与dex通信，然后">
+<meta name="twitter:image" content="https://www.flywzj.com/blog/dex/dex01.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://www.flywzj.com/blog/dex/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>通过Dex和openLDAP进行Kubernetes身份验证 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/dex/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">通过Dex和openLDAP进行Kubernetes身份验证
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-02-04 15:22:53 / 修改时间：15:38:18" itemprop="dateCreated datePublished" datetime="2019-02-04T15:22:53+08:00">2019-02-04</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/kubernetes/" itemprop="url" rel="index"><span itemprop="name">kubernetes</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">31k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">52 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Dex是一种身份服务，它使用OpenID Connect(简称OIDC)来驱动其他应用程序的身份验证。</p>
+<p>Dex通过“connectors.”充当其他身份提供商的门户。这使得dex可以将身份验证延迟(找不到很好的词来形容，只能硬翻了)到LDAP服务器、SAML提供程序或已建立的身份提供程序（如GitHub，Google和Active Directory）。客户端编写一次身份验证逻辑与dex通信，然后dex处理给定后端的协议。</p>
+<a id="more"></a>
+<h2 id="OAuth2"><a href="#OAuth2" class="headerlink" title="OAuth2"></a>OAuth2</h2><p>OAuth（开放授权）是一个开放标准，允许用户授权第三方移动应用访问他们存储在另外的服务提供者上的信息，而不需要将用户名和密码提供给第三方移动应用或分享他们数据的所有内容。</p>
+<p>我相信大家都使用过类似“使用QQ登录”诸如此类的按钮来登录一些第三方的应用或者网站。在这些情况下，第三方应用程序(网站)选择让外部提供商（在这种情况下为QQ）证明您的身份，而不是让您使用应用程序本身设置用户名和密码。</p>
+<p>服务器端应用程序的一般流程是：</p>
+<ul>
+<li>新用户访问应用程序。</li>
+</ul>
+<ul>
+<li>用户点击网站上的登录按钮(诸如“使用QQ登录”)，该应用程序将用户重定向到QQ。</li>
+</ul>
+<ul>
+<li>用户登录QQ，然后QQ会提示该应用程序会获取的相应权限。</li>
+</ul>
+<ul>
+<li>如果用户单击“授权并登录”，则QQ会连同获取的Access Token使用代码将用户重定向回该应用程序。</li>
+</ul>
+<ul>
+<li>应用程序通过Access Token获取用户的OpenID；调用OpenAPI，来请求访问或修改用户授权的资源。</li>
+</ul>
+<p>在这些情况下，dex充当QQ（在OpenID Connect中称为“provider”），而客户端应用程序重定向到它以获得最终用户的身份。</p>
+<blockquote>
+<p>关于OAuth: <a href="https://oauth.net/2/" target="_blank" rel="noopener">https://oauth.net/2/</a></p>
+</blockquote>
+<h2 id="ID-Tokens"><a href="#ID-Tokens" class="headerlink" title="ID Tokens"></a>ID Tokens</h2><p>ID Tokens<br>是OpenID Connect和dex主要功能引入的OAuth2扩展。ID Tokens<br>是由dex签名的JSON Web令牌（JWT），作为OAuth2响应的一部分返回，用于证明最终用户的身份。</p>
+<p>OpenID Connect的OAuth2主要扩展名是令牌响应中返回的额外令牌，称为ID Tokens。此令牌是由OpenID Connect服务器签名的JSON Web令牌，具有用户ID，名称，电子邮件等众所周知的字段。</p>
+<h2 id="Connectors"><a href="#Connectors" class="headerlink" title="Connectors"></a>Connectors</h2><p>当用户通过dex登录时，用户的身份通常存储在另一个用户管理系统中：LDAP目录，GitHub组织等。Dex充当客户端应用程序和上游身份提供者之间的中间人。客户端只需要了解OpenID Connect来查询dex，而dex实现了一组用于查询其他用户管理系统的协议。</p>
+<h2 id="OpenID-Connect-Tokens"><a href="#OpenID-Connect-Tokens" class="headerlink" title="OpenID Connect Tokens"></a>OpenID Connect Tokens</h2><p>OpenID Connect 1.0是OAuth 2.0协议之上的简单身份层。它允许客户端根据授权服务器执行的身份验证来验证最终用户的身份，以及以可互操作和类似REST的方式获取有关最终用户的基本配置文件信息。</p>
+<p>OpenID Connect允许所有类型的客户端（包括基于Web，移动和JavaScript客户端）请求和接收有关经过身份验证的会话和最终用户的信息。规范套件是可扩展的，允许参与者在对它们有意义时使用可选功能，例如身份数据加密，OpenID提供程序的发现和会话管理。</p>
+<p>协议的OAuth2的主要扩展是返回的附加字段，其中访问令牌称为ID Token。此令牌是JSON Web令牌（JWT），具有由服务器签名的众所周知的字段，例如用户的电子邮件。</p>
+<p>为了识别用户，验证者使用OAuth2 令牌响应中的id_token（而不是access_token） 作为承载令牌。</p>
+<p>来自OpenID Connect提供商的令牌响应包括一个称为ID令牌的签名JWT。ID令牌包含名称，电子邮件，唯一标识符，在dex的情况下，包含一组可用于标识用户的组。像dex这样的OpenID Connect提供程序发布公钥; Kubernetes API服务器了解如何使用它们来验证ID令牌。</p>
+<blockquote>
+<p>关于OpenID Connect: <a href="https://openid.net/connect/" target="_blank" rel="noopener">https://openid.net/connect/</a></p>
+</blockquote>
+<p>身份验证流程如下所示：</p>
+<ul>
+<li>OAuth2客户端通过dex登录用户。</li>
+</ul>
+<ul>
+<li>在与Kubernetes API通信时，该客户端使用返回的ID令牌作为承载令牌。</li>
+</ul>
+<ul>
+<li>Kubernetes使用dex的公钥来验证ID令牌。</li>
+</ul>
+<ul>
+<li>指定为用户名（以及可选的组信息）的声明将与该请求相关联。</li>
+</ul>
+<blockquote>
+<p>用户名和组信息可以与Kubernetes 授权插件（例如基于角色的访问控制（RBAC））结合使用以实施策略。</p>
+</blockquote>
+<p>dex有自己的用户概念，但它允许它们以不同的方式进行身份验证，称为connectors。目前，dex提供两种类型的连接器：local连接器和OIDC连接器。使用local连接器进行身份验证时，用户使用电子邮件和密码登录，并使用dex本身提供的可自定义UI。使用OIDC连接器，用户可以通过登录到另一个OIDC身份提供商（如Google或Salesforce）进行身份验证。</p>
+<h2 id="从dex请求ID令牌"><a href="#从dex请求ID令牌" class="headerlink" title="从dex请求ID令牌"></a>从dex请求ID令牌</h2><p>直接使用dex对用户进行身份验证的应用程序使用OAuth2代码流来请求令牌响应。采取的确切步骤是：</p>
+<ul>
+<li>用户访问客户端应用。</li>
+</ul>
+<ul>
+<li>客户端应用程序通过OAuth2请求将用户重定向到dex。</li>
+</ul>
+<ul>
+<li>Dex确定用户的身份。</li>
+</ul>
+<ul>
+<li>Dex使用代码将用户重定向到客户端。</li>
+</ul>
+<ul>
+<li>客户端使用dex为id_token交换代码。</li>
+</ul>
+<h2 id="部署-openLDAP"><a href="#部署-openLDAP" class="headerlink" title="部署 openLDAP"></a>部署 openLDAP</h2><h3 id="配置PVC"><a href="#配置PVC" class="headerlink" title="配置PVC"></a>配置PVC</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim openldap-pvc.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap-data</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    app: ldap</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: default-rbd</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="string">"5Gi"</span></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap-config</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    app: ldap</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: default-rbd</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="string">"1Gi"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl create -f openldap-pvc.yaml </span></span><br><span class="line">persistentvolumeclaim/ldap-data created</span><br><span class="line">persistentvolumeclaim/ldap-config created</span><br></pre></td></tr></table></figure>
+<h3 id="部署openLDAP"><a href="#部署openLDAP" class="headerlink" title="部署openLDAP"></a>部署openLDAP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim openldap.yaml </span></span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap</span><br><span class="line">  labels:</span><br><span class="line">    app: ldap</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: ldap</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">        - name: ldap</span><br><span class="line">          image: 192.168.100.100/library/openldap:1.2.2</span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: ldap-data</span><br><span class="line">              mountPath: /var/lib/ldap</span><br><span class="line">            - name: ldap-config</span><br><span class="line">              mountPath: /etc/ldap/slapd.d</span><br><span class="line">            - name: ldap-certs</span><br><span class="line">              mountPath: /container/service/slapd/assets/certs</span><br><span class="line">          ports:</span><br><span class="line">            - containerPort: 389</span><br><span class="line">              name: openldap</span><br><span class="line">          env:</span><br><span class="line">            - name: LDAP_LOG_LEVEL</span><br><span class="line">              value: <span class="string">"256"</span></span><br><span class="line">            - name: LDAP_ORGANISATION</span><br><span class="line">              value: <span class="string">"zhi"</span></span><br><span class="line">            - name: LDAP_DOMAIN</span><br><span class="line">              value: <span class="string">"flywzj.com"</span></span><br><span class="line">            - name: LDAP_ADMIN_PASSWORD</span><br><span class="line">              value: <span class="string">"admin"</span></span><br><span class="line">            - name: LDAP_CONFIG_PASSWORD</span><br><span class="line">              value: <span class="string">"config"</span></span><br><span class="line">            - name: LDAP_READONLY_USER</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_READONLY_USER_USERNAME</span><br><span class="line">              value: <span class="string">"readonly"</span></span><br><span class="line">            - name: LDAP_READONLY_USER_PASSWORD</span><br><span class="line">              value: <span class="string">"readonly"</span></span><br><span class="line">            - name: LDAP_RFC2307BIS_SCHEMA</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_BACKEND</span><br><span class="line">              value: <span class="string">"mdb"</span></span><br><span class="line">            - name: LDAP_TLS</span><br><span class="line">              value: <span class="string">"true"</span></span><br><span class="line">            - name: LDAP_TLS_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"ldap.crt"</span></span><br><span class="line">            - name: LDAP_TLS_KEY_FILENAME</span><br><span class="line">              value: <span class="string">"ldap.key"</span></span><br><span class="line">            - name: LDAP_TLS_CA_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"ca.crt"</span></span><br><span class="line">            - name: LDAP_TLS_ENFORCE</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_TLS_CIPHER_SUITE</span><br><span class="line">              value: <span class="string">"SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"</span></span><br><span class="line">            - name: LDAP_TLS_VERIFY_CLIENT</span><br><span class="line">              value: <span class="string">"demand"</span></span><br><span class="line">            - name: LDAP_REPLICATION</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_REPLICATION_CONFIG_SYNCPROV</span><br><span class="line">              value: <span class="string">"binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=<span class="variable">$LDAP_CONFIG_PASSWORD</span> searchbase=\"cn=config\" type=refreshAndPersist retry=\"60 +\" timeout=1 starttls=critical"</span></span><br><span class="line">            - name: LDAP_REPLICATION_DB_SYNCPROV</span><br><span class="line">              value: <span class="string">"binddn=\"cn=admin,<span class="variable">$LDAP_BASE_DN</span>\" bindmethod=simple credentials=<span class="variable">$LDAP_ADMIN_PASSWORD</span> searchbase=\"<span class="variable">$LDAP_BASE_DN</span>\" type=refreshAndPersist interval=00:00:00:10 retry=\"60 +\" timeout=1 starttls=critical"</span></span><br><span class="line">            - name: LDAP_REPLICATION_HOSTS</span><br><span class="line">              value: <span class="string">"#PYTHON2BASH:['ldap://ldap-one-service', 'ldap://ldap-two-service']"</span></span><br><span class="line">            - name: KEEP_EXISTING_CONFIG</span><br><span class="line">              value: <span class="string">"false"</span></span><br><span class="line">            - name: LDAP_REMOVE_CONFIG_AFTER_SETUP</span><br><span class="line">              value: <span class="string">"true"</span></span><br><span class="line">            - name: LDAP_SSL_HELPER_PREFIX</span><br><span class="line">              value: <span class="string">"ldap"</span></span><br><span class="line">      volumes:</span><br><span class="line">        - name: ldap-data</span><br><span class="line">          persistentVolumeClaim:</span><br><span class="line">            claimName: ldap-data</span><br><span class="line">          <span class="comment">#hostPath:</span></span><br><span class="line">          <span class="comment">#  path: "/data/ldap/db"</span></span><br><span class="line">        - name: ldap-config</span><br><span class="line">          persistentVolumeClaim:</span><br><span class="line">            claimName: ldap-config</span><br><span class="line">          <span class="comment">#hostPath:</span></span><br><span class="line">          <span class="comment">#  path: "/data/ldap/config"</span></span><br><span class="line">        - name: ldap-certs</span><br><span class="line">          hostPath:</span><br><span class="line">            path: <span class="string">"/data/ldap/certs"</span></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: ldap</span><br><span class="line">  name: ldap</span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: NodePort</span><br><span class="line">  ports:</span><br><span class="line">    - port: 389</span><br><span class="line">      nodePort: 38989</span><br><span class="line">  selector:</span><br><span class="line">    app: ldap</span><br><span class="line"><span class="comment"># kubectl create -f openldap.yaml </span></span><br><span class="line">deployment.extensions/ldap created</span><br><span class="line">service/ldap created</span><br><span class="line"><span class="comment"># kubectl get pods -l app=ldap</span></span><br><span class="line">NAME                    READY   STATUS    RESTARTS   AGE</span><br><span class="line">ldap-65f5786ff8-xrtkk   1/1     Running   0          28d</span><br></pre></td></tr></table></figure>
+<h3 id="部署openldapadmin"><a href="#部署openldapadmin" class="headerlink" title="部署openldapadmin"></a>部署openldapadmin</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim phpldapadmin.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ReplicationController</span><br><span class="line">metadata:</span><br><span class="line">  name: phpldapadmin-controller</span><br><span class="line">  labels:</span><br><span class="line">    app: phpldapadmin</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  selector:</span><br><span class="line">    app: phpldapadmin</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: phpldapadmin</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">        - name: phpldapadmin</span><br><span class="line">          image: 192.168.100.100/library/phpldapadmin:0.7.2</span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: phpldapadmin-certs</span><br><span class="line">              mountPath: /container/service/phpldapadmin/assets/apache2/certs</span><br><span class="line">            - name: ldap-client-certs</span><br><span class="line">              mountPath: /container/service/ldap-client/assets/certs</span><br><span class="line">          ports:</span><br><span class="line">            - containerPort: 443</span><br><span class="line">          env:</span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_HOSTS</span><br><span class="line">              <span class="comment">#value: "#PYTHON2BASH:[&#123;'ldap-service': [&#123;'server': [&#123;'tls': 'true'&#125;]&#125;]&#125;]"</span></span><br><span class="line">              value: <span class="string">"ldap"</span></span><br><span class="line">            - name: PHPLDAPADMIN_SERVER_ADMIN</span><br><span class="line">              value: <span class="string">"wangzhijiansd@qq.com"</span></span><br><span class="line">            - name: PHPLDAPADMIN_SERVER_PATH</span><br><span class="line">              value: <span class="string">"/phpldapadmin"</span></span><br><span class="line">            - name: PHPLDAPADMIN_HTTPS</span><br><span class="line">              value: <span class="string">"true"</span></span><br><span class="line">            - name: PHPLDAPADMIN_HTTPS_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"cert.crt"</span></span><br><span class="line">            - name: PHPLDAPADMIN_HTTPS_KEY_FILENAME</span><br><span class="line">              value: <span class="string">"cert.key"</span></span><br><span class="line">            - name: PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"ca.crt"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS</span><br><span class="line">              value: <span class="string">"true"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT</span><br><span class="line">              value: <span class="string">"demand"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"cert.crt"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS_KEY_FILENAME</span><br><span class="line">              value: <span class="string">"cert.key"</span></span><br><span class="line">            - name: PHPLDAPADMIN_LDAP_CLIENT_TLS_CA_CRT_FILENAME</span><br><span class="line">              value: <span class="string">"ca.crt"</span></span><br><span class="line">      volumes:</span><br><span class="line">        - name: phpldapadmin-certs</span><br><span class="line">          hostPath:</span><br><span class="line">            path: <span class="string">"/data/phpldapadmin/ssl/"</span></span><br><span class="line">        - name: ldap-client-certs</span><br><span class="line">          hostPath:</span><br><span class="line">            path: <span class="string">"/data/phpldapadmin/ldap-client-certs/"</span></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: phpldapadmin</span><br><span class="line">  name: phpldapadmin</span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: NodePort</span><br><span class="line">  ports:</span><br><span class="line">    - port: 443</span><br><span class="line">      nodePort: 32001</span><br><span class="line">  selector:</span><br><span class="line">    app: phpldapadmin</span><br><span class="line"><span class="comment"># kubectl create -f phpldapadmin.yaml </span></span><br><span class="line">replicationcontroller/phpldapadmin-controller created</span><br><span class="line">service/phpldapadmin created</span><br><span class="line"><span class="comment"># kubectl get pods -l app=phpldapadmin</span></span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE</span><br><span class="line">phpldapadmin-controller-4cwlb   1/1     Running   0          28d</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关于 openLDAP 的相关镜像详见:</p>
+<ul>
+<li><a href="https://github.com/osixia/docker-openldap" target="_blank" rel="noopener">https://github.com/osixia/docker-openldap</a></li>
+</ul>
+<ul>
+<li><a href="https://github.com/osixia/docker-openldap-backup" target="_blank" rel="noopener">https://github.com/osixia/docker-openldap-backup</a></li>
+</ul>
+<ul>
+<li><a href="https://github.com/osixia/docker-phpLDAPadmin" target="_blank" rel="noopener">https://github.com/osixia/docker-phpLDAPadmin</a></li>
+</ul>
+</blockquote>
+<h3 id="配置-openLDAP"><a href="#配置-openLDAP" class="headerlink" title="配置 openLDAP"></a>配置 openLDAP</h3><h4 id="使用-phpldapadmin-进行配置管理"><a href="#使用-phpldapadmin-进行配置管理" class="headerlink" title="使用 phpldapadmin 进行配置管理"></a>使用 phpldapadmin 进行配置管理</h4><ul>
+<li>输入 <a href="https://nodeip:nodeport" target="_blank" rel="noopener">https://nodeip:nodeport</a> 登录</li>
+</ul>
+<ul>
+<li>login:</li>
+</ul>
+<ul>
+<li>Login DN: cn=admin,dc=flywzj,dc=com</li>
+</ul>
+<ul>
+<li>Password: admin</li>
+</ul>
+<ul>
+<li>点击 Authenticate 登录</li>
+</ul>
+<h4 id="登录LDAP容器进行配置管理"><a href="#登录LDAP容器进行配置管理" class="headerlink" title="登录LDAP容器进行配置管理"></a>登录LDAP容器进行配置管理</h4><blockquote>
+<p>注1:Dex目前允许不安全的连接，但是Dex官方强烈建议使用TLS，通过使用端口636而不是389来实现。这里使用的是不安全的389端口来实现，请知悉。</p>
+</blockquote>
+<blockquote>
+<p>注2:这里配置两个组，组k8s关联用户wang，组test关联用户zhi</p>
+</blockquote>
+<h5 id="查看当前LDAP配置"><a href="#查看当前LDAP配置" class="headerlink" title="查看当前LDAP配置"></a>查看当前LDAP配置</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl exec -it ldap-65f5786ff8-xrtkk /bin/bash</span></span><br><span class="line">root@ldap-65f5786ff8-xrtkk:/<span class="comment"># ldapsearch -x -H ldap:// -b dc=flywzj,dc=com -D "cn=admin,dc=flywzj,dc=com" -w admin</span></span><br><span class="line"><span class="comment"># extended LDIF</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># LDAPv3</span></span><br><span class="line"><span class="comment"># base &lt;dc=flywzj,dc=com&gt; with scope subtree</span></span><br><span class="line"><span class="comment"># filter: (objectclass=*)</span></span><br><span class="line"><span class="comment"># requesting: ALL</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># flywzj.com</span></span><br><span class="line">dn: dc=flywzj,dc=com</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: dcObject</span><br><span class="line">objectClass: organization</span><br><span class="line">o: zhi</span><br><span class="line">dc: flywzj</span><br><span class="line"></span><br><span class="line"><span class="comment"># admin, flywzj.com</span></span><br><span class="line">dn: cn=admin,dc=flywzj,dc=com</span><br><span class="line">objectClass: simpleSecurityObject</span><br><span class="line">objectClass: organizationalRole</span><br><span class="line">cn: admin</span><br><span class="line">description: LDAP administrator</span><br><span class="line">userPassword:: e1NTSEF9NFpVZU5IaGhDSzZ4OWF2KzBCSjlZOUY4SzRhWTdpWUk=</span><br><span class="line"></span><br><span class="line"><span class="comment"># search result</span></span><br><span class="line">search: 2</span><br><span class="line">result: 0 Success</span><br><span class="line"></span><br><span class="line"><span class="comment"># numResponses: 3</span></span><br><span class="line"><span class="comment"># numEntries: 2</span></span><br></pre></td></tr></table></figure>
+<h5 id="配置新建OU和组"><a href="#配置新建OU和组" class="headerlink" title="配置新建OU和组"></a>配置新建OU和组</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">root@ldap-65f5786ff8-xrtkk:/<span class="comment"># cat &lt;&lt;EOF &gt; container/service/slapd/assets/groups.ldif</span></span><br><span class="line">dn: ou=Groups,dc=flywzj,dc=com</span><br><span class="line">ou: Groups</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line">dn: ou=People,dc=flywzj,dc=com</span><br><span class="line">ou: People</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line">dn: cn=k8s,ou=Groups,dc=flywzj,dc=com</span><br><span class="line">cn: k8s</span><br><span class="line">gidNumber: 500</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line">memberuid: wang</span><br><span class="line"></span><br><span class="line">dn: cn=<span class="built_in">test</span>,ou=Groups,dc=flywzj,dc=com</span><br><span class="line">cn: <span class="built_in">test</span></span><br><span class="line">gidNumber: 501</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line">memberuid: zhi</span><br><span class="line">EOF</span><br><span class="line">root@ldap-65f5786ff8-xrtkk:/<span class="comment"># ldapadd -x -D "cn=admin,dc=flywzj,dc=com" -w admin -f /container/service/slapd/assets/groups.ldif -H ldap:/// </span></span><br><span class="line">adding new entry <span class="string">"ou=Groups,dc=flywzj,dc=com"</span></span><br><span class="line"></span><br><span class="line">adding new entry <span class="string">"ou=People,dc=flywzj,dc=com"</span></span><br><span class="line"></span><br><span class="line">adding new entry <span class="string">"cn=k8s,ou=Groups,dc=flywzj,dc=com"</span></span><br><span class="line"></span><br><span class="line">adding new entry <span class="string">"cn=test,ou=Groups,dc=flywzj,dc=com"</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如上可以看出，这里新建了两个OU:</p>
+<ul>
+<li>ou=Groups,dc=flywzj,dc=com</li>
+</ul>
+<ul>
+<li>ou=People,dc=flywzj,dc=com</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>同时新建了两个组:</p>
+<ul>
+<li>cn=k8s,ou=Groups,dc=flywzj,dc=com</li>
+</ul>
+<ul>
+<li>cn=test,ou=Groups,dc=flywzj,dc=com</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>特别说明，所有配置是都可以放在一个 ldif 文件中来进行配置的，这里分成两个 ldif 文件来配置就是为了方便理解和排版。</p>
+</blockquote>
+<h5 id="查看配置文件"><a href="#查看配置文件" class="headerlink" title="查看配置文件"></a>查看配置文件</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">root@ldap-65f5786ff8-xrtkk:/<span class="comment"># ldapsearch -x -H ldap:// -b dc=flywzj,dc=com -D "cn=admin,dc=flywzj,dc=com" -w admin</span></span><br><span class="line"><span class="comment"># extended LDIF</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># LDAPv3</span></span><br><span class="line"><span class="comment"># base &lt;dc=flywzj,dc=com&gt; with scope subtree</span></span><br><span class="line"><span class="comment"># filter: (objectclass=*)</span></span><br><span class="line"><span class="comment"># requesting: ALL</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># flywzj.com</span></span><br><span class="line">dn: dc=flywzj,dc=com</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: dcObject</span><br><span class="line">objectClass: organization</span><br><span class="line">o: zhi</span><br><span class="line">dc: flywzj</span><br><span class="line"></span><br><span class="line"><span class="comment"># admin, flywzj.com</span></span><br><span class="line">dn: cn=admin,dc=flywzj,dc=com</span><br><span class="line">objectClass: simpleSecurityObject</span><br><span class="line">objectClass: organizationalRole</span><br><span class="line">cn: admin</span><br><span class="line">description: LDAP administrator</span><br><span class="line">userPassword:: e1NTSEF9NHNid2tMZCtnSS9LazJieGRsdWdhZFN1OGR0ZE4wVjA=</span><br><span class="line"></span><br><span class="line"><span class="comment"># Groups, flywzj.com</span></span><br><span class="line">dn: ou=Groups,dc=flywzj,dc=com</span><br><span class="line">ou: Groups</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># People, flywzj.com</span></span><br><span class="line">dn: ou=People,dc=flywzj,dc=com</span><br><span class="line">ou: People</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s, Groups, flywzj.com</span></span><br><span class="line">dn: cn=k8s,ou=Groups,dc=flywzj,dc=com</span><br><span class="line">cn: k8s</span><br><span class="line">gidNumber: 500</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line">memberUid: wang</span><br><span class="line"></span><br><span class="line"><span class="comment"># test, Groups, flywzj.com</span></span><br><span class="line">dn: cn=<span class="built_in">test</span>,ou=Groups,dc=flywzj,dc=com</span><br><span class="line">cn: <span class="built_in">test</span></span><br><span class="line">gidNumber: 501</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line">memberUid: zhi</span><br><span class="line"></span><br><span class="line"><span class="comment"># search result</span></span><br><span class="line">search: 2</span><br><span class="line">result: 0 Success</span><br><span class="line"></span><br><span class="line"><span class="comment"># numResponses: 9</span></span><br><span class="line"><span class="comment"># numEntries: 8</span></span><br></pre></td></tr></table></figure>
+<h5 id="配置用户"><a href="#配置用户" class="headerlink" title="配置用户"></a>配置用户</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat &lt;&lt;EOF &gt; /container/service/slapd/assets/users.ldif </span></span><br><span class="line">dn: uid=wang,ou=People,dc=flywzj,dc=com</span><br><span class="line">cn: wang</span><br><span class="line">gidnumber: 500</span><br><span class="line">givenname: wang</span><br><span class="line">homedirectory: /home/users/wang</span><br><span class="line">loginshell: /bin/sh</span><br><span class="line">objectclass: inetOrgPerson</span><br><span class="line">objectclass: posixAccount</span><br><span class="line">objectclass: top</span><br><span class="line">objectClass: shadowAccount</span><br><span class="line">objectClass: organizationalPerson</span><br><span class="line">mail: wangzhijiansd@qq.com</span><br><span class="line">sn: wang</span><br><span class="line">uid: wang</span><br><span class="line">uidnumber: 1000</span><br><span class="line">userpassword: wangzhijian</span><br><span class="line"></span><br><span class="line">dn: uid=zhi,ou=People,dc=flywzj,dc=com</span><br><span class="line">homedirectory: /home/users/zhi</span><br><span class="line">loginshell: /bin/sh</span><br><span class="line">objectclass: inetOrgPerson</span><br><span class="line">objectclass: posixAccount</span><br><span class="line">objectclass: top</span><br><span class="line">objectClass: shadowAccount</span><br><span class="line">objectClass: organizationalPerson</span><br><span class="line">mail: zhijiansd@163.com</span><br><span class="line">cn: zhi</span><br><span class="line">givenname: zhi</span><br><span class="line">sn: zhi</span><br><span class="line">uid: zhi</span><br><span class="line">uidnumber: 1001</span><br><span class="line">gidnumber: 501</span><br><span class="line">userpassword: zhijian</span><br><span class="line">EOF</span><br><span class="line">root@ldap-65f5786ff8-xrtkk:/<span class="comment"># ldapadd -x -D "cn=admin,dc=flywzj,dc=com" -w admin -f /container/service/slapd/assets/users.ldif -H ldap:/// </span></span><br><span class="line">adding new entry <span class="string">"uid=wang,ou=People,dc=flywzj,dc=com"</span></span><br><span class="line"></span><br><span class="line">adding new entry <span class="string">"uid=zhi,ou=People,dc=flywzj,dc=com"</span></span><br></pre></td></tr></table></figure>
+<h5 id="查看配置文件-1"><a href="#查看配置文件-1" class="headerlink" title="查看配置文件"></a>查看配置文件</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line">root@ldap-65f5786ff8-xrtkk:/<span class="comment"># ldapsearch -x -H ldap:// -b dc=flywzj,dc=com -D "cn=admin,dc=flywzj,dc=com" -w admin</span></span><br><span class="line"><span class="comment"># extended LDIF</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># LDAPv3</span></span><br><span class="line"><span class="comment"># base &lt;dc=flywzj,dc=com&gt; with scope subtree</span></span><br><span class="line"><span class="comment"># filter: (objectclass=*)</span></span><br><span class="line"><span class="comment"># requesting: ALL</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># flywzj.com</span></span><br><span class="line">dn: dc=flywzj,dc=com</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: dcObject</span><br><span class="line">objectClass: organization</span><br><span class="line">o: zhi</span><br><span class="line">dc: flywzj</span><br><span class="line"></span><br><span class="line"><span class="comment"># admin, flywzj.com</span></span><br><span class="line">dn: cn=admin,dc=flywzj,dc=com</span><br><span class="line">objectClass: simpleSecurityObject</span><br><span class="line">objectClass: organizationalRole</span><br><span class="line">cn: admin</span><br><span class="line">description: LDAP administrator</span><br><span class="line">userPassword:: e1NTSEF9NHNid2tMZCtnSS9LazJieGRsdWdhZFN1OGR0ZE4wVjA=</span><br><span class="line"></span><br><span class="line"><span class="comment"># Groups, flywzj.com</span></span><br><span class="line">dn: ou=Groups,dc=flywzj,dc=com</span><br><span class="line">ou: Groups</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># People, flywzj.com</span></span><br><span class="line">dn: ou=People,dc=flywzj,dc=com</span><br><span class="line">ou: People</span><br><span class="line">objectClass: organizationalUnit</span><br><span class="line">objectClass: top</span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s, Groups, flywzj.com</span></span><br><span class="line">dn: cn=k8s,ou=Groups,dc=flywzj,dc=com</span><br><span class="line">cn: k8s</span><br><span class="line">gidNumber: 500</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line">memberUid: wang</span><br><span class="line"></span><br><span class="line"><span class="comment"># test, Groups, flywzj.com</span></span><br><span class="line">dn: cn=<span class="built_in">test</span>,ou=Groups,dc=flywzj,dc=com</span><br><span class="line">cn: <span class="built_in">test</span></span><br><span class="line">gidNumber: 501</span><br><span class="line">objectClass: posixGroup</span><br><span class="line">objectClass: top</span><br><span class="line">memberUid: zhi</span><br><span class="line"></span><br><span class="line"><span class="comment"># wang, People, flywzj.com</span></span><br><span class="line">dn: uid=wang,ou=People,dc=flywzj,dc=com</span><br><span class="line">cn: wang</span><br><span class="line">gidNumber: 500</span><br><span class="line">givenName: wang</span><br><span class="line">homeDirectory: /home/users/wang</span><br><span class="line">loginShell: /bin/sh</span><br><span class="line">objectClass: inetOrgPerson</span><br><span class="line">objectClass: posixAccount</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: shadowAccount</span><br><span class="line">objectClass: organizationalPerson</span><br><span class="line">mail: wangzhijiansd@qq.com</span><br><span class="line">sn: wang</span><br><span class="line">uid: wang</span><br><span class="line">uidNumber: 1000</span><br><span class="line">userPassword:: d2FuZ3poaWppYW4=</span><br><span class="line"></span><br><span class="line"><span class="comment"># zhi, People, flywzj.com</span></span><br><span class="line">dn: uid=zhi,ou=People,dc=flywzj,dc=com</span><br><span class="line">homeDirectory: /home/users/zhi</span><br><span class="line">loginShell: /bin/sh</span><br><span class="line">objectClass: inetOrgPerson</span><br><span class="line">objectClass: posixAccount</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: shadowAccount</span><br><span class="line">objectClass: organizationalPerson</span><br><span class="line">mail: zhijiansd@163.com</span><br><span class="line">cn: zhi</span><br><span class="line">givenName: zhi</span><br><span class="line">sn: zhi</span><br><span class="line">uid: zhi</span><br><span class="line">uidNumber: 1001</span><br><span class="line">gidNumber: 501</span><br><span class="line">userPassword:: emhpamlhbg==</span><br><span class="line"></span><br><span class="line"><span class="comment"># search result</span></span><br><span class="line">search: 2</span><br><span class="line">result: 0 Success</span><br><span class="line"></span><br><span class="line"><span class="comment"># numResponses: 9</span></span><br><span class="line"><span class="comment"># numEntries: 8</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这时候你也可以使用 phpldapadmin 登录查看，特别说明，如果登录进去出现了一些”?”提示，那是因为某些模板没有导入导致的，可忽略。</p>
+</blockquote>
+<h2 id="部署-Dex"><a href="#部署-Dex" class="headerlink" title="部署 Dex"></a>部署 Dex</h2><blockquote>
+<p>Dex详见:<a href="https://github.com/dexidp/dex" target="_blank" rel="noopener">https://github.com/dexidp/dex</a></p>
+</blockquote>
+<h3 id="生成证书并配置secret"><a href="#生成证书并配置secret" class="headerlink" title="生成证书并配置secret"></a>生成证书并配置secret</h3><blockquote>
+<p>生成dex server和login application相关证书和secret</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim gencert.sh</span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">mkdir -p ssl</span><br><span class="line"></span><br><span class="line">cat &lt;&lt; EOF &gt; ssl/req.cnf</span><br><span class="line">[req]</span><br><span class="line">req_extensions = v3_req</span><br><span class="line">distinguished_name = req_distinguished_name</span><br><span class="line"></span><br><span class="line">[req_distinguished_name]</span><br><span class="line"></span><br><span class="line">[ v3_req ]</span><br><span class="line">basicConstraints = CA:FALSE</span><br><span class="line">keyUsage = nonRepudiation, digitalSignature, keyEncipherment</span><br><span class="line">subjectAltName = @alt_names</span><br><span class="line"></span><br><span class="line">[alt_names]</span><br><span class="line">DNS.1 = dex</span><br><span class="line">DNS.2 = dex.svc.cluster.local</span><br><span class="line">DNS.3 = loginapp</span><br><span class="line">DNS.4 = loginapp.svc.cluster.local</span><br><span class="line">DNS.5 = login.flywzj.com</span><br><span class="line">IP.1 = 192.168.100.181</span><br><span class="line">IP.2 = 192.168.100.182</span><br><span class="line">IP.3 = 192.168.100.183</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">openssl genrsa -out ssl/dex-ca-key.pem 2048</span><br><span class="line">openssl req -x509 -new -nodes -key ssl/dex-ca-key.pem -days 1000 -out ssl/dex-ca.pem -subj <span class="string">"/CN=kube-ca"</span></span><br><span class="line"></span><br><span class="line">openssl genrsa -out ssl/dex-app-key.pem 2048</span><br><span class="line">openssl req -new -key ssl/dex-app-key.pem -out ssl/dex-app-csr.pem -subj <span class="string">"/CN=kube-ca"</span> -config ssl/req.cnf</span><br><span class="line">openssl x509 -req -<span class="keyword">in</span> ssl/dex-app-csr.pem -CA ssl/dex-ca.pem -CAkey ssl/dex-ca-key.pem -CAcreateserial -out ssl/dex-app.pem -days 1000 -extensions v3_req -extfile ssl/req.cnf</span><br><span class="line"></span><br><span class="line">kubectl create secret tls dex --cert=ssl/dex-app.pem --key=ssl/dex-app-key.pem </span><br><span class="line">kubectl create secret tls loginapp --cert=ssl/dex-app.pem --key=ssl/dex-app-key.pem </span><br><span class="line"></span><br><span class="line"><span class="comment"># ./gencert.sh </span></span><br><span class="line">Generating RSA private key, 2048 bit long modulus</span><br><span class="line">........................+++</span><br><span class="line">.......................................+++</span><br><span class="line">e is 65537 (0x10001)</span><br><span class="line">Generating RSA private key, 2048 bit long modulus</span><br><span class="line">...........................................+++</span><br><span class="line">........................+++</span><br><span class="line">e is 65537 (0x10001)</span><br><span class="line">Signature ok</span><br><span class="line">subject=/CN=kube-ca</span><br><span class="line">Getting CA Private Key</span><br><span class="line">secret/dex created</span><br><span class="line">secret/loginapp created</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl get secret dex</span></span><br><span class="line">NAME   TYPE                DATA   AGE</span><br><span class="line">dex    kubernetes.io/tls   2      8h</span><br><span class="line"><span class="comment"># kubectl get secret loginapp</span></span><br><span class="line">NAME       TYPE                DATA   AGE</span><br><span class="line">loginapp   kubernetes.io/tls   2      8h</span><br></pre></td></tr></table></figure>
+<h3 id="复制证书"><a href="#复制证书" class="headerlink" title="复制证书"></a>复制证书</h3><blockquote>
+<p>用于为Dex签署SSL证书的CA文件需要复制到apiserver可以读取的位置</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cp ssl/dex-ca.pem /etc/kubernetes/ssl/</span></span><br></pre></td></tr></table></figure>
+<h3 id="部署-Dex-1"><a href="#部署-Dex-1" class="headerlink" title="部署 Dex"></a>部署 Dex</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wget https://raw.githubusercontent.com/dexidp/dex/master/examples/k8s/dex.yaml</span></span><br><span class="line"><span class="comment"># vim dex.yaml </span></span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: dex</span><br><span class="line">  name: dex</span><br><span class="line">  namespace: default </span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: dex</span><br><span class="line">    spec:</span><br><span class="line">      serviceAccountName: dex <span class="comment"># This is created below</span></span><br><span class="line">      containers:</span><br><span class="line">      - image: 192.168.100.100/coreos/dex:v2.10.0</span><br><span class="line">        name: dex</span><br><span class="line">        <span class="built_in">command</span>: [<span class="string">"/usr/local/bin/dex"</span>, <span class="string">"serve"</span>, <span class="string">"/etc/dex/cfg/config.yaml"</span>]</span><br><span class="line"></span><br><span class="line">        ports:</span><br><span class="line">        - name: https</span><br><span class="line">          containerPort: 5556</span><br><span class="line"></span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: config</span><br><span class="line">          mountPath: /etc/dex/cfg</span><br><span class="line">        - name: tls</span><br><span class="line">          mountPath: /etc/dex/tls</span><br><span class="line"></span><br><span class="line">      volumes:</span><br><span class="line">      - name: config</span><br><span class="line">        configMap:</span><br><span class="line">          name: dex</span><br><span class="line">          items:</span><br><span class="line">          - key: config.yaml</span><br><span class="line">            path: config.yaml</span><br><span class="line">      - name: tls</span><br><span class="line">        secret:</span><br><span class="line">          secretName: dex</span><br><span class="line">---</span><br><span class="line">kind: ConfigMap</span><br><span class="line">apiVersion: v1</span><br><span class="line">metadata:</span><br><span class="line">  name: dex</span><br><span class="line">  namespace: default </span><br><span class="line">data:</span><br><span class="line">  config.yaml: |</span><br><span class="line">    issuer: https://192.168.100.185:32000</span><br><span class="line">    storage:</span><br><span class="line">      <span class="built_in">type</span>: kubernetes</span><br><span class="line">      config:</span><br><span class="line">        inCluster: <span class="literal">true</span></span><br><span class="line">    web:</span><br><span class="line">      https: 0.0.0.0:5556</span><br><span class="line">      tlsCert: /etc/dex/tls/tls.crt</span><br><span class="line">      tlsKey: /etc/dex/tls/tls.key</span><br><span class="line">    </span><br><span class="line">    logger:</span><br><span class="line">      level: <span class="string">"debug"</span></span><br><span class="line">      format: text</span><br><span class="line">      </span><br><span class="line">    connectors:</span><br><span class="line">      - <span class="built_in">type</span>: ldap</span><br><span class="line">        id: ldap</span><br><span class="line">        name: LDAP</span><br><span class="line">        config:</span><br><span class="line">          host: ldap:389</span><br><span class="line">          insecureNoSSL: <span class="literal">true</span></span><br><span class="line">          insecureSkipVerify: <span class="literal">true</span></span><br><span class="line">          bindDN: cn=admin,dc=flywzj,dc=com</span><br><span class="line">          bindPW: admin</span><br><span class="line">          userSearch:</span><br><span class="line">            baseDN: ou=People,dc=flywzj,dc=com</span><br><span class="line">            filter: <span class="string">"(objectClass=posixAccount)"</span></span><br><span class="line">            username: mail</span><br><span class="line">            idAttr: uid</span><br><span class="line">            emailAttr: mail</span><br><span class="line">            nameAttr: uid</span><br><span class="line">          groupSearch:</span><br><span class="line">            baseDN: ou=Groups,dc=flywzj,dc=com</span><br><span class="line">            filter: <span class="string">"(objectClass=posixGroup)"</span></span><br><span class="line">            userAttr: uid</span><br><span class="line">            groupAttr: memberUid</span><br><span class="line">            nameAttr: cn</span><br><span class="line">    oauth2:</span><br><span class="line">      skipApprovalScreen: <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">    staticClients:</span><br><span class="line">    - id: login</span><br><span class="line">      redirectURIs:</span><br><span class="line">      - <span class="string">'https://192.168.100.185:32002/callback'</span></span><br><span class="line">      name: <span class="string">'Login App'</span></span><br><span class="line">      secret: 4TORGiNV9M54BTk1v7dNuFSaI6hUjfjr</span><br><span class="line"></span><br><span class="line">    enablePasswordDB: <span class="literal">true</span></span><br><span class="line">    staticPasswords:</span><br><span class="line">    - email: <span class="string">"wangzhijiansd@qq.com"</span></span><br><span class="line">      <span class="comment"># bcrypt hash of the string "password"</span></span><br><span class="line">      <span class="built_in">hash</span>: <span class="string">"<span class="variable">$2a</span><span class="variable">$10</span><span class="variable">$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W</span>"</span></span><br><span class="line">      username: <span class="string">"admin"</span></span><br><span class="line">      userID: <span class="string">"08a8684b-db88-4b73-90a9-3cd1661f5466"</span></span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: dex</span><br><span class="line">  namespace: default </span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: NodePort</span><br><span class="line">  ports:</span><br><span class="line">  - name: dex</span><br><span class="line">    port: 5556</span><br><span class="line">    protocol: TCP</span><br><span class="line">    targetPort: 5556</span><br><span class="line">    nodePort: 32000</span><br><span class="line">  selector:</span><br><span class="line">    app: dex</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    app: dex</span><br><span class="line">  name: dex</span><br><span class="line">  namespace: default </span><br><span class="line">---</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">kind: ClusterRole</span><br><span class="line">metadata:</span><br><span class="line">  name: dex</span><br><span class="line">rules:</span><br><span class="line">- apiGroups: [<span class="string">"dex.coreos.com"</span>] <span class="comment"># API group created by dex</span></span><br><span class="line">  resources: [<span class="string">"*"</span>]</span><br><span class="line">  verbs: [<span class="string">"*"</span>]</span><br><span class="line">- apiGroups: [<span class="string">"apiextensions.k8s.io"</span>]</span><br><span class="line">  resources: [<span class="string">"customresourcedefinitions"</span>]</span><br><span class="line">  verbs: [<span class="string">"create"</span>] <span class="comment"># To manage its own resources, dex must be able to create customresourcedefinitions</span></span><br><span class="line">---</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">kind: ClusterRoleBinding</span><br><span class="line">metadata:</span><br><span class="line">  name: dex</span><br><span class="line">roleRef:</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">  kind: ClusterRole</span><br><span class="line">  name: dex</span><br><span class="line">subjects:</span><br><span class="line">- kind: ServiceAccount</span><br><span class="line">  name: dex           <span class="comment"># Service account assigned to the dex pod, created above</span></span><br><span class="line">  namespace: default  <span class="comment"># The namespace dex is running in</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl create -f dex.yaml </span></span><br><span class="line">deployment.extensions/dex created</span><br><span class="line">configmap/dex created</span><br><span class="line">service/dex created</span><br><span class="line">serviceaccount/dex created</span><br><span class="line">clusterrole.rbac.authorization.k8s.io/dex created</span><br><span class="line">clusterrolebinding.rbac.authorization.k8s.io/dex created</span><br><span class="line"><span class="comment"># kubectl get pod --show-labels -l app=dex</span></span><br><span class="line"><span class="comment"># kubectl get services dex</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意1: yaml文件虽然是从官方的，但是做了一些改动，特别是这里将官方的3个副本更改为了1个副本，因为使用3个副本事会产生错误，我在issue中翻阅到有说是NTP时钟不同步造成的。</p>
+</blockquote>
+<blockquote>
+<p>注意2: 这里的 connectors 是LDAP，详细文档见:<a href="https://github.com/dexidp/dex/blob/master/Documentation/connectors/ldap.md" target="_blank" rel="noopener">https://github.com/dexidp/dex/blob/master/Documentation/connectors/ldap.md</a></p>
+</blockquote>
+<h3 id="查看-OpenID-Connect-发现"><a href="#查看-OpenID-Connect-发现" class="headerlink" title="查看 OpenID Connect 发现"></a>查看 OpenID Connect 发现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># curl -k https://192.168.100.185:32000/.well-known/openid-configuration</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"issuer"</span>: <span class="string">"https://192.168.100.185:32000"</span>,</span><br><span class="line">  <span class="string">"authorization_endpoint"</span>: <span class="string">"https://192.168.100.185:32000/auth"</span>,</span><br><span class="line">  <span class="string">"token_endpoint"</span>: <span class="string">"https://192.168.100.185:32000/token"</span>,</span><br><span class="line">  <span class="string">"jwks_uri"</span>: <span class="string">"https://192.168.100.185:32000/keys"</span>,</span><br><span class="line">  <span class="string">"response_types_supported"</span>: [</span><br><span class="line">    <span class="string">"code"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"subject_types_supported"</span>: [</span><br><span class="line">    <span class="string">"public"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"id_token_signing_alg_values_supported"</span>: [</span><br><span class="line">    <span class="string">"RS256"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"scopes_supported"</span>: [</span><br><span class="line">    <span class="string">"openid"</span>,</span><br><span class="line">    <span class="string">"email"</span>,</span><br><span class="line">    <span class="string">"groups"</span>,</span><br><span class="line">    <span class="string">"profile"</span>,</span><br><span class="line">    <span class="string">"offline_access"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"token_endpoint_auth_methods_supported"</span>: [</span><br><span class="line">    <span class="string">"client_secret_basic"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"claims_supported"</span>: [</span><br><span class="line">    <span class="string">"aud"</span>,</span><br><span class="line">    <span class="string">"email"</span>,</span><br><span class="line">    <span class="string">"email_verified"</span>,</span><br><span class="line">    <span class="string">"exp"</span>,</span><br><span class="line">    <span class="string">"iat"</span>,</span><br><span class="line">    <span class="string">"iss"</span>,</span><br><span class="line">    <span class="string">"locale"</span>,</span><br><span class="line">    <span class="string">"name"</span>,</span><br><span class="line">    <span class="string">"sub"</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="查看-JSON-Web-Key"><a href="#查看-JSON-Web-Key" class="headerlink" title="查看 JSON Web Key"></a>查看 JSON Web Key</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># curl -k https://192.168.100.185:32000/keys</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"keys"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"use"</span>: <span class="string">"sig"</span>,</span><br><span class="line">      <span class="string">"kty"</span>: <span class="string">"RSA"</span>,</span><br><span class="line">      <span class="string">"kid"</span>: <span class="string">"a813de5c6100949abc59317714e3b09abecf8641"</span>,</span><br><span class="line">      <span class="string">"alg"</span>: <span class="string">"RS256"</span>,</span><br><span class="line">      <span class="string">"n"</span>: <span class="string">"u7G_RoZEuDwiW7kLBCMjjJMm1NgnHIXiTznxABe3uW8GsdASqRhUsDH2zFceZZObKchHWrKpkPZS4SjvcThF785xoJ4-FlAcrsUd4agyN9uwrAeL_luOrXvl-i0QAUKIHlqbTfZmzBIaFhHnG0yXKgqkXzTarQxDeynWVrVTdWsm7P_BYjQ5dnIlZu1xeRzw-NWf5UAi9Csh1x82XMtlAbMgWlJoWI36yVCCGUdJYintSp-tOfjkPBUghIO7ju8fb22X5uOgRFMq_RkIpXs2asf5FapVQMpcX_WAK3vUhmfH5F0lQZ9Cv9U__k3rHKRS7XwkcSQ4OKf7Vxrx4LQEcQ"</span>,</span><br><span class="line">      <span class="string">"e"</span>: <span class="string">"AQAB"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="配置-Login-App"><a href="#配置-Login-App" class="headerlink" title="配置 Login App"></a>配置 Login App</h2><blockquote>
+<p>一旦启动并运行dex，下一步就是编写使用dex驱动身份验证的应用程序。具体详见:<a href="https://github.com/dexidp/dex/blob/master/Documentation/using-dex.md。" target="_blank" rel="noopener">https://github.com/dexidp/dex/blob/master/Documentation/using-dex.md。</a></p>
+</blockquote>
+<blockquote>
+<p>这里我们使用 loginapp 来配置:<a href="https://github.com/fydrah/loginapp。" target="_blank" rel="noopener">https://github.com/fydrah/loginapp。</a></p>
+</blockquote>
+<h3 id="配置-Configmap"><a href="#配置-Configmap" class="headerlink" title="配置 Configmap"></a>配置 Configmap</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat ssl/dex-ca.pem </span></span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIIC9zCCAd+gAwIBAgIJAJPzlo1fzzxqMA0GCSqGSIb3DQEBCwUAMBIxEDAOBgNV</span><br><span class="line">BAMMB2t1YmUtY2EwHhcNMTkwMTA0MDYyNzM5WhcNMjEwOTMwMDYyNzM5WjASMRAw</span><br><span class="line">DgYDVQQDDAdrdWJlLWNhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA</span><br><span class="line">xnFM6sykmKdmr1Z4DADujeIUZXvz5ajy+xdjpfjrNhnr3002GsthAlN6lWjJP6dn</span><br><span class="line">uVN20M1W/oozF7OzMuSRNO6zLepAG2TrRl/1DZG9EFSN7m65HtxK0DA3RyZc4CuD</span><br><span class="line">j3ADT899yziyaVTvUjR8MxLWHeibgAanZ2Bdc8icd4zt7QCGmy3hYbZZMw6UhSlg</span><br><span class="line">KUT24m6hw+W167knbjG/U64x1Qzik0DCx0fqY26jdJVZN6AnOpAFoIJ6RNIS1X/f</span><br><span class="line">bPa5kzUeTNSbgCW64LS0uOtXBh9uICxaxhHthgKtcOXFn7UrLWVnMfmd0fVi3nV3</span><br><span class="line">Tu5j8swrXlDVX+vaTJvDawIDAQABo1AwTjAdBgNVHQ4EFgQUv7Ta12WZE11NQhjp</span><br><span class="line">FOWxHG+wcZUwHwYDVR0jBBgwFoAUv7Ta12WZE11NQhjpFOWxHG+wcZUwDAYDVR0T</span><br><span class="line">BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAsixLWA/28uVQMPfsWAv2cfdJMMCC</span><br><span class="line">vI6Y7uXsLUrNiONG6Ay/pU+6Qc/2kmZJlo0bHLx7P8ncKNHyTPzO1IzMDvvu65TU</span><br><span class="line">FdNAnKkqK90IRfjwY+RJv2J2NEKXmWRCxaJG522Uc0aGaYo6BPfrrYInr1fTh6i+</span><br><span class="line">/ovF4smyCo2bMX1dI5i7TlhAD9qsOA36XVYg+w5w7jXoJTYh14oKsE23pXpTiuSa</span><br><span class="line">h6KdnvrjilwuBpV/SG40TsnITwyeaQFWMwbzJkhbvMgRK2crRruUhcIumIE5TTfL</span><br><span class="line">VgKzJ5oisjgjrZ3oFw871L2HTPFI3C6Xpp6yV6LNpFGOizT8HTLp63CwQw==</span><br><span class="line">-----END CERTIFICATE-----</span><br><span class="line"></span><br><span class="line"><span class="comment"># vim ca-cm.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ConfigMap</span><br><span class="line">metadata:</span><br><span class="line">  name: ca</span><br><span class="line">  namespace: default</span><br><span class="line">data:</span><br><span class="line">  ca.pem: |</span><br><span class="line">    -----BEGIN CERTIFICATE-----</span><br><span class="line">    MIIC9zCCAd+gAwIBAgIJAJPzlo1fzzxqMA0GCSqGSIb3DQEBCwUAMBIxEDAOBgNV</span><br><span class="line">    BAMMB2t1YmUtY2EwHhcNMTkwMTA0MDYyNzM5WhcNMjEwOTMwMDYyNzM5WjASMRAw</span><br><span class="line">    DgYDVQQDDAdrdWJlLWNhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA</span><br><span class="line">    xnFM6sykmKdmr1Z4DADujeIUZXvz5ajy+xdjpfjrNhnr3002GsthAlN6lWjJP6dn</span><br><span class="line">    uVN20M1W/oozF7OzMuSRNO6zLepAG2TrRl/1DZG9EFSN7m65HtxK0DA3RyZc4CuD</span><br><span class="line">    j3ADT899yziyaVTvUjR8MxLWHeibgAanZ2Bdc8icd4zt7QCGmy3hYbZZMw6UhSlg</span><br><span class="line">    KUT24m6hw+W167knbjG/U64x1Qzik0DCx0fqY26jdJVZN6AnOpAFoIJ6RNIS1X/f</span><br><span class="line">    bPa5kzUeTNSbgCW64LS0uOtXBh9uICxaxhHthgKtcOXFn7UrLWVnMfmd0fVi3nV3</span><br><span class="line">    Tu5j8swrXlDVX+vaTJvDawIDAQABo1AwTjAdBgNVHQ4EFgQUv7Ta12WZE11NQhjp</span><br><span class="line">    FOWxHG+wcZUwHwYDVR0jBBgwFoAUv7Ta12WZE11NQhjpFOWxHG+wcZUwDAYDVR0T</span><br><span class="line">    BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAsixLWA/28uVQMPfsWAv2cfdJMMCC</span><br><span class="line">    vI6Y7uXsLUrNiONG6Ay/pU+6Qc/2kmZJlo0bHLx7P8ncKNHyTPzO1IzMDvvu65TU</span><br><span class="line">    FdNAnKkqK90IRfjwY+RJv2J2NEKXmWRCxaJG522Uc0aGaYo6BPfrrYInr1fTh6i+</span><br><span class="line">    /ovF4smyCo2bMX1dI5i7TlhAD9qsOA36XVYg+w5w7jXoJTYh14oKsE23pXpTiuSa</span><br><span class="line">    h6KdnvrjilwuBpV/SG40TsnITwyeaQFWMwbzJkhbvMgRK2crRruUhcIumIE5TTfL</span><br><span class="line">    VgKzJ5oisjgjrZ3oFw871L2HTPFI3C6Xpp6yV6LNpFGOizT8HTLp63CwQw==</span><br><span class="line">    -----END CERTIFICATE-----</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl create -f ca-cm.yaml </span></span><br><span class="line">configmap/ca created</span><br><span class="line"><span class="comment"># kubectl get configmap ca</span></span><br><span class="line">NAME   DATA   AGE</span><br><span class="line">ca     1      27d</span><br></pre></td></tr></table></figure>
+<h3 id="配置-Login-App-Configmap"><a href="#配置-Login-App-Configmap" class="headerlink" title="配置 Login App Configmap"></a>配置 Login App Configmap</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim loginapp-cm.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ConfigMap</span><br><span class="line">metadata:</span><br><span class="line">  name: loginapp</span><br><span class="line">  namespace: default</span><br><span class="line">data:</span><br><span class="line">  config.yaml: |</span><br><span class="line">    debug: <span class="literal">false</span></span><br><span class="line">    client_id: <span class="string">"login"</span></span><br><span class="line">    client_secret: 4TORGiNV9M54BTk1v7dNuFSaI6hUjfjr</span><br><span class="line">    issuer_url: <span class="string">"https://192.168.100.185:32000"</span></span><br><span class="line">    issuer_root_ca: <span class="string">"/etc/ssl/ca.pem"</span></span><br><span class="line">    redirect_url: <span class="string">"https://192.168.100.185:32002/callback"</span></span><br><span class="line">    tls_enabled: <span class="literal">true</span></span><br><span class="line">    tls_cert: <span class="string">"/etc/loginapp/tls/tls.crt"</span></span><br><span class="line">    tls_key: <span class="string">"/etc/loginapp/tls/tls.key"</span></span><br><span class="line">    listen: <span class="string">"https://0.0.0.0:5555"</span></span><br><span class="line">    disable_choices: <span class="literal">false</span></span><br><span class="line">    extra_scopes: <span class="string">"groups"</span></span><br><span class="line">    name: <span class="string">"Kubernetes Auth"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl create -f loginapp-cm.yaml </span></span><br><span class="line">configmap/loginapp created</span><br><span class="line"><span class="comment"># kubectl get configmap loginapp</span></span><br><span class="line">NAME       DATA   AGE</span><br><span class="line">loginapp   1      24d</span><br></pre></td></tr></table></figure>
+<h3 id="部署-Login-App"><a href="#部署-Login-App" class="headerlink" title="部署 Login App"></a>部署 Login App</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim loginapp-deploy.yml </span></span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: loginapp</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  replicas: 3</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        app: loginapp</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - image: 192.168.100.100/library/login-app:latest</span><br><span class="line">        name: loginapp</span><br><span class="line">        ports:</span><br><span class="line">        - name: https</span><br><span class="line">          containerPort: 5555</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: ca</span><br><span class="line">          mountPath: /etc/ssl/</span><br><span class="line">        - name: config</span><br><span class="line">          mountPath: /app/</span><br><span class="line">        - name: tls</span><br><span class="line">          mountPath: /etc/loginapp/tls</span><br><span class="line">      volumes:</span><br><span class="line">      - name: ca</span><br><span class="line">        configMap:</span><br><span class="line">          name: ca</span><br><span class="line">          items:</span><br><span class="line">          - key: ca.pem</span><br><span class="line">            path: ca.pem</span><br><span class="line">      - name: config</span><br><span class="line">        configMap:</span><br><span class="line">          name: loginapp</span><br><span class="line">          items:</span><br><span class="line">          - key: config.yaml</span><br><span class="line">            path: config.yaml</span><br><span class="line">      - name: tls</span><br><span class="line">        secret:</span><br><span class="line">          secretName: loginapp</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: loginapp</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: NodePort</span><br><span class="line">  ports:</span><br><span class="line">  - name: loginapp</span><br><span class="line">    port: 5555</span><br><span class="line">    protocol: TCP</span><br><span class="line">    targetPort: 5555</span><br><span class="line">    nodePort: 32002</span><br><span class="line">  selector:</span><br><span class="line">    app: loginapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl create -f loginapp-deploy.yml</span></span><br><span class="line"><span class="comment"># kubectl get pod --show-labels -l app=loginapp</span></span><br><span class="line"><span class="comment"># kubectl get service loginapp</span></span><br></pre></td></tr></table></figure>
+<h2 id="配置-kubernetes"><a href="#配置-kubernetes" class="headerlink" title="配置 kubernetes"></a>配置 kubernetes</h2><blockquote>
+<p>配置K8s Apiserver以使用OpenID Connect 身份验证插件，详见:<a href="https://github.com/dexidp/dex/blob/master/Documentation/kubernetes.md" target="_blank" rel="noopener">https://github.com/dexidp/dex/blob/master/Documentation/kubernetes.md</a></p>
+</blockquote>
+<h3 id="配置-kube-apiserver"><a href="#配置-kube-apiserver" class="headerlink" title="配置 kube-apiserver"></a>配置 kube-apiserver</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">--oidc-issuer-url=https://192.168.100.185:32000</span><br><span class="line">--oidc-client-id=loginapp</span><br><span class="line">--oidc-ca-file=/etc/kubernetes/ssl/dex-ca.pem</span><br><span class="line">--oidc-username-claim=email</span><br><span class="line">--oidc-groups-claim=groups</span><br></pre></td></tr></table></figure>
+<h3 id="配置-RBAC"><a href="#配置-RBAC" class="headerlink" title="配置 RBAC"></a>配置 RBAC</h3><h4 id="赋予-k8s-组-cluster-admin-角色"><a href="#赋予-k8s-组-cluster-admin-角色" class="headerlink" title="赋予 k8s 组 cluster-admin 角色"></a>赋予 k8s 组 cluster-admin 角色</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim k8s.yml </span></span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">kind: ClusterRoleBinding</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap-cluster-admin</span><br><span class="line">  namespace: kube-system</span><br><span class="line">roleRef:</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">  kind: ClusterRole</span><br><span class="line">  name: cluster-admin</span><br><span class="line">subjects:</span><br><span class="line">  - kind: Group</span><br><span class="line">    name: k8s</span><br><span class="line"><span class="comment"># kubectl create -f k8s.yml </span></span><br><span class="line">clusterrolebinding.rbac.authorization.k8s.io/ldap-cluster-admin created</span><br></pre></td></tr></table></figure>
+<h4 id="赋予-test-组相应权限"><a href="#赋予-test-组相应权限" class="headerlink" title="赋予 test 组相应权限"></a>赋予 test 组相应权限</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim test.yaml </span></span><br><span class="line">kind: Role</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap-test</span><br><span class="line">  namespace: <span class="built_in">test</span></span><br><span class="line">rules:</span><br><span class="line">- apiGroups: [<span class="string">""</span>]</span><br><span class="line">  resources: [<span class="string">"pods"</span>]</span><br><span class="line">  verbs: [<span class="string">"get"</span>, <span class="string">"watch"</span>, <span class="string">"list"</span>]</span><br><span class="line">---</span><br><span class="line">kind: RoleBinding</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: ldap-test </span><br><span class="line">  namespace: <span class="built_in">test</span></span><br><span class="line">subjects:</span><br><span class="line">- kind: Group</span><br><span class="line">  name: <span class="built_in">test</span></span><br><span class="line">  apiGroup: <span class="string">""</span></span><br><span class="line">roleRef:</span><br><span class="line">  kind: Role</span><br><span class="line">  name: ldap-test</span><br><span class="line">  apiGroup: <span class="string">""</span></span><br><span class="line"><span class="comment"># kubectl create -f test.yaml  </span></span><br><span class="line">role.rbac.authorization.k8s.io/ldap-test created</span><br><span class="line">rolebinding.rbac.authorization.k8s.io/ldap-test created</span><br></pre></td></tr></table></figure>
+<h2 id="登录-Dex-获取-ID-Tokens"><a href="#登录-Dex-获取-ID-Tokens" class="headerlink" title="登录 Dex 获取 ID Tokens"></a>登录 Dex 获取 ID Tokens</h2><ul>
+<li>浏览器输入 <a href="https://192.168.100.185:32002/" target="_blank" rel="noopener">https://192.168.100.185:32002/</a> (loginapp的nodeport)进行登录</li>
+</ul>
+<ul>
+<li>Authentication for clients : login(login 对应之前 dex 和 Login App Configmap 的配置)<br><img src="/blog/dex/dex01.png" alt="dex01"></li>
+</ul>
+<ul>
+<li>点击 “Request Token” 进行登录</li>
+</ul>
+<ul>
+<li>之后，会跳转至 Dex 的网址 <a href="https://192.168.100.185:32000" target="_blank" rel="noopener">https://192.168.100.185:32000</a><br><img src="/blog/dex/dex02.png" alt="dex02"></li>
+</ul>
+<ul>
+<li>点击 “Log in with LDAP”</li>
+</ul>
+<ul>
+<li>输入 Username 和 Password ，点击 “Login” 登录生成 id-token<br><img src="/blog/dex/dex03.png" alt="dex03"></li>
+</ul>
+<ul>
+<li>根据提示将文件复制至~/.kube/config<br><img src="/blog/dex/dex04.png" alt="dex04"></li>
+</ul>
+<h2 id="检查用户权限"><a href="#检查用户权限" class="headerlink" title="检查用户权限"></a>检查用户权限</h2><blockquote>
+<p>根据之前配置的 RBAC 来测试用户拥有的权限</p>
+</blockquote>
+<h3 id="测试用户-wang"><a href="#测试用户-wang" class="headerlink" title="测试用户 wang"></a>测试用户 wang</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl get nodes --user=wang</span></span><br><span class="line">NAME     STATUS   ROLES    AGE    VERSION</span><br><span class="line">node01   Ready    &lt;none&gt;   174d   v1.13.0</span><br><span class="line">node02   Ready    &lt;none&gt;   174d   v1.13.0</span><br><span class="line">node03   Ready    &lt;none&gt;   174d   v1.13.0</span><br></pre></td></tr></table></figure>
+<h3 id="测试用户-zhi"><a href="#测试用户-zhi" class="headerlink" title="测试用户 zhi"></a>测试用户 zhi</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># kubectl get nodes --user=zhi</span><br><span class="line">Error from server (Forbidden): nodes is forbidden: User &quot;zhijiansd@163.com&quot; cannot list resource &quot;nodes&quot; in API group &quot;&quot; at the cluster scope</span><br><span class="line"></span><br><span class="line"># kubectl get pod -n test --user=zhi</span><br><span class="line">NAME                          READY   STATUS    RESTARTS   AGE</span><br><span class="line">test-nginx-75677f8b58-p8w6d   1/1     Running   0          35h</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kubernetes/" rel="tag"><i class="fa fa-tag"></i> kubernetes</a>
+          
+            <a href="/tags/dex/" rel="tag"><i class="fa fa-tag"></i> dex</a>
+          
+            <a href="/tags/openldap/" rel="tag"><i class="fa fa-tag"></i> openldap</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/openldap/" rel="next" title="部署openLDAP">
+                <i class="fa fa-chevron-left"></i> 部署openLDAP
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2"><span class="nav-number">1.</span> <span class="nav-text">OAuth2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ID-Tokens"><span class="nav-number">2.</span> <span class="nav-text">ID Tokens</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Connectors"><span class="nav-number">3.</span> <span class="nav-text">Connectors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenID-Connect-Tokens"><span class="nav-number">4.</span> <span class="nav-text">OpenID Connect Tokens</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从dex请求ID令牌"><span class="nav-number">5.</span> <span class="nav-text">从dex请求ID令牌</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-openLDAP"><span class="nav-number">6.</span> <span class="nav-text">部署 openLDAP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置PVC"><span class="nav-number">6.1.</span> <span class="nav-text">配置PVC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部署openLDAP"><span class="nav-number">6.2.</span> <span class="nav-text">部署openLDAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部署openldapadmin"><span class="nav-number">6.3.</span> <span class="nav-text">部署openldapadmin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-openLDAP"><span class="nav-number">6.4.</span> <span class="nav-text">配置 openLDAP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-phpldapadmin-进行配置管理"><span class="nav-number">6.4.1.</span> <span class="nav-text">使用 phpldapadmin 进行配置管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#登录LDAP容器进行配置管理"><span class="nav-number">6.4.2.</span> <span class="nav-text">登录LDAP容器进行配置管理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#查看当前LDAP配置"><span class="nav-number">6.4.2.1.</span> <span class="nav-text">查看当前LDAP配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置新建OU和组"><span class="nav-number">6.4.2.2.</span> <span class="nav-text">配置新建OU和组</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#查看配置文件"><span class="nav-number">6.4.2.3.</span> <span class="nav-text">查看配置文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置用户"><span class="nav-number">6.4.2.4.</span> <span class="nav-text">配置用户</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#查看配置文件-1"><span class="nav-number">6.4.2.5.</span> <span class="nav-text">查看配置文件</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-Dex"><span class="nav-number">7.</span> <span class="nav-text">部署 Dex</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#生成证书并配置secret"><span class="nav-number">7.1.</span> <span class="nav-text">生成证书并配置secret</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复制证书"><span class="nav-number">7.2.</span> <span class="nav-text">复制证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部署-Dex-1"><span class="nav-number">7.3.</span> <span class="nav-text">部署 Dex</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看-OpenID-Connect-发现"><span class="nav-number">7.4.</span> <span class="nav-text">查看 OpenID Connect 发现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看-JSON-Web-Key"><span class="nav-number">7.5.</span> <span class="nav-text">查看 JSON Web Key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置-Login-App"><span class="nav-number">8.</span> <span class="nav-text">配置 Login App</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-Configmap"><span class="nav-number">8.1.</span> <span class="nav-text">配置 Configmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-Login-App-Configmap"><span class="nav-number">8.2.</span> <span class="nav-text">配置 Login App Configmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部署-Login-App"><span class="nav-number">8.3.</span> <span class="nav-text">部署 Login App</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置-kubernetes"><span class="nav-number">9.</span> <span class="nav-text">配置 kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-kube-apiserver"><span class="nav-number">9.1.</span> <span class="nav-text">配置 kube-apiserver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-RBAC"><span class="nav-number">9.2.</span> <span class="nav-text">配置 RBAC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#赋予-k8s-组-cluster-admin-角色"><span class="nav-number">9.2.1.</span> <span class="nav-text">赋予 k8s 组 cluster-admin 角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#赋予-test-组相应权限"><span class="nav-number">9.2.2.</span> <span class="nav-text">赋予 test 组相应权限</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#登录-Dex-获取-ID-Tokens"><span class="nav-number">10.</span> <span class="nav-text">登录 Dex 获取 ID Tokens</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检查用户权限"><span class="nav-number">11.</span> <span class="nav-text">检查用户权限</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#测试用户-wang"><span class="nav-number">11.1.</span> <span class="nav-text">测试用户 wang</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试用户-zhi"><span class="nav-number">11.2.</span> <span class="nav-text">测试用户 zhi</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">74k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">2:03</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
