@@ -405,7 +405,7 @@
                 
               
 
-              <time title="创建时间：2019-03-10 16:47:59 / 修改时间：16:55:24" itemprop="dateCreated datePublished" datetime="2019-03-10T16:47:59+08:00">2019-03-10</time>
+              <time title="创建时间：2019-03-10 16:47:59 / 修改时间：16:58:13" itemprop="dateCreated datePublished" datetime="2019-03-10T16:47:59+08:00">2019-03-10</time>
             
 
             
@@ -500,77 +500,19 @@
 
       
         
-          
-            <p>kaniko是一个从Dockerfile，容器或Kubernetes集群内构建容器映像的工具。</p>
+          <p>kaniko是一个从Dockerfile，容器或Kubernetes集群内构建容器映像的工具。</p>
 <p>kaniko不依赖于Docker守护程序，并且在用户空间中完全执行Dockerfile中的每个命令。这样可以在无法轻松或安全地运行Docker守护程序的环境中构建容器映像，例如标准Kubernetes集群。</p>
 <p>kaniko执行程序映像负责从Dockerfile构建映像并将其推送到注册表。在执行程序映像中，提取基本映像的文件系统（Dockerfile中的FROM映像）。然后，在Dockerfile中执行命令，在每个文件系统之后对用户空间中的文件系统进行快照。在每个命令之后，将一层已更改的文件附加到基本图像（如果有的话）并更新图像元数据。</p>
 <p>在kubernetes上构建还有另外一种选择，就是docker in docker，将宿主机的/var/run/docker.dock挂载到pod，并使用宿主机Docker守护程序执行构建。但是docker in docker必须运行在特权模式下，这会产生安全风险。</p>
-<h2 id="在Docker中运行kaniko"><a href="#在Docker中运行kaniko" class="headerlink" title="在Docker中运行kaniko"></a>在Docker中运行kaniko</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mkdir app &amp;&amp; cd app</span></span><br><span class="line"><span class="comment"># vim Dockerfile </span></span><br><span class="line">FROM 192.168.100.100/library/alpine:3.9</span><br><span class="line">WORKDIR /app</span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; world.txt</span><br><span class="line"><span class="comment"># docker run --env DOCKER_CONFIG=/kaniko -v /root/app:/workspace -v /etc/pki/ca-trust/source/anchors/harbor-ca.pem:/kaniko/ssl/certs/ca.pem -v /root/.docker/config.json:/kaniko/config.json 192.168.100.100/k8s.gcr.io/executor:debug -d 192.168.100.100/library/test:test</span></span><br><span class="line">INFO[0000] Downloading base image 192.168.100.100/library/alpine:3.9 </span><br><span class="line">INFO[0000] Error <span class="keyword">while</span> retrieving image from cache: getting file info: <span class="built_in">stat</span> /cache/sha256:25b4d910f4b76a63a3b45d0f69a57c34157500faf6087236581eca221c62d214: no such file or directory </span><br><span class="line">INFO[0000] Downloading base image 192.168.100.100/library/alpine:3.9 </span><br><span class="line">INFO[0000] Unpacking rootfs as cmd RUN <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; world.txt requires it. </span><br><span class="line">INFO[0002] Taking snapshot of full filesystem...        </span><br><span class="line">INFO[0002] RUN <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; world.txt                 </span><br><span class="line">INFO[0002] cmd: /bin/sh                                 </span><br><span class="line">INFO[0002] args: [-c <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; world.txt]          </span><br><span class="line">INFO[0002] Taking snapshot of full filesystem...        </span><br><span class="line">2019/03/08 15:35:14 existing blob: sha256:6c40cc604d8e4c121adcb6b0bfe8bb038815c350980090e74aa5a6423f8f82c0</span><br><span class="line">2019/03/08 15:35:14 pushed blob sha256:4c1586bb248bd4662909b9c520aec7d405ba28f72be717bda7f906328ba93ed2</span><br><span class="line">2019/03/08 15:35:14 pushed blob sha256:acf567dd059c0c462de4ef165221491959c8195b5777a7f87bdd9de7fc939bea</span><br><span class="line">2019/03/08 15:35:14 192.168.100.100/library/<span class="built_in">test</span>:<span class="built_in">test</span>: digest: sha256:c430406eda9f80eed55c12625585bb7da6947edd0332bf559a9514d7d8328601 size: 588</span><br><span class="line"><span class="comment"># docker run -it 192.168.100.100/library/test:test cat /app/world.txt</span></span><br><span class="line">hello</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注1:</p>
-</blockquote>
-<ul>
-<li>–env DOCKER_CONFIG=/kaniko:设置环境变量</li>
-</ul>
-<ul>
-<li>-v /root/app:/workspace:将/app目录挂载到/workspace构建上下文</li>
-</ul>
-<ul>
-<li>-v /etc/pki/ca-trust/source/anchors/harbor-ca.pem:/kaniko/ssl/certs/ca.pem:将私有镜像仓库的证书挂载到/kaniko/ssl/certs/下</li>
-</ul>
-<ul>
-<li>-v /root/.docker/config.json:/kaniko/config.json:将docker配置文件挂载到/kaniko下</li>
-</ul>
-<ul>
-<li>192.168.100.100/k8s.gcr.io/executor:debug:运行kaniko容器(gcr.io/kaniko-project/executor)</li>
-</ul>
-<ul>
-<li>-d 192.168.100.100/library/test:test:推送的镜像</li>
-</ul>
-<blockquote>
-<p>注2:对于开源镜像仓库harbor，push到镜像仓库后无法显示在UI上。对于公有云来说，由于各自的认证方式有别，push镜像可能会无法上传，hub.docker.com、阿里云容器镜像服务都可以push，网易云镜像中心无法push，提示“no token in bearer response:<br>{“errors”:[{“code”:”DENIED”,”message”:”Real name authentication required”}]}”。</p>
-</blockquote>
-<h2 id="在kubernetes中运行kaniko"><a href="#在kubernetes中运行kaniko" class="headerlink" title="在kubernetes中运行kaniko"></a>在kubernetes中运行kaniko</h2><h3 id="示例dockerfile"><a href="#示例dockerfile" class="headerlink" title="示例dockerfile"></a>示例dockerfile</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim Dockerfile </span></span><br><span class="line">FROM 192.168.100.100/library/alpine:3.9</span><br><span class="line">WORKDIR /app</span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; world.txt</span><br></pre></td></tr></table></figure>
-<h3 id="挂载harbor镜像仓库CA证书"><a href="#挂载harbor镜像仓库CA证书" class="headerlink" title="挂载harbor镜像仓库CA证书"></a>挂载harbor镜像仓库CA证书</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl create configmap ca-certificates --from-file=/etc/pki/ca-trust/source/anchors/harbor-ca.pem</span></span><br><span class="line">configmap/ca-certificates created</span><br></pre></td></tr></table></figure>
-<h3 id="挂载docker配置文件"><a href="#挂载docker配置文件" class="headerlink" title="挂载docker配置文件"></a>挂载docker配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl create configmap docker-config --from-file=/root/.docker/config.json </span></span><br><span class="line">configmap/docker-config created</span><br></pre></td></tr></table></figure>
-<h3 id="配置yaml文件"><a href="#配置yaml文件" class="headerlink" title="配置yaml文件"></a>配置yaml文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim kaniko.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  name: kaniko</span><br><span class="line">spec:</span><br><span class="line">  restartPolicy: Never</span><br><span class="line">  initContainers:</span><br><span class="line">  - name: git-clone</span><br><span class="line">    image: alpine/git</span><br><span class="line">    args:</span><br><span class="line">        - <span class="built_in">clone</span></span><br><span class="line">        - --single-branch</span><br><span class="line">        - --</span><br><span class="line">        - https://github.com/zhijiansd/gityun.git</span><br><span class="line">        - /context</span><br><span class="line">    volumeMounts:</span><br><span class="line">    - name: context</span><br><span class="line">      mountPath: /context</span><br><span class="line"></span><br><span class="line">  containers:</span><br><span class="line">  - name: kaniko</span><br><span class="line">    image: registry.cn-hangzhou.aliyuncs.com/gityun/executor:debug</span><br><span class="line">    args: [<span class="string">"--dockerfile=/context/Dockerfile"</span>,</span><br><span class="line">           <span class="string">"--context=/context"</span>,      </span><br><span class="line">           <span class="string">"--destination=192.168.100.100/library/test:test"</span>]</span><br><span class="line">    volumeMounts:</span><br><span class="line">      - name: ca-certificates</span><br><span class="line">        mountPath: /kaniko/ssl/certs/</span><br><span class="line">      - name: docker-config</span><br><span class="line">        mountPath: /kaniko/.docker/</span><br><span class="line">      - name: context</span><br><span class="line">        mountPath: /context</span><br><span class="line">  restartPolicy: Never</span><br><span class="line">  volumes:</span><br><span class="line">    - name: ca-certificates</span><br><span class="line">      configMap:</span><br><span class="line">        name: ca-certificates</span><br><span class="line">    - name: docker-config</span><br><span class="line">      configMap:</span><br><span class="line">        name: docker-config</span><br><span class="line">    - name: context</span><br><span class="line">      emptyDir: &#123;&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注:</p>
-</blockquote>
-<ul>
-<li>配置Init容器使用镜像 “alpine/git” clone相关项目并挂载为context，将相关代码传递到kaniko容器进行构建</li>
-</ul>
-<ul>
-<li>使用configmap将harbor的CA证书和docker配置文件config.json挂载到kaniko</li>
-</ul>
-<h2 id="运行并查看"><a href="#运行并查看" class="headerlink" title="运行并查看"></a>运行并查看</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl create -f kaniko.yaml </span></span><br><span class="line">pod/kaniko created</span><br><span class="line"><span class="comment"># kubectl get pod|grep kaniko</span></span><br><span class="line">kaniko                             0/1     Completed   0          29s</span><br><span class="line"><span class="comment"># kubectl logs kaniko</span></span><br><span class="line">INFO[0000] Downloading base image 192.168.100.100/library/alpine:3.9 </span><br><span class="line">INFO[0000] Error <span class="keyword">while</span> retrieving image from cache: getting file info: <span class="built_in">stat</span> /cache/sha256:25b4d910f4b76a63a3b45d0f69a57c34157500faf6087236581eca221c62d214: no such file or directory </span><br><span class="line">INFO[0000] Downloading base image 192.168.100.100/library/alpine:3.9 </span><br><span class="line">INFO[0001] Unpacking rootfs as cmd RUN <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; world.txt requires it. </span><br><span class="line">INFO[0002] Taking snapshot of full filesystem...        </span><br><span class="line">INFO[0002] WORKDIR /app                                 </span><br><span class="line">INFO[0002] cmd: workdir                                 </span><br><span class="line">INFO[0002] Changed working directory to /app            </span><br><span class="line">INFO[0002] Creating directory /app                      </span><br><span class="line">INFO[0002] Taking snapshot of files...                  </span><br><span class="line">INFO[0002] RUN <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; world.txt                 </span><br><span class="line">INFO[0002] cmd: /bin/sh                                 </span><br><span class="line">INFO[0002] args: [-c <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; world.txt]          </span><br><span class="line">INFO[0002] Taking snapshot of full filesystem...        </span><br><span class="line">2019/03/10 08:06:41 existing blob: sha256:6c40cc604d8e4c121adcb6b0bfe8bb038815c350980090e74aa5a6423f8f82c0</span><br><span class="line">2019/03/10 08:06:41 pushed blob sha256:a45d1670e71fec26e7147195023edc9fd26f93bbd4412fea4998528122ea43a0</span><br><span class="line">2019/03/10 08:06:41 pushed blob sha256:a04e0385010a9eedddbdd6ddca8e90725d0b981fb7954948af67b538c781727f</span><br><span class="line">2019/03/10 08:06:41 pushed blob sha256:e67312291a1a10d69480c1dd22c9af51a659e48ae07ba8221877397fd74e51fe</span><br><span class="line">2019/03/10 08:06:41 192.168.100.100/library/<span class="built_in">test</span>:<span class="built_in">test</span>: digest: sha256:5c3d933724e54a605f84a233eccb95e00c1870f02f213de2157b7d143686edba size: 748</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注:</p>
-</blockquote>
-<ul>
-<li>日志上关于 cache 的 error 提示我根据官方提供的 flags 添加了相关命令，依然会出现该错误，但是这不影响，镜像依然 push 到了harbor</li>
-</ul>
-<ul>
-<li>使用 kubernetes 构建到 harbor ，镜像依然无法显示在UI上，但是可以pull</li>
-</ul>
-<ul>
-<li>对于公有云，全都无法 push，提示“connect: connection refused”</li>
-</ul>
-<ul>
-<li>所以，最后这是一个半成品，没啥用，但是尝试了，还是写下来记录一下</li>
-</ul>
-<p>附:</p>
-<ul>
-<li>kaniko的GitHub: <a href="https://github.com/GoogleContainerTools/kaniko" target="_blank" rel="noopener">https://github.com/GoogleContainerTools/kaniko</a></li>
-</ul>
-<ul>
-<li>本文参考文章:<a href="https://harthoover.com/using-kaniko-for-container-builds-on-kubernetes/" target="_blank" rel="noopener">https://harthoover.com/using-kaniko-for-container-builds-on-kubernetes/</a></li>
-</ul>
-<ul>
-<li>harbor UI无法显示push的镜像的issue:<a href="https://github.com/goharbor/harbor/issues/6811" target="_blank" rel="noopener">https://github.com/goharbor/harbor/issues/6811</a></li>
-</ul>
-
+          <!--noindex-->
           
+            <div class="post-button text-center">
+              <a class="btn" href="/blog/kaniko/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+         
+          <!--/noindex-->
         
       
     </div>
