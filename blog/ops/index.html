@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="GitLab和Jenkins都是作为Pod部署在kubernetes上的，Jenkins通过创建的pipeline流水线任务从gitlab拉取构建文件以进行构建。">
+<meta name="keywords" content="kubernetes,gitlab,jenkins">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes+GitLab+Jenkins使用Pipeline构建镜像">
+<meta property="og:url" content="https://www.flywzj.com/blog/ops/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="GitLab和Jenkins都是作为Pod部署在kubernetes上的，Jenkins通过创建的pipeline流水线任务从gitlab拉取构建文件以进行构建。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops01.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops02.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops03.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops04.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops17.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops18.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops19.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops05.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops06.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops07.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops08.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops09.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops10.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops11.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops12.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops13.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops14.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops15.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/ops/ops16.png">
+<meta property="og:updated_time" content="2019-03-29T06:44:20.085Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes+GitLab+Jenkins使用Pipeline构建镜像">
+<meta name="twitter:description" content="GitLab和Jenkins都是作为Pod部署在kubernetes上的，Jenkins通过创建的pipeline流水线任务从gitlab拉取构建文件以进行构建。">
+<meta name="twitter:image" content="https://www.flywzj.com/blog/ops/ops01.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://www.flywzj.com/blog/ops/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kubernetes+GitLab+Jenkins使用Pipeline构建镜像 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/ops/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes+GitLab+Jenkins使用Pipeline构建镜像
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-29 14:35:19 / 修改时间：14:44:20" itemprop="dateCreated datePublished" datetime="2019-03-29T14:35:19+08:00">2019-03-29</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/kubernetes/" itemprop="url" rel="index"><span itemprop="name">kubernetes</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/ops/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/ops/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">19k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">32 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>GitLab和Jenkins都是作为Pod部署在kubernetes上的，Jenkins通过创建的pipeline流水线任务从gitlab拉取构建文件以进行构建。</p>
+<a id="more"></a>
+<blockquote>
+<p>注:Pod都使用了持久化存储来部署,同时使用的是私有仓库镜像。 </p>
+</blockquote>
+<h2 id="部署GitLab"><a href="#部署GitLab" class="headerlink" title="部署GitLab"></a>部署GitLab</h2><h3 id="部署Redis"><a href="#部署Redis" class="headerlink" title="部署Redis"></a>部署Redis</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim redis.yaml </span></span><br><span class="line">apiVersion: apps/v1beta1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: redis</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  serviceName: redis</span><br><span class="line">  replicas: 1</span><br><span class="line">  updateStrategy:</span><br><span class="line">    <span class="built_in">type</span>: RollingUpdate</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      name: redis</span><br><span class="line">    spec:</span><br><span class="line">      terminationGracePeriodSeconds: 30</span><br><span class="line">      containers:</span><br><span class="line">        - name: redis</span><br><span class="line">          image: 192.168.100.100/library/redis:4</span><br><span class="line">          ports:</span><br><span class="line">            - containerPort: 6379</span><br><span class="line">          resources:</span><br><span class="line">            requests:</span><br><span class="line">              memory: <span class="string">"1Gi"</span></span><br><span class="line">              cpu: <span class="string">"1000m"</span></span><br><span class="line">            limits:</span><br><span class="line">              memory: <span class="string">"2Gi"</span></span><br><span class="line">              cpu: <span class="string">"2000m"</span></span><br><span class="line"></span><br><span class="line">          livenessProbe:</span><br><span class="line">            <span class="built_in">exec</span>:</span><br><span class="line">              <span class="built_in">command</span>:</span><br><span class="line">              - redis-cli</span><br><span class="line">              - ping</span><br><span class="line">            initialDelaySeconds: 30</span><br><span class="line">            timeoutSeconds: 5</span><br><span class="line">          readinessProbe:</span><br><span class="line">            <span class="built_in">exec</span>:</span><br><span class="line">              <span class="built_in">command</span>:</span><br><span class="line">              - redis-cli</span><br><span class="line">              - ping</span><br><span class="line">            initialDelaySeconds: 5</span><br><span class="line">            timeoutSeconds: 1</span><br><span class="line"></span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: redis</span><br><span class="line">              mountPath: /var/lib/redis</span><br><span class="line">  volumeClaimTemplates:</span><br><span class="line">  - metadata:</span><br><span class="line">      name: redis</span><br><span class="line">      annotations:</span><br><span class="line">        volume.beta.kubernetes.io/storage-class: <span class="string">"ceph-rbd"</span></span><br><span class="line">    spec:</span><br><span class="line">      accessModes: [ <span class="string">"ReadWriteOnce"</span> ]</span><br><span class="line">      resources:</span><br><span class="line">        requests:</span><br><span class="line">          storage: 10Gi</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: redis</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">    - name: redis</span><br><span class="line">      port: 6379</span><br><span class="line">      targetPort: redis</span><br><span class="line">  selector:</span><br><span class="line">    name: redis</span><br><span class="line"><span class="comment"># kubectl create -f redis.yaml </span></span><br><span class="line">statefulset.apps/redis created</span><br><span class="line">service/redis created</span><br></pre></td></tr></table></figure>
+<h3 id="部署PostgreSQL"><a href="#部署PostgreSQL" class="headerlink" title="部署PostgreSQL"></a>部署PostgreSQL</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim postgresql.yaml </span></span><br><span class="line">apiVersion: apps/v1beta1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: postgresql</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  serviceName: postgresql</span><br><span class="line">  replicas: 1</span><br><span class="line">  updateStrategy:</span><br><span class="line">    <span class="built_in">type</span>: RollingUpdate</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      name: postgresql</span><br><span class="line">    spec:</span><br><span class="line">      terminationGracePeriodSeconds: 30</span><br><span class="line">      containers:</span><br><span class="line">        - name: postgresql</span><br><span class="line">          image: 192.168.100.100/library/postgres:11</span><br><span class="line">          ports:</span><br><span class="line">            - containerPort: 5432</span><br><span class="line">          resources:</span><br><span class="line">            requests:</span><br><span class="line">              memory: <span class="string">"1Gi"</span></span><br><span class="line">              cpu: <span class="string">"1000m"</span></span><br><span class="line">            limits:</span><br><span class="line">              memory: <span class="string">"2Gi"</span></span><br><span class="line">              cpu: <span class="string">"2000m"</span></span><br><span class="line"></span><br><span class="line">          env:</span><br><span class="line">          - name: DB_USER</span><br><span class="line">            value: gitlab</span><br><span class="line">          - name: DB_PASS</span><br><span class="line">            value: passw0rd</span><br><span class="line">          - name: DB_NAME</span><br><span class="line">            value: gitlab_production</span><br><span class="line">          - name: DB_EXTENSION</span><br><span class="line">            value: pg_trgm</span><br><span class="line"></span><br><span class="line">          livenessProbe:</span><br><span class="line">            <span class="built_in">exec</span>:</span><br><span class="line">              <span class="built_in">command</span>:</span><br><span class="line">              - pg_isready</span><br><span class="line">              - -h</span><br><span class="line">              - localhost</span><br><span class="line">              - -U</span><br><span class="line">              - postgres</span><br><span class="line">            initialDelaySeconds: 30</span><br><span class="line">            timeoutSeconds: 5</span><br><span class="line">          readinessProbe:</span><br><span class="line">            <span class="built_in">exec</span>:</span><br><span class="line">              <span class="built_in">command</span>:</span><br><span class="line">              - pg_isready</span><br><span class="line">              - -h</span><br><span class="line">              - localhost</span><br><span class="line">              - -U</span><br><span class="line">              - postgres</span><br><span class="line">            initialDelaySeconds: 5</span><br><span class="line">            timeoutSeconds: 1</span><br><span class="line"></span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: postgresql</span><br><span class="line">              mountPath: /var/lib/postgresql</span><br><span class="line">  volumeClaimTemplates:</span><br><span class="line">  - metadata:</span><br><span class="line">      name: postgresql</span><br><span class="line">      annotations:</span><br><span class="line">        volume.beta.kubernetes.io/storage-class: <span class="string">"ceph-rbd"</span></span><br><span class="line">    spec:</span><br><span class="line">      accessModes: [ <span class="string">"ReadWriteOnce"</span> ]</span><br><span class="line">      resources:</span><br><span class="line">        requests:</span><br><span class="line">          storage: 10Gi</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: postgresql</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">    - name: postgresql</span><br><span class="line">      port: 5432</span><br><span class="line">      targetPort: postgresql</span><br><span class="line">  selector:</span><br><span class="line">    name: postgresql</span><br><span class="line"><span class="comment"># kubectl create -f postgresql.yaml </span></span><br><span class="line">statefulset.apps/postgresql created</span><br><span class="line">service/postgresql created</span><br></pre></td></tr></table></figure>
+<h2 id="部署Gitlab"><a href="#部署Gitlab" class="headerlink" title="部署Gitlab"></a>部署Gitlab</h2><h3 id="部署GitLab-1"><a href="#部署GitLab-1" class="headerlink" title="部署GitLab"></a>部署GitLab</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim gitlab.yaml </span></span><br><span class="line">apiVersion: apps/v1beta1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  serviceName: gitlab</span><br><span class="line">  replicas: 1</span><br><span class="line">  updateStrategy:</span><br><span class="line">    <span class="built_in">type</span>: RollingUpdate</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      name: gitlab</span><br><span class="line">      labels:</span><br><span class="line">        name: gitlab</span><br><span class="line">    spec:</span><br><span class="line">      terminationGracePeriodSeconds: 30</span><br><span class="line">      containers:</span><br><span class="line">        - name: gitlab</span><br><span class="line">          image: 192.168.100.100/gitlab/gitlab-ce:11.7.5-ce</span><br><span class="line">          resources:</span><br><span class="line">            requests:</span><br><span class="line">              memory: <span class="string">"1Gi"</span></span><br><span class="line">              cpu: <span class="string">"1000m"</span></span><br><span class="line">            limits:</span><br><span class="line">              memory: <span class="string">"4Gi"</span></span><br><span class="line">              cpu: <span class="string">"2000m"</span></span><br><span class="line"></span><br><span class="line">          env:</span><br><span class="line">          - name: TZ</span><br><span class="line">            value: Asia/BeiJing</span><br><span class="line">          - name: GITLAB_TIMEZONE</span><br><span class="line">            value: BeiJing</span><br><span class="line"></span><br><span class="line">          - name: GITLAB_SECRETS_DB_KEY_BASE</span><br><span class="line">            value: rVhTJmMMnn3RCwxXV7HCTNTkJXWLPjJhNHM3sWTgKwnqnNVTwNCVJ7zPLzKgVz7z</span><br><span class="line">          - name: GITLAB_SECRETS_SECRET_KEY_BASE</span><br><span class="line">            value: VkT7bxtXRsgvLpqRgbVnJKfjTMs7TsWrkXfmntPvbNWRLc4dxK9cWkLNpnNNvmsM</span><br><span class="line">          - name: GITLAB_SECRETS_OTP_KEY_BASE</span><br><span class="line">            value: Xgksv7WKTvWVrNm9vcvbdgMnVqXLPb3F9XvbFLXNLTTXtzcvJgp7nTrdbxN444Jt</span><br><span class="line"></span><br><span class="line">          - name: GITLAB_ROOT_PASSWORD</span><br><span class="line">            value: wangzhijian</span><br><span class="line">          - name: GITLAB_ROOT_EMAIL</span><br><span class="line">            value: wangzhijiansd@qq.com</span><br><span class="line"></span><br><span class="line">          - name: GITLAB_HOST</span><br><span class="line">            value: git.default</span><br><span class="line">          - name: GITLAB_PORT</span><br><span class="line">            value: <span class="string">"80"</span></span><br><span class="line">          - name: GITLAB_SSH_PORT</span><br><span class="line">            value: <span class="string">"22"</span></span><br><span class="line"></span><br><span class="line">          - name: GITLAB_NOTIFY_ON_BROKEN_BUILDS</span><br><span class="line">            value: <span class="string">"true"</span></span><br><span class="line">          - name: GITLAB_NOTIFY_PUSHER</span><br><span class="line">            value: <span class="string">"false"</span></span><br><span class="line"></span><br><span class="line">          - name: GITLAB_BACKUP_SCHEDULE</span><br><span class="line">            value: daily</span><br><span class="line">          - name: GITLAB_BACKUP_TIME</span><br><span class="line">            value: 01:00</span><br><span class="line"></span><br><span class="line">          - name: DB_TYPE</span><br><span class="line">            value: postgresql</span><br><span class="line">          - name: DB_HOST</span><br><span class="line">            value: postgresql</span><br><span class="line">          - name: DB_PORT</span><br><span class="line">            value: <span class="string">"5432"</span></span><br><span class="line">          - name: DB_USER</span><br><span class="line">            value: gitlab</span><br><span class="line">          - name: DB_PASS</span><br><span class="line">            value: passw0rd</span><br><span class="line">          - name: DB_NAME</span><br><span class="line">            value: gitlab_production</span><br><span class="line"></span><br><span class="line">          - name: REDIS_HOST</span><br><span class="line">            value: redis</span><br><span class="line">          - name: REDIS_PORT</span><br><span class="line">            value: <span class="string">"6379"</span></span><br><span class="line"></span><br><span class="line">          - name: SMTP_ENABLED</span><br><span class="line">            value: <span class="string">"true"</span></span><br><span class="line">          - name: SMTP_DOMAIN</span><br><span class="line">            value: www.flywzj.com</span><br><span class="line">          - name: SMTP_HOST</span><br><span class="line">            value: smtp.qq.com</span><br><span class="line">          - name: SMTP_PORT</span><br><span class="line">            value: <span class="string">"465"</span></span><br><span class="line">          - name: SMTP_USER</span><br><span class="line">            value: wangzhijiansd@qq.com</span><br><span class="line">          - name: SMTP_PASS</span><br><span class="line">            value: <span class="string">"********"</span></span><br><span class="line">          - name: SMTP_STARTTLS</span><br><span class="line">            value: <span class="string">"true"</span></span><br><span class="line">          - name: SMTP_AUTHENTICATION</span><br><span class="line">            value: login</span><br><span class="line"></span><br><span class="line">          - name: IMAP_ENABLED</span><br><span class="line">            value: <span class="string">"false"</span></span><br><span class="line">          - name: IMAP_HOST</span><br><span class="line">            value: imap.gmail.com</span><br><span class="line">          - name: IMAP_PORT</span><br><span class="line">            value: <span class="string">"993"</span></span><br><span class="line">          - name: IMAP_USER</span><br><span class="line">            value: mailer@example.com</span><br><span class="line">          - name: IMAP_PASS</span><br><span class="line">            value: password</span><br><span class="line">          - name: IMAP_SSL</span><br><span class="line">            value: <span class="string">"true"</span></span><br><span class="line">          - name: IMAP_STARTTLS</span><br><span class="line">            value: <span class="string">"false"</span></span><br><span class="line"></span><br><span class="line">          ports:</span><br><span class="line">          - name: http</span><br><span class="line">            containerPort: 80</span><br><span class="line">          - name: ssh</span><br><span class="line">            containerPort: 22</span><br><span class="line"></span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: gitlab</span><br><span class="line">              mountPath: /home/git/data</span><br><span class="line">  volumeClaimTemplates:</span><br><span class="line">  - metadata:</span><br><span class="line">      name: gitlab</span><br><span class="line">      annotations:</span><br><span class="line">        volume.beta.kubernetes.io/storage-class: <span class="string">"ceph-rbd"</span></span><br><span class="line">    spec:</span><br><span class="line">      accessModes: [ <span class="string">"ReadWriteOnce"</span> ]</span><br><span class="line">      resources:</span><br><span class="line">        requests:</span><br><span class="line">          storage: 10Gi</span><br><span class="line"><span class="comment"># vim gitlab-svc.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: LoadBalancer</span><br><span class="line">  ports:</span><br><span class="line">    - name: http</span><br><span class="line">      port: 80</span><br><span class="line">      targetPort: http</span><br><span class="line">    - name: ssh</span><br><span class="line">      port: 22</span><br><span class="line">      targetPort: ssh</span><br><span class="line">  selector:</span><br><span class="line">    name: gitlab</span><br><span class="line"><span class="comment"># kubectl create -f gitlab.yaml </span></span><br><span class="line">statefulset.apps/gitlab created</span><br><span class="line"><span class="comment"># kubectl create -f gitlab-svc.yaml </span></span><br><span class="line">service/gitlab created</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关于变量的赋予请参考:<a href="https://github.com/sameersbn/docker-gitlab" target="_blank" rel="noopener">https://github.com/sameersbn/docker-gitlab</a></p>
+</blockquote>
+<blockquote>
+<p>如需进行特殊配置，请参考gitlab相关文档将相应配置写入gitlab.rb并使用configmap将其挂载到/etc/gitlab/目录下</p>
+</blockquote>
+<h2 id="部署Jenkins"><a href="#部署Jenkins" class="headerlink" title="部署Jenkins"></a>部署Jenkins</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim jenkins.yaml</span></span><br><span class="line">apiVersion: apps/v1beta1</span><br><span class="line">kind: StatefulSet</span><br><span class="line">metadata:</span><br><span class="line">  name: jenkins</span><br><span class="line">spec:</span><br><span class="line">  serviceName: jenkins</span><br><span class="line">  replicas: 1</span><br><span class="line">  updateStrategy:</span><br><span class="line">    <span class="built_in">type</span>: RollingUpdate</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      name: jenkins</span><br><span class="line">      labels:</span><br><span class="line">        name: jenkins</span><br><span class="line">    spec:</span><br><span class="line">      terminationGracePeriodSeconds: 10</span><br><span class="line">      serviceAccountName: jenkins</span><br><span class="line">      containers:</span><br><span class="line">        - name: jenkins</span><br><span class="line">          image: 192.168.100.100/jenkins/jenkins:lts</span><br><span class="line">          imagePullPolicy: Always</span><br><span class="line">          ports:</span><br><span class="line">            - containerPort: 8080</span><br><span class="line">            - containerPort: 50000</span><br><span class="line">          resources:</span><br><span class="line">            limits:</span><br><span class="line">              cpu: 2</span><br><span class="line">              memory: 2Gi</span><br><span class="line">            requests:</span><br><span class="line">              cpu: 1</span><br><span class="line">              memory: 1Gi</span><br><span class="line">          env:</span><br><span class="line">            - name: LIMITS_MEMORY</span><br><span class="line">              valueFrom:</span><br><span class="line">                resourceFieldRef:</span><br><span class="line">                  resource: limits.memory</span><br><span class="line">                  divisor: 1Mi</span><br><span class="line">            - name: JAVA_OPTS</span><br><span class="line">              value: -Duser.timezone=Asia/Shanghai -Xmx$(LIMITS_MEMORY)m -XshowSettings:vm -Dhudson.slaves.NodeProvisioner.initialDelay=0 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85</span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: jenkins-home</span><br><span class="line">              mountPath: /var/jenkins_home</span><br><span class="line">          livenessProbe:</span><br><span class="line">            httpGet:</span><br><span class="line">              path: /login</span><br><span class="line">              port: 8080</span><br><span class="line">            initialDelaySeconds: 60</span><br><span class="line">            timeoutSeconds: 5</span><br><span class="line">            failureThreshold: 12 <span class="comment"># ~2 minutes</span></span><br><span class="line">          readinessProbe:</span><br><span class="line">            httpGet:</span><br><span class="line">              path: /login</span><br><span class="line">              port: 8080</span><br><span class="line">            initialDelaySeconds: 60</span><br><span class="line">            timeoutSeconds: 5</span><br><span class="line">            failureThreshold: 12 <span class="comment"># ~2 minutes</span></span><br><span class="line">      securityContext:</span><br><span class="line">        fsGroup: 1000</span><br><span class="line">  volumeClaimTemplates:</span><br><span class="line">  - metadata:</span><br><span class="line">      name: jenkins-home</span><br><span class="line">      annotations:</span><br><span class="line">        volume.beta.kubernetes.io/storage-class: <span class="string">"ceph-rbd"</span></span><br><span class="line">    spec:</span><br><span class="line">      accessModes: [ <span class="string">"ReadWriteOnce"</span> ]</span><br><span class="line">      resources:</span><br><span class="line">        requests:</span><br><span class="line">          storage: 10Gi</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: jenkins</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  <span class="built_in">type</span>: LoadBalancer</span><br><span class="line">  ports:</span><br><span class="line">  - name: http</span><br><span class="line">    port: 8080</span><br><span class="line">    targetPort: 8080</span><br><span class="line">  - name: agent</span><br><span class="line">    port: 50000</span><br><span class="line">    targetPort: 50000</span><br><span class="line">  selector:</span><br><span class="line">    name: jenkins</span><br><span class="line"><span class="comment"># kubectl apply -f jenkins.yaml</span></span><br><span class="line">statefulset.apps/jenkins configured</span><br><span class="line">service/jenkins configured</span><br></pre></td></tr></table></figure>
+<h3 id="配置RBAC"><a href="#配置RBAC" class="headerlink" title="配置RBAC"></a>配置RBAC</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim jenkins-rbac.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  name: jenkins</span><br><span class="line">---</span><br><span class="line">kind: Role</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">metadata:</span><br><span class="line">  name: jenkins</span><br><span class="line">rules:</span><br><span class="line">- apiGroups: [<span class="string">""</span>]</span><br><span class="line">  resources: [<span class="string">"pods"</span>]</span><br><span class="line">  verbs: [<span class="string">"create"</span>,<span class="string">"delete"</span>,<span class="string">"get"</span>,<span class="string">"list"</span>,<span class="string">"patch"</span>,<span class="string">"update"</span>,<span class="string">"watch"</span>]</span><br><span class="line">- apiGroups: [<span class="string">""</span>]</span><br><span class="line">  resources: [<span class="string">"pods/exec"</span>]</span><br><span class="line">  verbs: [<span class="string">"create"</span>,<span class="string">"delete"</span>,<span class="string">"get"</span>,<span class="string">"list"</span>,<span class="string">"patch"</span>,<span class="string">"update"</span>,<span class="string">"watch"</span>]</span><br><span class="line">- apiGroups: [<span class="string">""</span>]</span><br><span class="line">  resources: [<span class="string">"pods/log"</span>]</span><br><span class="line">  verbs: [<span class="string">"get"</span>,<span class="string">"list"</span>,<span class="string">"watch"</span>]</span><br><span class="line">- apiGroups: [<span class="string">""</span>]</span><br><span class="line">  resources: [<span class="string">"secrets"</span>]</span><br><span class="line">  verbs: [<span class="string">"get"</span>]</span><br><span class="line">---</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">kind: RoleBinding</span><br><span class="line">metadata:</span><br><span class="line">  name: jenkins</span><br><span class="line">roleRef:</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">  kind: Role</span><br><span class="line">  name: jenkins</span><br><span class="line">subjects:</span><br><span class="line">- kind: ServiceAccount</span><br><span class="line">  name: jenkins</span><br><span class="line"><span class="comment"># kubectl apply -f jenkins-rbac.yaml</span></span><br><span class="line">serviceaccount/jenkins configured</span><br><span class="line">role.rbac.authorization.k8s.io/jenkins configured</span><br><span class="line">rolebinding.rbac.authorization.k8s.io/jenkins configured</span><br><span class="line"><span class="comment"># kubectl create clusterrolebinding cluster-admin-jenkins --clusterrole=cluster-admin --serviceaccount=default:default</span></span><br></pre></td></tr></table></figure>
+<h2 id="查看相关部署情况"><a href="#查看相关部署情况" class="headerlink" title="查看相关部署情况"></a>查看相关部署情况</h2><h3 id="查看-StatefulSet"><a href="#查看-StatefulSet" class="headerlink" title="查看 StatefulSet"></a>查看 StatefulSet</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl get statefulset</span></span><br><span class="line">NAME         READY   AGE</span><br><span class="line">gitlab       1/1     41h</span><br><span class="line">jenkins      1/1     41h</span><br><span class="line">postgresql   1/1     41h</span><br><span class="line">redis        1/1     41h</span><br></pre></td></tr></table></figure>
+<h3 id="查看-PV和PVC"><a href="#查看-PV和PVC" class="headerlink" title="查看 PV和PVC"></a>查看 PV和PVC</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl get pv</span></span><br><span class="line">NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                             STORAGECLASS   REASON   AGE</span><br><span class="line">pvc-18ec78b1-4ee5-11e9-b373-000c292a7b79   10Gi       RWO            Delete           Bound    default/redis-redis-0             ceph-rbd                41h</span><br><span class="line">pvc-48a7f8c4-4ee9-11e9-b373-000c292a7b79   10Gi       RWO            Delete           Bound    default/postgresql-postgresql-0   ceph-rbd                41h</span><br><span class="line">pvc-49035b17-4eeb-11e9-b373-000c292a7b79   10Gi       RWO            Delete           Bound    default/gitlab-gitlab-0           ceph-rbd                41h</span><br><span class="line">pvc-b5bbbd9b-4af6-11e9-9bd3-000c292a7b79   10Gi       RWO            Delete           Bound    default/jenkins-home-jenkins-0    ceph-rbd                41h</span><br><span class="line"><span class="comment"># kubectl get pvc</span></span><br><span class="line">NAME                      STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE</span><br><span class="line">gitlab-gitlab-0           Bound    pvc-49035b17-4eeb-11e9-b373-000c292a7b79   10Gi       RWO            ceph-rbd       41h</span><br><span class="line">jenkins-home-jenkins-0    Bound    pvc-b5bbbd9b-4af6-11e9-9bd3-000c292a7b79   10Gi       RWO            ceph-rbd       41h</span><br><span class="line">postgresql-postgresql-0   Bound    pvc-48a7f8c4-4ee9-11e9-b373-000c292a7b79   10Gi       RWO            ceph-rbd       41h</span><br><span class="line">redis-redis-0             Bound    pvc-18ec78b1-4ee5-11e9-b373-000c292a7b79   10Gi       RWO            ceph-rbd       41h</span><br></pre></td></tr></table></figure>
+<h3 id="查看-Pod"><a href="#查看-Pod" class="headerlink" title="查看 Pod"></a>查看 Pod</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl get pod</span></span><br><span class="line">NAME                               READY   STATUS    RESTARTS   AGE</span><br><span class="line">gitlab-0                           1/1     Running   0          41h</span><br><span class="line">jenkins-0                          1/1     Running   0          41h</span><br><span class="line">postgresql-0                       1/1     Running   0          41h</span><br><span class="line">redis-0                            1/1     Running   0          41h</span><br></pre></td></tr></table></figure>
+<h3 id="查看-Service"><a href="#查看-Service" class="headerlink" title="查看 Service"></a>查看 Service</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl get services</span></span><br><span class="line">NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                    AGE</span><br><span class="line">gitlab       LoadBalancer   10.96.131.243   &lt;pending&gt;     80:30284/TCP,22:32377/TCP                  41h</span><br><span class="line">jenkins      LoadBalancer   10.106.240.93   &lt;pending&gt;     8080:31906/TCP,50000:31611/TCP             41h</span><br><span class="line">postgresql   ClusterIP      10.106.35.107   &lt;none&gt;        5432/TCP                                   41h</span><br><span class="line">redis        ClusterIP      10.99.125.252   &lt;none&gt;        6379/TCP                                   41h</span><br></pre></td></tr></table></figure>
+<h2 id="配置Jenkins"><a href="#配置Jenkins" class="headerlink" title="配置Jenkins"></a>配置Jenkins</h2><blockquote>
+<p>当您使用nodeport方式打开Jenkins的时候，首先会出现“Unlocking Jenkins”，这里的“Administrator password”存放在logs中，你可以通过查看日志获取，也可通过如下命令获取:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl exec -it jenkins-0 cat /var/jenkins_home/secrets/initialAdminPassword</span></span><br><span class="line">1f297e8179664848a3e0b672ceafce1f</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在之后会提示您安装插件(这里我安装了推荐插件)和配置管理员账号，请自行安装和配置。</p>
+</blockquote>
+<blockquote>
+<p>登录后，在“系统管理”===&gt;“插件管理”===&gt;“available”(可用插件)===&gt;安装Kubernetes和GitLab插件</p>
+</blockquote>
+<h3 id="关于Gitlab插件的配置"><a href="#关于Gitlab插件的配置" class="headerlink" title="关于Gitlab插件的配置"></a>关于Gitlab插件的配置</h3><blockquote>
+<p>在“系统管理”===&gt;“系统设置”下进行设置</p>
+</blockquote>
+<p><img src="/blog/ops/ops01.png" alt="ops01"></p>
+<ul>
+<li>Connection name: gitlab(可自行更改)</li>
+<li>Gitlab host URL: <a href="http://gitlab(该gitlab与kubernetes的service对应)" target="_blank" rel="noopener">http://gitlab(该gitlab与kubernetes的service对应)</a></li>
+<li>Credentials: 点击“Add”或者在首页的凭据栏配置全局凭据，如下所示:<br><img src="/blog/ops/ops02.png" alt="ops02"></li>
+</ul>
+<blockquote>
+<p>配置完成后点击“Test Connection”进行测试，如出现“Success”即为成功</p>
+</blockquote>
+<h4 id="关于GitLab-API-token"><a href="#关于GitLab-API-token" class="headerlink" title="关于GitLab API token"></a>关于GitLab API token</h4><blockquote>
+<p>登录相关Gitlab账户，在该用户的“Setting”===&gt;“Access Tokens”下添加个人访问令牌的名称、到期时间以及授予的权限,如下所示:<br><img src="/blog/ops/ops03.png" alt="ops03"></p>
+</blockquote>
+<blockquote>
+<p>之后会生成个人访问令牌，请注意保存，之后将无法再查看该token。将该token复制到Jenkins以添加凭据<br><img src="/blog/ops/ops04.png" alt="ops04"></p>
+</blockquote>
+<h3 id="关于kubernetes插件的配置"><a href="#关于kubernetes插件的配置" class="headerlink" title="关于kubernetes插件的配置"></a>关于kubernetes插件的配置</h3><blockquote>
+<p>在“系统管理”===&gt;“系统设置”===&gt;拖到最后找到“云”===&gt;“新增一个云”</p>
+</blockquote>
+<p><img src="/blog/ops/ops17.png" alt="ops17"></p>
+<ul>
+<li><p>name: kubernetes(可名称)</p>
+</li>
+<li><p>kubernetes 地址: <a href="https://kubernetes.default(可配置为apiserver地址)" target="_blank" rel="noopener">https://kubernetes.default(可配置为apiserver地址)</a></p>
+</li>
+<li><p>Jenkins 地址: <a href="http://jenkins:8080(配置的是service名，也可以直接配置http://ip:port)" target="_blank" rel="noopener">http://jenkins:8080(配置的是service名，也可以直接配置http://ip:port)</a></p>
+</li>
+<li><p>Jenkins 通道: jenkins:50000(配置的是service:port，也可以配置ip:port)</p>
+</li>
+<li><p>这里没有配置凭据，因为上面的部署中已经赋予了相应权限，如果是集群外安装则需要添加凭据</p>
+</li>
+</ul>
+<blockquote>
+<p>点击“Test Connection”，如出现“Connection test successful”则说明 Jenkins已经可以和 Kubernetes 通信了</p>
+</blockquote>
+<h3 id="关于添加凭据"><a href="#关于添加凭据" class="headerlink" title="关于添加凭据"></a>关于添加凭据</h3><blockquote>
+<p>Jenkins支持添加多种类型凭据，除了上面介绍的“Gitlab API token”还有“SSH Username with private key”、“Certificate”以及常见的用户名密码类型，这里说的就是用户名密码类型，这里添加harbor镜像仓库以及Gitlab的用户名密码以备使用。</p>
+</blockquote>
+<p><img src="/blog/ops/ops18.png" alt="ops18"><br><img src="/blog/ops/ops19.png" alt="ops19"></p>
+<h2 id="使用-GitLab-新建项目"><a href="#使用-GitLab-新建项目" class="headerlink" title="使用 GitLab 新建项目"></a>使用 GitLab 新建项目</h2><h3 id="登录Gitlab"><a href="#登录Gitlab" class="headerlink" title="登录Gitlab"></a>登录Gitlab</h3><blockquote>
+<p>使用nodeport方式打开Gitlab，然后使用root账户登录，在“Admin Area”的“Settings”下配置“Network”，使其允许从hooks和 services向local network发出请求。</p>
+</blockquote>
+<p><img src="/blog/ops/ops05.png" alt="ops05"></p>
+<h3 id="新建Gitlab账户"><a href="#新建Gitlab账户" class="headerlink" title="新建Gitlab账户"></a>新建Gitlab账户</h3><p><img src="/blog/ops/ops06.png" alt="ops06"></p>
+<h3 id="新建项目"><a href="#新建项目" class="headerlink" title="新建项目"></a>新建项目</h3><p><img src="/blog/ops/ops07.png" alt="ops07"></p>
+<h3 id="写一个简单的dockerfile"><a href="#写一个简单的dockerfile" class="headerlink" title="写一个简单的dockerfile"></a>写一个简单的dockerfile</h3><p><img src="/blog/ops/ops08.png" alt="ops08"></p>
+<h2 id="使用-Jenkins-新建任务"><a href="#使用-Jenkins-新建任务" class="headerlink" title="使用 Jenkins 新建任务"></a>使用 Jenkins 新建任务</h2><h3 id="添加凭据"><a href="#添加凭据" class="headerlink" title="添加凭据"></a>添加凭据</h3><h3 id="新建pipeline任务"><a href="#新建pipeline任务" class="headerlink" title="新建pipeline任务"></a>新建pipeline任务</h3><p><img src="/blog/ops/ops09.png" alt="ops09"></p>
+<h3 id="写一个pipeline"><a href="#写一个pipeline" class="headerlink" title="写一个pipeline"></a>写一个pipeline</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">def label = <span class="string">"docker-<span class="variable">$&#123;UUID.randomUUID().toString()&#125;</span>"</span></span><br><span class="line"></span><br><span class="line">podTemplate(label: label, yaml: <span class="string">""</span><span class="string">"</span></span><br><span class="line"><span class="string">apiVersion: v1</span></span><br><span class="line"><span class="string">kind: Pod</span></span><br><span class="line"><span class="string">spec:</span></span><br><span class="line"><span class="string">  containers:</span></span><br><span class="line"><span class="string">  - name: docker</span></span><br><span class="line"><span class="string">    image: 192.168.100.100/docker/docker:18</span></span><br><span class="line"><span class="string">    command: ['cat']</span></span><br><span class="line"><span class="string">    tty: true</span></span><br><span class="line"><span class="string">    volumeMounts:</span></span><br><span class="line"><span class="string">    - name: dockersock</span></span><br><span class="line"><span class="string">      mountPath: /var/run/docker.sock</span></span><br><span class="line"><span class="string">  volumes:</span></span><br><span class="line"><span class="string">  - name: dockersock</span></span><br><span class="line"><span class="string">    hostPath:</span></span><br><span class="line"><span class="string">      path: /var/run/docker.sock</span></span><br><span class="line"><span class="string">"</span><span class="string">""</span></span><br><span class="line">  ) &#123;</span><br><span class="line"></span><br><span class="line">  def image = <span class="string">"192.168.100.100/library/alpine:test"</span></span><br><span class="line">  node(label) &#123;</span><br><span class="line">    stage(<span class="string">'Git'</span>) &#123;</span><br><span class="line">      git credentialsId: <span class="string">'gitlab'</span>,url:<span class="string">'http://gitlab/zhi/alpine.git'</span> </span><br><span class="line">      &#125;	  </span><br><span class="line">    stage(<span class="string">'Build Docker image'</span>)</span><br><span class="line">        withCredentials([</span><br><span class="line">            usernamePassword(</span><br><span class="line">                credentialsId: <span class="string">'harbor'</span>, </span><br><span class="line">                passwordVariable: <span class="string">'PASSWORD'</span>, </span><br><span class="line">                usernameVariable: <span class="string">'USERNAME'</span>)])  &#123;</span><br><span class="line">      container(<span class="string">'docker'</span>) &#123;</span><br><span class="line">        sh <span class="string">"docker build -t <span class="variable">$&#123;image&#125;</span> ."</span></span><br><span class="line">        sh <span class="string">"docker login -u '<span class="variable">$USERNAME</span>' -p '<span class="variable">$PASSWORD</span>' 192.168.100.100"</span></span><br><span class="line">        sh <span class="string">"docker push <span class="variable">$&#123;image&#125;</span>"</span> </span><br><span class="line">        sh <span class="string">"docker rmi <span class="variable">$&#123;image&#125;</span>"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意:该流水线是参照<a href="https://github.com/jenkinsci/kubernetes-plugin" target="_blank" rel="noopener">jenkinsci-kubernetes-plugin</a>而来。</p>
+</blockquote>
+<blockquote>
+<p>关于该流水线的简单解释:</p>
+</blockquote>
+<ul>
+<li>podTemplate: 用于创建代理的pod的模板</li>
+<li>label: pod的标签。设置唯一值以避免跨构建的冲突</li>
+<li>containers: 用于创建pod的容器模板</li>
+<li>containerTemplate: 将添加到pod中的容器模板</li>
+<li>name: 容器名</li>
+<li>image: 容器镜像</li>
+<li>command: 容器将执行的命令</li>
+<li>tty: true,启用TTY</li>
+<li>volumes: 为pod挂载相应卷</li>
+<li>node: 选择相应标签</li>
+<li>stage: 构建阶段，这将显性的显示在“Stage View”下</li>
+<li>withCredentials: 将凭据绑定到变量</li>
+<li>usernamePassword: 将一个变量设置为用户名，将另一个变量设置为凭据中给出的密码</li>
+<li>credentialsId: 设置凭据ID</li>
+<li>passwordVariable: 在构建期间要设置为密码的环境变量的名称</li>
+<li>usernameVariable: 构建期间要设置为用户名的环境变量的名称</li>
+</ul>
+<h3 id="进行构建"><a href="#进行构建" class="headerlink" title="进行构建"></a>进行构建</h3><blockquote>
+<p>点击“立即构建”进行构建</p>
+</blockquote>
+<p><img src="/blog/ops/ops10.png" alt="ops10"></p>
+<h3 id="定时构建"><a href="#定时构建" class="headerlink" title="定时构建"></a>定时构建</h3><p><img src="/blog/ops/ops11.png" alt="ops11"></p>
+<h4 id="构建语法"><a href="#构建语法" class="headerlink" title="构建语法"></a>构建语法</h4><blockquote>
+<p>(<em> </em> <em> </em> <em> : 5个</em>)</p>
+<ul>
+<li>第一个*表示分钟，取值0~59</li>
+<li>第二个*表示小时，取值0~23</li>
+<li>第三个*表示一个月的第几天，取值1~31</li>
+<li>第四个*表示第几月，取值1~12</li>
+<li>第五个*表示一周中的第几天，取值0~7，其中0和7代表的都是周日</li>
+</ul>
+</blockquote>
+<h3 id="触发构建"><a href="#触发构建" class="headerlink" title="触发构建"></a>触发构建</h3><h4 id="在该任务下启用触发器"><a href="#在该任务下启用触发器" class="headerlink" title="在该任务下启用触发器"></a>在该任务下启用触发器</h4><blockquote>
+<p>勾选将更改推送到GitLab时构建，点击高级生成“Secret token”</p>
+</blockquote>
+<p><img src="/blog/ops/ops12.png" alt="ops12"></p>
+<h4 id="在Gitlab下添加Webhooks"><a href="#在Gitlab下添加Webhooks" class="headerlink" title="在Gitlab下添加Webhooks"></a>在Gitlab下添加Webhooks</h4><blockquote>
+<p>在该项目下设置“Integrations”，将Jenkins的配置配置在“URL”和“Secret Token”项下，根据情况勾选相应触发项</p>
+</blockquote>
+<p><img src="/blog/ops/ops13.png" alt="ops13"></p>
+<h4 id="在Gitlab下更新该项目"><a href="#在Gitlab下更新该项目" class="headerlink" title="在Gitlab下更新该项目"></a>在Gitlab下更新该项目</h4><p><img src="/blog/ops/ops14.png" alt="ops14"></p>
+<h4 id="查看Jenkins是否触发了构建"><a href="#查看Jenkins是否触发了构建" class="headerlink" title="查看Jenkins是否触发了构建"></a>查看Jenkins是否触发了构建</h4><p><img src="/blog/ops/ops15.png" alt="ops15"></p>
+<h2 id="关于在Jenkins中使用kubectl命令"><a href="#关于在Jenkins中使用kubectl命令" class="headerlink" title="关于在Jenkins中使用kubectl命令"></a>关于在Jenkins中使用kubectl命令</h2><blockquote>
+<p>注: 在上面的Jenkins的部署中已经做好了相关权限的分配 </p>
+</blockquote>
+<h3 id="重构jnlp-slave"><a href="#重构jnlp-slave" class="headerlink" title="重构jnlp-slave"></a>重构jnlp-slave</h3><blockquote>
+<p>注: docker安装包和kubectl命令请自行下载至构建目录下</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#  mkdir jnlp &amp;&amp; cd jnlp</span></span><br><span class="line"><span class="comment"># cp .kube/config .</span></span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line">config  docker-18.06.1-ce.tgz  Dockerfile  kubectl</span><br><span class="line"><span class="comment"># cat Dockerfile </span></span><br><span class="line">FROM jenkins/jnlp-slave:3.27-1-alpine</span><br><span class="line">MAINTAINER zhi &lt;wangzhijiansd@qq.com&gt;</span><br><span class="line"></span><br><span class="line">USER root</span><br><span class="line">ARG DOCKER_GID=994</span><br><span class="line">ENV DOCKER_VERSION=18.06.1-ce</span><br><span class="line"></span><br><span class="line">COPY docker-<span class="variable">$&#123;DOCKER_VERSION&#125;</span>.tgz /var/tmp/</span><br><span class="line">RUN  tar --strip-components=1 -xvzf /var/tmp/docker-<span class="variable">$&#123;DOCKER_VERSION&#125;</span>.tgz -C /usr/<span class="built_in">local</span>/bin \</span><br><span class="line">    &amp;&amp; rm -rf /var/tmp/docker-<span class="variable">$&#123;DOCKER_VERSION&#125;</span>.tgz \</span><br><span class="line">    &amp;&amp; chmod -R 775 /usr/<span class="built_in">local</span>/bin/docker</span><br><span class="line"></span><br><span class="line">COPY kubectl /usr/<span class="built_in">local</span>/bin/</span><br><span class="line"></span><br><span class="line">RUN mkdir -p /root/.kube/</span><br><span class="line">COPY config /root/.kube/</span><br><span class="line"></span><br><span class="line">RUN addgroup -g <span class="variable">$&#123;DOCKER_GID&#125;</span> docker &amp;&amp; adduser jenkins docker </span><br><span class="line"></span><br><span class="line">USER jenkins:<span class="variable">$&#123;DOCKER_GID&#125;</span></span><br><span class="line"><span class="comment"># docker build -t 192.168.100.100/jenkins/jnlp-slave:latest .</span></span><br><span class="line"><span class="comment"># docker push 192.168.100.100/jenkins/jnlp-slave:latest</span></span><br></pre></td></tr></table></figure>
+<h3 id="编写一个pipeline"><a href="#编写一个pipeline" class="headerlink" title="编写一个pipeline"></a>编写一个pipeline</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">podTemplate(label: <span class="string">'mypod'</span>, cloud: <span class="string">'kubernetes'</span>, containers: [</span><br><span class="line">    containerTemplate(</span><br><span class="line">        name: <span class="string">'jnlp'</span>, </span><br><span class="line">        image: <span class="string">'192.168.100.100/jenkins/jnlp-slave:latest'</span>, </span><br><span class="line">        alwaysPullImage: <span class="literal">true</span>, </span><br><span class="line">        args: <span class="string">'$&#123;computer.jnlpmac&#125; $&#123;computer.name&#125;'</span>),</span><br><span class="line">  ],</span><br><span class="line">  volumes: [</span><br><span class="line">    hostPathVolume(</span><br><span class="line">     mountPath: <span class="string">'/var/run/docker.sock'</span>, </span><br><span class="line"> hostPath: <span class="string">'/var/run/docker.sock'</span>),</span><br><span class="line">],) </span><br><span class="line">&#123;</span><br><span class="line">    node(<span class="string">'mypod'</span>) &#123;</span><br><span class="line">        stage(<span class="string">'Run shell'</span>) &#123;</span><br><span class="line">            sh <span class="string">'kubectl get pod -n kube-system'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="进行构建-1"><a href="#进行构建-1" class="headerlink" title="进行构建"></a>进行构建</h3><p><img src="/blog/ops/ops16.png" alt="ops16"></p>
+<blockquote>
+<p>附:</p>
+<ul>
+<li>K8S+Gitlab+Jenkins构建镜像并创建Pod: <a href="https://blog.51cto.com/wangzhijian/2285861" target="_blank" rel="noopener">https://blog.51cto.com/wangzhijian/2285861</a></li>
+<li>流水线语法参考: <a href="https://jenkins.io/zh/doc/book/pipeline/syntax/" target="_blank" rel="noopener">https://jenkins.io/zh/doc/book/pipeline/syntax/</a></li>
+<li>关于凭据绑定: <a href="https://jenkins.io/doc/pipeline/steps/credentials-binding/" target="_blank" rel="noopener">https://jenkins.io/doc/pipeline/steps/credentials-binding/</a></li>
+<li>关于定时构建: <a href="https://www.cnblogs.com/panpan0301/p/7738249.html" target="_blank" rel="noopener">https://www.cnblogs.com/panpan0301/p/7738249.html</a></li>
+</ul>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kubernetes/" rel="tag"><i class="fa fa-tag"></i> kubernetes</a>
+          
+            <a href="/tags/gitlab/" rel="tag"><i class="fa fa-tag"></i> gitlab</a>
+          
+            <a href="/tags/jenkins/" rel="tag"><i class="fa fa-tag"></i> jenkins</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/501be2e/" rel="next" title="Harbor从1.6.2升级到1.7.4">
+                <i class="fa fa-chevron-left"></i> Harbor从1.6.2升级到1.7.4
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#部署GitLab"><span class="nav-number">1.</span> <span class="nav-text">部署GitLab</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#部署Redis"><span class="nav-number">1.1.</span> <span class="nav-text">部署Redis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部署PostgreSQL"><span class="nav-number">1.2.</span> <span class="nav-text">部署PostgreSQL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署Gitlab"><span class="nav-number">2.</span> <span class="nav-text">部署Gitlab</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#部署GitLab-1"><span class="nav-number">2.1.</span> <span class="nav-text">部署GitLab</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署Jenkins"><span class="nav-number">3.</span> <span class="nav-text">部署Jenkins</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置RBAC"><span class="nav-number">3.1.</span> <span class="nav-text">配置RBAC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看相关部署情况"><span class="nav-number">4.</span> <span class="nav-text">查看相关部署情况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看-StatefulSet"><span class="nav-number">4.1.</span> <span class="nav-text">查看 StatefulSet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看-PV和PVC"><span class="nav-number">4.2.</span> <span class="nav-text">查看 PV和PVC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看-Pod"><span class="nav-number">4.3.</span> <span class="nav-text">查看 Pod</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看-Service"><span class="nav-number">4.4.</span> <span class="nav-text">查看 Service</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置Jenkins"><span class="nav-number">5.</span> <span class="nav-text">配置Jenkins</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于Gitlab插件的配置"><span class="nav-number">5.1.</span> <span class="nav-text">关于Gitlab插件的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关于GitLab-API-token"><span class="nav-number">5.1.1.</span> <span class="nav-text">关于GitLab API token</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于kubernetes插件的配置"><span class="nav-number">5.2.</span> <span class="nav-text">关于kubernetes插件的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于添加凭据"><span class="nav-number">5.3.</span> <span class="nav-text">关于添加凭据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-GitLab-新建项目"><span class="nav-number">6.</span> <span class="nav-text">使用 GitLab 新建项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#登录Gitlab"><span class="nav-number">6.1.</span> <span class="nav-text">登录Gitlab</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新建Gitlab账户"><span class="nav-number">6.2.</span> <span class="nav-text">新建Gitlab账户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新建项目"><span class="nav-number">6.3.</span> <span class="nav-text">新建项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写一个简单的dockerfile"><span class="nav-number">6.4.</span> <span class="nav-text">写一个简单的dockerfile</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-Jenkins-新建任务"><span class="nav-number">7.</span> <span class="nav-text">使用 Jenkins 新建任务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#添加凭据"><span class="nav-number">7.1.</span> <span class="nav-text">添加凭据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新建pipeline任务"><span class="nav-number">7.2.</span> <span class="nav-text">新建pipeline任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写一个pipeline"><span class="nav-number">7.3.</span> <span class="nav-text">写一个pipeline</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进行构建"><span class="nav-number">7.4.</span> <span class="nav-text">进行构建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定时构建"><span class="nav-number">7.5.</span> <span class="nav-text">定时构建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#构建语法"><span class="nav-number">7.5.1.</span> <span class="nav-text">构建语法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#触发构建"><span class="nav-number">7.6.</span> <span class="nav-text">触发构建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在该任务下启用触发器"><span class="nav-number">7.6.1.</span> <span class="nav-text">在该任务下启用触发器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在Gitlab下添加Webhooks"><span class="nav-number">7.6.2.</span> <span class="nav-text">在Gitlab下添加Webhooks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在Gitlab下更新该项目"><span class="nav-number">7.6.3.</span> <span class="nav-text">在Gitlab下更新该项目</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看Jenkins是否触发了构建"><span class="nav-number">7.6.4.</span> <span class="nav-text">查看Jenkins是否触发了构建</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于在Jenkins中使用kubectl命令"><span class="nav-number">8.</span> <span class="nav-text">关于在Jenkins中使用kubectl命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#重构jnlp-slave"><span class="nav-number">8.1.</span> <span class="nav-text">重构jnlp-slave</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编写一个pipeline"><span class="nav-number">8.2.</span> <span class="nav-text">编写一个pipeline</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进行构建-1"><span class="nav-number">8.3.</span> <span class="nav-text">进行构建</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">126k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">3:30</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
