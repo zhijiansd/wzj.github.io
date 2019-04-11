@@ -108,24 +108,32 @@
 
 
 
-  <meta name="description" content="Harbor最新的V1.7版本又添加了一些新的功能:  在线GC（垃圾回收）- 现在 Harbor 可以清理从后端存储中已删除的镜像且在执行GC操作之前不再要求中断 Harbor 的运行。支持按需垃圾收集，使管理员能够手动配置运行docker注册表垃圾收集或使用cron计划自动配置 镜像构建历史 - 可查看容器镜像的构建历史和内容 镜像复制（Image Retag）- 提供了在镜像上传至Harbo">
+  <meta name="description" content="GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。">
+<meta name="keywords" content="kubernetes,gitlab,runnner,CI,CD">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Harbor从1.6.2升级到1.7.4">
-<meta property="og:url" content="https://www.flywzj.com/blog/501be2e/index.html">
+<meta property="og:title" content="在kubernetes上部署GitLab Runner">
+<meta property="og:url" content="https://www.flywzj.com/blog/runner/index.html">
 <meta property="og:site_name" content="ZhiJian">
-<meta property="og:description" content="Harbor最新的V1.7版本又添加了一些新的功能:  在线GC（垃圾回收）- 现在 Harbor 可以清理从后端存储中已删除的镜像且在执行GC操作之前不再要求中断 Harbor 的运行。支持按需垃圾收集，使管理员能够手动配置运行docker注册表垃圾收集或使用cron计划自动配置 镜像构建历史 - 可查看容器镜像的构建历史和内容 镜像复制（Image Retag）- 提供了在镜像上传至Harbo">
+<meta property="og:description" content="GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-18T09:21:18.659Z">
+<meta property="og:image" content="https://www.flywzj.com/blog/runner/run01.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/runner/run02.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/runner/run03.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/runner/run04.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/runner/run05.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/runner/run06.png">
+<meta property="og:updated_time" content="2019-04-11T09:26:35.384Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Harbor从1.6.2升级到1.7.4">
-<meta name="twitter:description" content="Harbor最新的V1.7版本又添加了一些新的功能:  在线GC（垃圾回收）- 现在 Harbor 可以清理从后端存储中已删除的镜像且在执行GC操作之前不再要求中断 Harbor 的运行。支持按需垃圾收集，使管理员能够手动配置运行docker注册表垃圾收集或使用cron计划自动配置 镜像构建历史 - 可查看容器镜像的构建历史和内容 镜像复制（Image Retag）- 提供了在镜像上传至Harbo">
+<meta name="twitter:title" content="在kubernetes上部署GitLab Runner">
+<meta name="twitter:description" content="GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。">
+<meta name="twitter:image" content="https://www.flywzj.com/blog/runner/run01.png">
 
 
 
 
 
 
-  <link rel="canonical" href="https://www.flywzj.com/blog/501be2e/">
+  <link rel="canonical" href="https://www.flywzj.com/blog/runner/">
 
 
 
@@ -135,7 +143,7 @@
   };
 </script>
 
-  <title>Harbor从1.6.2升级到1.7.4 | ZhiJian</title>
+  <title>在kubernetes上部署GitLab Runner | ZhiJian</title>
   
 
 
@@ -363,7 +371,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/501be2e/">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/runner/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ZhiJian">
@@ -380,7 +388,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Harbor从1.6.2升级到1.7.4
+          <h1 class="post-title" itemprop="name headline">在kubernetes上部署GitLab Runner
               
             
           </h1>
@@ -405,7 +413,7 @@
                 
               
 
-              <time title="创建时间：2019-03-18 10:38:59 / 修改时间：17:21:18" itemprop="dateCreated datePublished" datetime="2019-03-18T10:38:59+08:00">2019-03-18</time>
+              <time title="创建时间：2019-04-11 17:23:10 / 修改时间：17:26:35" itemprop="dateCreated datePublished" datetime="2019-04-11T17:23:10+08:00">2019-04-11</time>
             
 
             
@@ -416,6 +424,24 @@
           </span>
 
           
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/kubernetes/" itemprop="url" rel="index"><span itemprop="name">kubernetes</span></a></span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -424,8 +450,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/501be2e/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/501be2e/" itemprop="commentCount"></span>
+                <a href="/blog/runner/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/runner/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -454,7 +480,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">3.7k</span>
+                <span title="本文字数">5.4k</span>
               
 
               
@@ -468,7 +494,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">6 分钟</span>
+                <span title="阅读时长">9 分钟</span>
               
             </div>
           
@@ -488,38 +514,50 @@
       
 
       
-        <p>Harbor最新的V1.7版本又添加了一些新的功能:</p>
-<ul>
-<li>在线GC（垃圾回收）- 现在 Harbor 可以清理从后端存储中已删除的镜像且在执行GC操作之前不再要求中断 Harbor 的运行。支持按需垃圾收集，使管理员能够手动配置运行docker注册表垃圾收集或使用cron计划自动配置</li>
-<li>镜像构建历史 - 可查看容器镜像的构建历史和内容</li>
-<li>镜像复制（Image Retag）- 提供了在镜像上传至Harbor后重新创建镜像tag的能力。此功能在CI流水线中提升镜像到生产状态或者通过编程方式重新tag镜像，亦或将特定镜像重新tag或者移动到其它仓库或者项目等场景中特别有用</li>
-<li>支持使用Helm Chart部署Harbor，使用户能够获得Harbor服务的高可用性</li>
-<li>支持Logger自定义，使用户能够自定义正在运行的作业的STDOUT / STDERR / FILE / DB记录器。</li>
-</ul>
+        <p>GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。</p>
 <a id="more"></a>
-<h2 id="升级须知"><a href="#升级须知" class="headerlink" title="升级须知"></a>升级须知</h2><ul>
-<li>必须在任何数据迁移之前备份数据</li>
-<li>从v1.6.0开始，Harbor会在启动时自动尝试迁移数据库模式，因此如果从v1.6.0或更高版本升级，则无需调用迁移器工具来进行迁移</li>
-<li>从v1.6.0起，Harbor将数据库从MariaDB迁移到PostgreSQL，并将Harbor，Notary和Clair DB合并为一个</li>
-</ul>
-<h2 id="停止并删除现有的Harbor实例"><a href="#停止并删除现有的Harbor实例" class="headerlink" title="停止并删除现有的Harbor实例"></a>停止并删除现有的Harbor实例</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cd harbor</span></span><br><span class="line"><span class="comment"># docker-compose -f ./docker-compose.yml -f ./docker-compose.clair.yml down</span></span><br></pre></td></tr></table></figure>
-<h2 id="备份Harbor的当前文件"><a href="#备份Harbor的当前文件" class="headerlink" title="备份Harbor的当前文件"></a>备份Harbor的当前文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mv harbor harbor-bak</span></span><br></pre></td></tr></table></figure>
-<h2 id="备份数据库"><a href="#备份数据库" class="headerlink" title="备份数据库"></a>备份数据库</h2><blockquote>
-<p>默认情况下目录为/data/database</p>
+<h2 id="注册Runner"><a href="#注册Runner" class="headerlink" title="注册Runner"></a>注册Runner</h2><h3 id="查看配置信息"><a href="#查看配置信息" class="headerlink" title="查看配置信息"></a>查看配置信息</h3><p>在Kubernetes上设置Gitlab Runner的第一步是获取身份验证令牌。此令牌非常重要，因为它会向Gitlab验证您的跑步者。要注册Runner，我们需要从Gitlab获取配置详细信息并完成Runner的注册过程。</p>
+<p>这里我是直接使用root账户来注册的，查看位于Admin Area &gt; Runners 的“Set up a shared Runner manually”(手动设置共享Runner)，这里包含使用Gitlab注册新Runner所需的配置详细信息，记住URL和token。</p>
+<p><img src="/blog/runner/run01.png" alt="run01"></p>
+<blockquote>
+<p>注意: 使用其他普通账户可以注册Specific Runners(特定的runner)，配置信息位于相关项目的Settings &gt; CI/CD &gt; Runners 下。</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cp -r /data/database /root/databak/</span></span><br></pre></td></tr></table></figure>
-<h2 id="下载迁移工具"><a href="#下载迁移工具" class="headerlink" title="下载迁移工具"></a>下载迁移工具</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker pull goharbor/harbor-migrator:v1.7.4</span></span><br></pre></td></tr></table></figure>
-<h2 id="升级harbor-cfg"><a href="#升级harbor-cfg" class="headerlink" title="升级harbor.cfg"></a>升级harbor.cfg</h2><blockquote>
-<p>注意: harbor.cfg将被覆盖，您必须在迁移后将其移动到安装目录</p>
+<h3 id="注册Runner-1"><a href="#注册Runner-1" class="headerlink" title="注册Runner"></a>注册Runner</h3><p>接下来，我们需要完成注册过程以连接新的Runner。注册Runner的最简单方法是使用Runner 在本地启动Docker容器来进行注册:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run --rm -it --entrypoint /bin/bash gitlab/gitlab-runner:latest</span></span><br><span class="line">root@ceb637716b3c:/<span class="comment"># gitlab-runner register     ##注册runner</span></span><br><span class="line">Runtime platform                                    arch=amd64 os=linux pid=30 revision=692ae235 version=11.9.0</span><br><span class="line">Running <span class="keyword">in</span> system-mode.                            </span><br><span class="line">                                                   </span><br><span class="line">Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com/):</span><br><span class="line">http://192.168.100.128:32626/          <span class="comment">##配置gitlab-ci的URL，通常为域名</span></span><br><span class="line">Please enter the gitlab-ci token <span class="keyword">for</span> this runner:</span><br><span class="line">5cy-91nwWtcqsuNXWZmF        <span class="comment">##输入gitlab-ci token</span></span><br><span class="line">Please enter the gitlab-ci description <span class="keyword">for</span> this runner:</span><br><span class="line">[ceb637716b3c]: Kubernetes Gitlab-Runner  <span class="comment">##输入gitlab-ci的描述</span></span><br><span class="line">Please enter the gitlab-ci tags <span class="keyword">for</span> this runner (comma separated):</span><br><span class="line">kubernetes,gitlab-runner      <span class="comment">##输入该runner的tag</span></span><br><span class="line">Registering runner... succeeded                     runner=5cy-91nw</span><br><span class="line">Please enter the executor: shell, virtualbox, docker+machine, docker-ssh+machine, kubernetes, parallels, docker-ssh, ssh, docker:</span><br><span class="line">kubernetes           <span class="comment">##输入executor</span></span><br><span class="line">Runner registered successfully. Feel free to start it, but <span class="keyword">if</span> it<span class="string">'s running already the config should be automatically reloaded! </span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">root@ceb637716b3c:/# grep token /etc/gitlab-runner/config.toml ##获取身份验证令牌</span></span><br><span class="line"><span class="string">  token = "-YGyg2YY_E4z9siNhpxj"</span></span><br><span class="line"><span class="string">    bearer_token_overwrite_allowed = false</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意:复制此令牌并确保不会丢失它,这是验证Runner连接Gitlab的唯一身份令牌。保存令牌后，为安全计，请删除Docker实例。</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run -it --rm -v /root/harbor-bak/harbor.cfg:/harbor-migration/harbor-cfg/harbor.cfg goharbor/harbor-migrator:v1.7.4 --cfg up</span></span><br><span class="line">Please backup before upgrade, </span><br><span class="line">Enter y to <span class="built_in">continue</span> updating or n to abort: y</span><br><span class="line">The path of the migrated harbor.cfg is not <span class="built_in">set</span>, the input file will be overwritten.</span><br><span class="line">input version: 1.6.0, migrator chain: [<span class="string">'1.7.0'</span>]</span><br><span class="line">migrating to version 1.7.0</span><br><span class="line">Written new values to /harbor-migration/harbor-cfg/harbor.cfg</span><br></pre></td></tr></table></figure>
-<h2 id="解压harbor离线包"><a href="#解压harbor离线包" class="headerlink" title="解压harbor离线包"></a>解压harbor离线包</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tar -zxvf harbor-offline-installer-v1.7.4.tgz</span></span><br></pre></td></tr></table></figure>
-<h2 id="覆盖harbor-cfg"><a href="#覆盖harbor-cfg" class="headerlink" title="覆盖harbor.cfg"></a>覆盖harbor.cfg</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cd harbor</span></span><br><span class="line"><span class="comment"># mv harbor.cfg harbor.bak</span></span><br><span class="line"><span class="comment"># cp /root/harbor-bak/harbor.cfg .</span></span><br></pre></td></tr></table></figure>
-<h2 id="载入镜像"><a href="#载入镜像" class="headerlink" title="载入镜像"></a>载入镜像</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker load -i harbor.v1.7.4.tar.gz</span></span><br><span class="line"><span class="comment"># docker images|grep 1.7.4</span></span><br></pre></td></tr></table></figure>
-<h2 id="安装Notary，Clair和Helm-Chart服务"><a href="#安装Notary，Clair和Helm-Chart服务" class="headerlink" title="安装Notary，Clair和Helm Chart服务"></a>安装Notary，Clair和Helm Chart服务</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ./install.sh --with-notary --with-clair --with-chartmuseum</span></span><br><span class="line">......</span><br><span class="line">✔ ----Harbor has been installed and started successfully.----</span><br><span class="line"></span><br><span class="line">Now you should be able to visit the admin portal at https://192.168.100.100. </span><br><span class="line">For more details, please visit https://github.com/goharbor/harbor .</span><br></pre></td></tr></table></figure>
-<h2 id="进行查看"><a href="#进行查看" class="headerlink" title="进行查看"></a>进行查看</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker-compose -f ./docker-compose.yml -f ./docker-compose.clair.yml ps</span></span><br><span class="line">       Name                     Command                  State                                    Ports                              </span><br><span class="line">-------------------------------------------------------------------------------------------------------------------------------------</span><br><span class="line">clair                /docker-entrypoint.sh            Up (healthy)   6060/tcp, 6061/tcp                                              </span><br><span class="line">harbor-adminserver   /harbor/start.sh                 Up (healthy)                                                                   </span><br><span class="line">harbor-core          /harbor/start.sh                 Up (healthy)                                                                   </span><br><span class="line">harbor-db            /entrypoint.sh postgres          Up (healthy)   5432/tcp                                                        </span><br><span class="line">harbor-jobservice    /harbor/start.sh                 Up                                                                             </span><br><span class="line">harbor-log           /bin/sh -c /usr/<span class="built_in">local</span>/bin/ ...   Up (healthy)   127.0.0.1:1514-&gt;10514/tcp                                       </span><br><span class="line">harbor-portal        nginx -g daemon off;             Up (healthy)   80/tcp                                                          </span><br><span class="line">nginx                nginx -g daemon off;             Up (healthy)   0.0.0.0:443-&gt;443/tcp, 0.0.0.0:4443-&gt;4443/tcp, 0.0.0.0:80-&gt;80/tcp</span><br><span class="line">redis                docker-entrypoint.sh redis ...   Up             6379/tcp                                                        </span><br><span class="line">registry             /entrypoint.sh /etc/regist ...   Up (healthy)   5000/tcp                                                        </span><br><span class="line">registryctl          /harbor/start.sh                 Up (healthy)</span><br></pre></td></tr></table></figure>
-<h2 id="清除旧版本镜像"><a href="#清除旧版本镜像" class="headerlink" title="清除旧版本镜像"></a>清除旧版本镜像</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker images|grep 1.6.2| awk '&#123;print $3&#125;'|xargs docker rmi</span></span><br></pre></td></tr></table></figure>
-<p>注: <a href="https://github.com/goharbor/harbor/blob/master/docs/migration_guide.md" target="_blank" rel="noopener">harbor升级和数据库迁移指南</a></p>
+<h2 id="在Kubernetes上部署Runner"><a href="#在Kubernetes上部署Runner" class="headerlink" title="在Kubernetes上部署Runner"></a>在Kubernetes上部署Runner</h2><h3 id="为Runner创建RBAC-角色访问控制"><a href="#为Runner创建RBAC-角色访问控制" class="headerlink" title="为Runner创建RBAC(角色访问控制)"></a>为Runner创建RBAC(角色访问控制)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim gitlab-runner-rbac.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">---</span><br><span class="line">kind: Role</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">rules:</span><br><span class="line">  - apiGroups: [<span class="string">""</span>]</span><br><span class="line">    resources: [<span class="string">"*"</span>]</span><br><span class="line">    verbs: [<span class="string">"*"</span>]</span><br><span class="line">---</span><br><span class="line">kind: RoleBinding</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">subjects:</span><br><span class="line">  - kind: ServiceAccount</span><br><span class="line">    name: gitlab-runner</span><br><span class="line">roleRef:</span><br><span class="line">  kind: Role</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br></pre></td></tr></table></figure>
+<h3 id="创建ConfigMap"><a href="#创建ConfigMap" class="headerlink" title="创建ConfigMap"></a>创建ConfigMap</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim config.toml </span></span><br><span class="line">concurrent = 4</span><br><span class="line"></span><br><span class="line">[[runners]]</span><br><span class="line">  name = <span class="string">"Kubernetes Gitlab-Runner"</span></span><br><span class="line">  url = <span class="string">"http://192.168.100.128:32626"</span></span><br><span class="line">  token = <span class="string">"-YGyg2YY_E4z9siNhpxj"</span></span><br><span class="line">  executor = <span class="string">"kubernetes"</span></span><br><span class="line">  [runners.kubernetes]</span><br><span class="line">  namespace = <span class="string">"default"</span></span><br><span class="line">  privileged = <span class="literal">true</span></span><br><span class="line">  poll_timeout = 600</span><br><span class="line">  cpu_request = <span class="string">"1"</span></span><br><span class="line">  service_cpu_request = <span class="string">"200m"</span></span><br><span class="line">  [[runners.kubernetes.volumes.host_path]]</span><br><span class="line">      name = <span class="string">"docker"</span></span><br><span class="line">      mount_path = <span class="string">"/var/run/docker.sock"</span></span><br><span class="line">      host_path = <span class="string">"/var/run/docker.sock"</span></span><br><span class="line"><span class="comment"># kubectl create configmap gitlab-runner-config --from-file=config.toml</span></span><br><span class="line">configmap/gitlab-runner-config created</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关于Kubernetes executor详询: <a href="https://docs.gitlab.com/runner/executors/kubernetes.html" target="_blank" rel="noopener">https://docs.gitlab.com/runner/executors/kubernetes.html</a></p>
+</blockquote>
+<h3 id="部署Runner"><a href="#部署Runner" class="headerlink" title="部署Runner"></a>部署Runner</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim gitlab-runner.yaml</span></span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      name: gitlab-runner</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        name: gitlab-runner</span><br><span class="line">    spec:</span><br><span class="line">      serviceAccountName: gitlab-runner</span><br><span class="line">      containers:</span><br><span class="line">        - name: gitlab-runner</span><br><span class="line">          image: 192.168.100.100/gitlab/gitlab-runner:v11.9.0</span><br><span class="line">          imagePullPolicy: Always</span><br><span class="line">          resources:</span><br><span class="line">            requests:</span><br><span class="line">              cpu: <span class="string">"100m"</span></span><br><span class="line">            limits:</span><br><span class="line">              cpu: <span class="string">"100m"</span></span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: config</span><br><span class="line">              mountPath: /etc/gitlab-runner/config.toml</span><br><span class="line">              readOnly: <span class="literal">true</span></span><br><span class="line">              subPath: config.toml</span><br><span class="line">      volumes:</span><br><span class="line">        - name: config</span><br><span class="line">          configMap:</span><br><span class="line">            name: gitlab-runner-config</span><br><span class="line">      restartPolicy: Always</span><br><span class="line"><span class="comment"># kubectl apply -f .</span></span><br><span class="line">serviceaccount/gitlab-runner created</span><br><span class="line">role.rbac.authorization.k8s.io/gitlab-runner created</span><br><span class="line">rolebinding.rbac.authorization.k8s.io/gitlab-runner created</span><br><span class="line">deployment.extensions/gitlab-runner created</span><br></pre></td></tr></table></figure>
+<h3 id="查看连接情况"><a href="#查看连接情况" class="headerlink" title="查看连接情况"></a>查看连接情况</h3><p><img src="/blog/runner/run02.png" alt="run02"></p>
+<blockquote>
+<p>注意:再次说明，使用root账户创建的runner是共享的，其他项目、其他用户的项目都可以使用。而在某个用户下创建的项目为特定runner，只执行该项目jobs。</p>
+</blockquote>
+<h2 id="使用Runner新建一个项目"><a href="#使用Runner新建一个项目" class="headerlink" title="使用Runner新建一个项目"></a>使用Runner新建一个项目</h2><h3 id="配置环境变量"><a href="#配置环境变量" class="headerlink" title="配置环境变量"></a>配置环境变量</h3><blockquote>
+<p>配置项位于该项目 Settings &gt; CI/CD &gt; Environment variables 下</p>
+</blockquote>
+<p><img src="/blog/runner/run03.png" alt="run03"></p>
+<h3 id="新建一个简单的dockerfile文件"><a href="#新建一个简单的dockerfile文件" class="headerlink" title="新建一个简单的dockerfile文件"></a>新建一个简单的dockerfile文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FROM 192.168.100.100/library/alpine:3.9</span><br><span class="line">WORKDIR /app</span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; hh.txt</span><br></pre></td></tr></table></figure>
+<h3 id="新建gitlab-ci-yml配置文件"><a href="#新建gitlab-ci-yml配置文件" class="headerlink" title="新建gitlab-ci.yml配置文件"></a>新建gitlab-ci.yml配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">image:</span><br><span class="line">  name: 192.168.100.100/library/alpine:3.9</span><br><span class="line"></span><br><span class="line">stages:</span><br><span class="line">  - <span class="built_in">test</span></span><br><span class="line">  </span><br><span class="line"><span class="built_in">test</span>:</span><br><span class="line">  stage: <span class="built_in">test</span></span><br><span class="line">  image: 192.168.100.100/docker/docker:18</span><br><span class="line">  script:</span><br><span class="line">    - docker info</span><br><span class="line">    - docker login -u <span class="variable">$harbor_username</span> -p <span class="variable">$harbor_password</span> 192.168.100.100</span><br><span class="line">    - docker build -t 192.168.100.100/docker/<span class="built_in">test</span>:latest .</span><br><span class="line">    - docker push 192.168.100.100/docker/<span class="built_in">test</span>:latest</span><br><span class="line">  tags: </span><br><span class="line">    - kubernetes</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/runner/run04.png" alt="run04"></p>
+<blockquote>
+<p>这里要注意的是，我截的图着重将clone的地址也截了下来，这里的gitlab为service。如果你是用的域名，而且域名可达，可忽略该问题。如果域名不可达，或者使用的是nodeport，又或者像我这样使用的是service，就需要更改gitlab的配置文件，不然gitlab-runner会出现无法Cloning repository的问题。这里我通过configmap挂载gitlab.rb配置文件来实现，gitlab.rb只需配置如下即可:<br>external_url “<a href="http://gitlab&quot;" target="_blank" rel="noopener">http://gitlab&quot;</a></p>
+</blockquote>
+<blockquote>
+<p>之后gitlab-runner会自动进行构建，构建成功会显示“passed”，失败则会显示“failed”。</p>
+</blockquote>
+<p><img src="/blog/runner/run05.png" alt="run05"></p>
+<blockquote>
+<p>点击“Stages”可查看相关构建阶段的详细信息</p>
+</blockquote>
+<p><img src="/blog/runner/run06.png" alt="run06"></p>
+<blockquote>
+<p>参照文章:<a href="https://adambcomer.com/blog/setup-gitlab-cicd-on-kubernetes.html" target="_blank" rel="noopener">https://adambcomer.com/blog/setup-gitlab-cicd-on-kubernetes.html</a></p>
+</blockquote>
 
       
     </div>
@@ -552,6 +590,20 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/kubernetes/" rel="tag"><i class="fa fa-tag"></i> kubernetes</a>
+          
+            <a href="/tags/gitlab/" rel="tag"><i class="fa fa-tag"></i> gitlab</a>
+          
+            <a href="/tags/runnner/" rel="tag"><i class="fa fa-tag"></i> runnner</a>
+          
+            <a href="/tags/CI/" rel="tag"><i class="fa fa-tag"></i> CI</a>
+          
+            <a href="/tags/CD/" rel="tag"><i class="fa fa-tag"></i> CD</a>
+          
+        </div>
+      
 
       
       
@@ -561,8 +613,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/kaniko/" rel="next" title="使用Kaniko进行构建">
-                <i class="fa fa-chevron-left"></i> 使用Kaniko进行构建
+              <a href="/blog/ops/" rel="next" title="Kubernetes+GitLab+Jenkins使用Pipeline构建镜像">
+                <i class="fa fa-chevron-left"></i> Kubernetes+GitLab+Jenkins使用Pipeline构建镜像
               </a>
             
           </div>
@@ -570,10 +622,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/ops/" rel="prev" title="Kubernetes+GitLab+Jenkins使用Pipeline构建镜像">
-                Kubernetes+GitLab+Jenkins使用Pipeline构建镜像 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -794,7 +842,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#升级须知"><span class="nav-number">1.</span> <span class="nav-text">升级须知</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#停止并删除现有的Harbor实例"><span class="nav-number">2.</span> <span class="nav-text">停止并删除现有的Harbor实例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备份Harbor的当前文件"><span class="nav-number">3.</span> <span class="nav-text">备份Harbor的当前文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备份数据库"><span class="nav-number">4.</span> <span class="nav-text">备份数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载迁移工具"><span class="nav-number">5.</span> <span class="nav-text">下载迁移工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#升级harbor-cfg"><span class="nav-number">6.</span> <span class="nav-text">升级harbor.cfg</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解压harbor离线包"><span class="nav-number">7.</span> <span class="nav-text">解压harbor离线包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#覆盖harbor-cfg"><span class="nav-number">8.</span> <span class="nav-text">覆盖harbor.cfg</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#载入镜像"><span class="nav-number">9.</span> <span class="nav-text">载入镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Notary，Clair和Helm-Chart服务"><span class="nav-number">10.</span> <span class="nav-text">安装Notary，Clair和Helm Chart服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进行查看"><span class="nav-number">11.</span> <span class="nav-text">进行查看</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#清除旧版本镜像"><span class="nav-number">12.</span> <span class="nav-text">清除旧版本镜像</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#注册Runner"><span class="nav-number">1.</span> <span class="nav-text">注册Runner</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看配置信息"><span class="nav-number">1.1.</span> <span class="nav-text">查看配置信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册Runner-1"><span class="nav-number">1.2.</span> <span class="nav-text">注册Runner</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在Kubernetes上部署Runner"><span class="nav-number">2.</span> <span class="nav-text">在Kubernetes上部署Runner</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为Runner创建RBAC-角色访问控制"><span class="nav-number">2.1.</span> <span class="nav-text">为Runner创建RBAC(角色访问控制)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建ConfigMap"><span class="nav-number">2.2.</span> <span class="nav-text">创建ConfigMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部署Runner"><span class="nav-number">2.3.</span> <span class="nav-text">部署Runner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看连接情况"><span class="nav-number">2.4.</span> <span class="nav-text">查看连接情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用Runner新建一个项目"><span class="nav-number">3.</span> <span class="nav-text">使用Runner新建一个项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置环境变量"><span class="nav-number">3.1.</span> <span class="nav-text">配置环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新建一个简单的dockerfile文件"><span class="nav-number">3.2.</span> <span class="nav-text">新建一个简单的dockerfile文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新建gitlab-ci-yml配置文件"><span class="nav-number">3.3.</span> <span class="nav-text">新建gitlab-ci.yml配置文件</span></a></li></ol></li></ol></div>
             
 
           </div>
