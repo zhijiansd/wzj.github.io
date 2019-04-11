@@ -122,7 +122,7 @@
 <meta property="og:image" content="https://www.flywzj.com/blog/runner/run04.png">
 <meta property="og:image" content="https://www.flywzj.com/blog/runner/run05.png">
 <meta property="og:image" content="https://www.flywzj.com/blog/runner/run06.png">
-<meta property="og:updated_time" content="2019-04-11T10:22:34.011Z">
+<meta property="og:updated_time" content="2019-04-11T10:27:34.612Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="在kubernetes上部署GitLab Runner">
 <meta name="twitter:description" content="GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。">
@@ -413,7 +413,7 @@
                 
               
 
-              <time title="创建时间：2019-04-11 17:23:10 / 修改时间：18:22:34" itemprop="dateCreated datePublished" datetime="2019-04-11T17:23:10+08:00">2019-04-11</time>
+              <time title="创建时间：2019-04-11 17:23:10 / 修改时间：18:27:34" itemprop="dateCreated datePublished" datetime="2019-04-11T17:23:10+08:00">2019-04-11</time>
             
 
             
@@ -545,7 +545,7 @@
 <h3 id="新建gitlab-ci-yml配置文件"><a href="#新建gitlab-ci-yml配置文件" class="headerlink" title="新建gitlab-ci.yml配置文件"></a>新建gitlab-ci.yml配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">image:</span><br><span class="line">  name: 192.168.100.100/library/alpine:3.9</span><br><span class="line"></span><br><span class="line">stages:</span><br><span class="line">  - <span class="built_in">test</span></span><br><span class="line">  </span><br><span class="line"><span class="built_in">test</span>:</span><br><span class="line">  stage: <span class="built_in">test</span></span><br><span class="line">  image: 192.168.100.100/docker/docker:18</span><br><span class="line">  script:</span><br><span class="line">    - docker info</span><br><span class="line">    - docker login -u <span class="variable">$harbor_username</span> -p <span class="variable">$harbor_password</span> 192.168.100.100</span><br><span class="line">    - docker build -t 192.168.100.100/docker/<span class="built_in">test</span>:latest .</span><br><span class="line">    - docker push 192.168.100.100/docker/<span class="built_in">test</span>:latest</span><br><span class="line">  tags: </span><br><span class="line">    - kubernetes</span><br></pre></td></tr></table></figure>
 <p><img src="/blog/runner/run04.png" alt="run04"></p>
 <blockquote>
-<p>这里要注意的是，我截的图着重将clone的地址也截了下来，这里的gitlab为service。如果你是用的域名，而且域名可达，可忽略该问题。如果域名不可达，或者使用的是nodeport，又或者像我这样使用的是service，就需要更改gitlab的配置文件，不然gitlab-runner会出现无法Cloning repository的问题。这里我通过configmap挂载gitlab.rb配置文件来实现，gitlab.rb只需配置如下即可:<br>external_url “<a href="http://gitlab&quot;" target="_blank" rel="noopener">http://gitlab&quot;</a></p>
+<p>这里要注意的是，我截的图着重将clone的地址也截了下来，这里的gitlab为service。如果你是用的域名，而且域名可达，可忽略该问题。如果域名不可达，或者使用的是nodeport，又或者像我这样使用的是service，就需要更改gitlab的配置文件，不然gitlab-runner会出现无法Cloning repository的问题。这里我通过configmap挂载gitlab.rb配置文件到/etc/gitlab/目录来实现，gitlab.rb只需配置如下即可:<br>external_url “<a href="http://gitlab&quot;" target="_blank" rel="noopener">http://gitlab&quot;</a></p>
 </blockquote>
 <blockquote>
 <p>之后gitlab-runner会自动进行构建，构建成功会显示“passed”，失败则会显示“failed”。</p>
