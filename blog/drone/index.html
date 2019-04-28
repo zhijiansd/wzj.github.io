@@ -108,37 +108,34 @@
 
 
 
-  <meta name="description" content="Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。">
-<meta name="keywords" content="kubernetes,wayne">
+  <meta name="description" content="Drone 是一种基于容器技术的持续交付系统。Drone 使用YAML配置文件来定义和执行Docker容器中的Pipelines。 Gogs 是一个用Go编写的轻量级git服务器，它设计简单，易于设置和操作。Gogs提供存储库文件查看和编辑，项目问题跟踪以及项目文档的内置wiki。">
+<meta name="keywords" content="docker,gogs,drone">
 <meta property="og:type" content="article">
-<meta property="og:title" content="部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne">
-<meta property="og:url" content="https://www.flywzj.com/blog/360wayne/index.html">
+<meta property="og:title" content="Drone + Gogs 执行自动构建">
+<meta property="og:url" content="https://www.flywzj.com/blog/drone/index.html">
 <meta property="og:site_name" content="ZhiJian">
-<meta property="og:description" content="Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。">
+<meta property="og:description" content="Drone 是一种基于容器技术的持续交付系统。Drone 使用YAML配置文件来定义和执行Docker容器中的Pipelines。 Gogs 是一个用Go编写的轻量级git服务器，它设计简单，易于设置和操作。Gogs提供存储库文件查看和编辑，项目问题跟踪以及项目文档的内置wiki。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne01.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne02.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne03.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne04.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne05.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne06.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne07.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne08.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne09.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/360wayne/wayne10.png">
-<meta property="og:updated_time" content="2018-12-11T14:04:44.000Z">
+<meta property="og:image" content="https://www.flywzj.com/blog/drone/gogs01.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/drone/drone01.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/drone/drone02.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/drone/drone03.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/drone/drone04.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/drone/drone05.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/drone/drone06.png">
+<meta property="og:image" content="https://www.flywzj.com/blog/drone/drone07.png">
+<meta property="og:updated_time" content="2019-04-28T09:14:27.612Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne">
-<meta name="twitter:description" content="Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。">
-<meta name="twitter:image" content="https://www.flywzj.com/blog/360wayne/wayne.png">
+<meta name="twitter:title" content="Drone + Gogs 执行自动构建">
+<meta name="twitter:description" content="Drone 是一种基于容器技术的持续交付系统。Drone 使用YAML配置文件来定义和执行Docker容器中的Pipelines。 Gogs 是一个用Go编写的轻量级git服务器，它设计简单，易于设置和操作。Gogs提供存储库文件查看和编辑，项目问题跟踪以及项目文档的内置wiki。">
+<meta name="twitter:image" content="https://www.flywzj.com/blog/drone/gogs01.png">
 
 
 
 
 
 
-  <link rel="canonical" href="https://www.flywzj.com/blog/360wayne/">
+  <link rel="canonical" href="https://www.flywzj.com/blog/drone/">
 
 
 
@@ -148,7 +145,7 @@
   };
 </script>
 
-  <title>部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne | ZhiJian</title>
+  <title>Drone + Gogs 执行自动构建 | ZhiJian</title>
   
 
 
@@ -376,7 +373,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/360wayne/">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/drone/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ZhiJian">
@@ -393,7 +390,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne
+          <h1 class="post-title" itemprop="name headline">Drone + Gogs 执行自动构建
               
             
           </h1>
@@ -418,24 +415,12 @@
                 
               
 
-              <time title="创建时间：2018-12-10 11:07:09" itemprop="dateCreated datePublished" datetime="2018-12-10T11:07:09+08:00">2018-12-10</time>
+              <time title="创建时间：2019-04-28 17:01:57 / 修改时间：17:14:27" itemprop="dateCreated datePublished" datetime="2019-04-28T17:01:57+08:00">2019-04-28</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-12-11 22:04:44" itemprop="dateModified" datetime="2018-12-11T22:04:44+08:00">2018-12-11</time>
               
             
           </span>
@@ -452,7 +437,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/kubernetes/" itemprop="url" rel="index"><span itemprop="name">kubernetes</span></a></span>
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/CI/" itemprop="url" rel="index"><span itemprop="name">CI</span></a></span>
 
                 
                 
@@ -467,8 +452,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/360wayne/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/360wayne/" itemprop="commentCount"></span>
+                <a href="/blog/drone/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/drone/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -497,7 +482,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">3.6k</span>
+                <span title="本文字数">6k</span>
               
 
               
@@ -511,7 +496,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">6 分钟</span>
+                <span title="阅读时长">10 分钟</span>
               
             </div>
           
@@ -531,88 +516,64 @@
       
 
       
-        <p>Wayne 是一个通用的、基于 Web 的 Kubernetes 多集群管理平台。通过可视化 Kubernetes 对象模板编辑的方式，降低业务接入成本， 拥有完整的权限管理系统，适应多租户场景，是一款适合企业级集群使用的发布平台。</p>
+        <p>Drone 是一种基于容器技术的持续交付系统。Drone 使用YAML配置文件来定义和执行Docker容器中的Pipelines。</p>
+<p>Gogs 是一个用Go编写的轻量级git服务器，它设计简单，易于设置和操作。Gogs提供存储库文件查看和编辑，项目问题跟踪以及项目文档的内置wiki。</p>
 <a id="more"></a>
-<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><ul>
-<li><p>基于 RBAC（Role based access control）的权限管理：用户通过角色与部门和项目关联，拥有部门角色允许操作部门资源，拥有项目角色允许操作项目资源，更加适合多租户场景。</p>
-</li>
-<li><p>简化 Kubernetes 对象创建：提供基础 Kubernetes 对象配置文件添加方式，同时支持高级模式直接编辑 Json/Yaml文件创建 Kubernetes 对象。</p>
-</li>
-<li><p>LDAP/OAuth 2.0/DB 多种登录模式支持：集成企业级 LDAP 登录及 DB 登录模式，同时还可以实现 OAuth2 登录。</p>
-</li>
-<li><p>支持多集群、多租户：可以同时管理多个 Kubernetes 集群，并针对性添加特定配置，更方便的多集群、多租户管理。</p>
-</li>
-<li><p>提供完整审计模块：每次操作都会有完整的审计功能，追踪用于操作历史，同时支持用户自定义 webhook。</p>
-</li>
-<li><p>提供基于 APIKey 的开放接口调用：用户可自主申请相关 APIKey 并管理自己的部门和项目，运维人员也可以申请全局 APIKey 进行特定资源的全局管理。</p>
-</li>
-<li><p>保留完整的发布历史：用户可以便捷的找到任何一次历史发布，并可轻松进行回滚，以及基于特定历史版本更新 Kubernetes 资源。</p>
-</li>
-<li><p>具备完善的资源报表：用户可以轻松获取各项目的资源使用占比和历史上线频次（天级）以及其他基础数据的报表和图表。</p>
-</li>
-<li><p>提供基于严密权限校验的 Web shell：用户可以通过 Web shell 的形式进入发布的 Pod 进行操作，自带完整的权限校验。</p>
-</li>
-<li><p>提供站内通知系统：方便管理员推送集群、业务通知和故障处理报告等。</p>
-</li>
-</ul>
-<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="/blog/360wayne/wayne.png" alt="wayne"></p>
-<h2 id="部署-Wayne"><a href="#部署-Wayne" class="headerlink" title="部署 Wayne"></a>部署 Wayne</h2><h3 id="下载相关文件并部署"><a href="#下载相关文件并部署" class="headerlink" title="下载相关文件并部署"></a>下载相关文件并部署</h3><blockquote>
-<p>Wayne 依赖 MySQL 和 RabbitMQ，其中 MySQL 是必须的服务，用户存储系统的各种数据，RabbitMQ 是可选的，主要用户扩展审计功能使用。</p>
+<p>Drone 作为一个CI工具，当然会出现与Jenkins的对比，从docker镜像来看，Jenkins的镜像达到了702M，而Drone的最新的docker镜像才62.1M。最重要的是drone使用的是yaml文件来进行构建，这对使用docker的人来说是相当友好的，而Jenkins的pipeline的编写对大多数人来说都是一种挑战。就像Jenkins官方所说的一样，“Jenkins是开源CI&amp;CD软件领导者， 提供超过1000个插件来支持构建、部署、自动化， 满足任何项目的需要。”，而drone所提供的插件相对来说很少，只有百十个的样子，所以这也是Jenkins的优势。</p>
+<p>当然，对于Gitlab-runner，它也有同样的问题，gitlab-runner的v11.9.0的镜像达到了403M，而且Gitlab-runner是与Gitlab深度集成的，如果你使用了Gitlab，那这很好；而如果你使用的是GitHub这些源代码管理系统，那这就是问题了。</p>
+<p>Drone适用于在Docker容器内运行的任何语言，数据库或服务。Drone使用容器将预先配置的步骤放入pipeline中。从现有插件或通过创建自己的插件来进行构建。当然，正如前面说的，drone使用yaml来定义pipeline，它的语法简洁明了，很容易上手。关于drone的更多介绍详见:<a href="https://drone.io/。" target="_blank" rel="noopener">https://drone.io/。</a></p>
+<p>还是从外在的地方来对比，我使用的Gitlab-CE的11.7.5版本，docker镜像达到了1.59G，而最新版的gogs，它的镜像才99.1M，足够轻量级。Gogs在GitHub上的star也突破了三万，这也证明了gogs的受欢迎程度，同时gogs对中文支持很好。其他不再细讲，Gitlab官方也对Gogs做了对比，详见:<a href="https://about.gitlab.com/devops-tools/gogs-vs-gitlab.html。" target="_blank" rel="noopener">https://about.gitlab.com/devops-tools/gogs-vs-gitlab.html。</a></p>
+<p>这里对于Drone和Gogs的部署是使用docker-compose单机模式部署的。在使用docker-compose部署之前，我首先想的是将drone部署在kubernetes上，但是drone对此的支持不是很好，drone需要可路由的域名，无论是使用traefik部署的内部域名，还是service，Gitlab和Gogs都无法连接该域名或service，这就导致Gitlab和Gogs无法将代码推送到drone。drone的文档也还不够丰富，我也查阅了官方论坛，依然没能解决，所以很遗憾。</p>
+<h2 id="配置-docker-compose"><a href="#配置-docker-compose" class="headerlink" title="配置 docker-compose"></a>配置 docker-compose</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim docker-compose.yaml </span></span><br><span class="line">version: <span class="string">'3.5'</span></span><br><span class="line"></span><br><span class="line">services:</span><br><span class="line">  drone-server:</span><br><span class="line">    container_name: drone-server</span><br><span class="line">    image: 192.168.100.100/drone/drone:1.1.0</span><br><span class="line">    restart: always</span><br><span class="line">    labels:</span><br><span class="line">      - <span class="string">"traefik.docker.network: traefik"</span></span><br><span class="line">      - <span class="string">"traefik.frontend.rule=Host:drone.flywzj.com"</span></span><br><span class="line">    networks:</span><br><span class="line">      traefik:</span><br><span class="line">        aliases:</span><br><span class="line">          - drone.flywzj.com</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">"18080:80"</span></span><br><span class="line">      - <span class="string">"4433:443"</span></span><br><span class="line">    volumes:</span><br><span class="line">      - /data/drone:/data</span><br><span class="line">      - /var/run/docker.sock:/var/run/docker.sock</span><br><span class="line">    environment:</span><br><span class="line">      - DRONE_GIT_ALWAYS_AUTH=<span class="literal">false</span></span><br><span class="line">      - DRONE_RUNNER_CAPACITY=2</span><br><span class="line">      - DRONE_RUNNER_NETWORKS=traefik</span><br><span class="line">      - DRONE_SERVER_HOST=drone-server</span><br><span class="line">      - DRONE_SERVER_PROTO=http</span><br><span class="line">      - DRONE_LOGS_DEBUG=<span class="literal">true</span></span><br><span class="line">      - DRONE_TLS_AUTOCERT=<span class="literal">false</span></span><br><span class="line">      - DRONE_GOGS_SKIP_VERIFY=<span class="literal">false</span></span><br><span class="line">      - DRONE_GOGS_SERVER=http://gogs.flywzj.com:3000</span><br><span class="line">      - DRONE_PROVIDER=gogs</span><br><span class="line">      - DRONE_DATABASE_DATASOURCE=/data/drone.sqlite</span><br><span class="line">      - DRONE_DATABASE_DRIVER=sqlite3</span><br><span class="line"></span><br><span class="line">  gogs:</span><br><span class="line">    container_name: gogs</span><br><span class="line">    image: 192.168.100.100/gogs/gogs:latest</span><br><span class="line">    restart: always</span><br><span class="line">    labels:</span><br><span class="line">      - <span class="string">"traefik.docker.network: traefik"</span></span><br><span class="line">      - <span class="string">"traefik.frontend.rule=Host:gogs.flywzj.com"</span></span><br><span class="line">      - <span class="string">"traefik.http.port=3000"</span></span><br><span class="line">      - <span class="string">"traefik.ssh.port=22"</span></span><br><span class="line">    networks:</span><br><span class="line">      traefik:</span><br><span class="line">        aliases:</span><br><span class="line">          - gogs.flywzj.com</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">"10022:22"</span></span><br><span class="line">      - <span class="string">"3000:3000"</span></span><br><span class="line">    volumes:</span><br><span class="line">      - /data/gogs:/data</span><br><span class="line">    depends_on:</span><br><span class="line">      - mysql</span><br><span class="line"></span><br><span class="line">  mysql:</span><br><span class="line">    container_name: mysql</span><br><span class="line">    image: 192.168.100.100/library/mysql:5.7</span><br><span class="line">    restart: always</span><br><span class="line">    labels:</span><br><span class="line">      - <span class="string">"traefik.docker.network: traefik"</span></span><br><span class="line">    networks:</span><br><span class="line">      - traefik</span><br><span class="line">    volumes:</span><br><span class="line">      - /data/mysql:/var/lib/mysql</span><br><span class="line">      - /var/run/docker.sock:/var/run/docker.sock</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">"3306:3306"</span></span><br><span class="line">    <span class="built_in">command</span>: --explicit_defaults_for_timestamp=<span class="literal">true</span> --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci </span><br><span class="line">    environment:</span><br><span class="line">      MYSQL_ROOT_PASSWORD: <span class="string">'passw0rd'</span></span><br><span class="line">      MYSQL_DATABASE: <span class="string">'gogs'</span></span><br><span class="line">      MYSQL_USER: <span class="string">'gogs'</span></span><br><span class="line">      MYSQL_PASSWORD: <span class="string">'gogs'</span></span><br><span class="line">      TZ: Asia/Shanghai</span><br><span class="line"></span><br><span class="line">  traefik-proxy:</span><br><span class="line">    container_name: traefik</span><br><span class="line">    image: 192.168.100.100/library/traefik:1.7</span><br><span class="line">    restart: always</span><br><span class="line">    labels:</span><br><span class="line">      - <span class="string">"traefik.docker.network: traefik"</span></span><br><span class="line">    networks:</span><br><span class="line">      - traefik</span><br><span class="line">    <span class="built_in">command</span>: --api --docker</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">"80:80"</span>   </span><br><span class="line">      - <span class="string">"8080:8080"</span></span><br><span class="line">    volumes:</span><br><span class="line">      - /var/run/docker.sock:/var/run/docker.sock</span><br><span class="line"></span><br><span class="line">networks:</span><br><span class="line">  traefik:</span><br><span class="line">    name: traefik</span><br><span class="line">    external: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<h2 id="部署-docker-compose"><a href="#部署-docker-compose" class="headerlink" title="部署 docker-compose"></a>部署 docker-compose</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker-compose up -d</span></span><br><span class="line">Creating mysql ... <span class="keyword">done</span></span><br><span class="line">Creating gogs ... <span class="keyword">done</span></span><br><span class="line">Creating drone-server ... </span><br><span class="line">Creating traefik ... </span><br><span class="line">Creating gogs ... </span><br><span class="line"><span class="comment"># docker-compose ps</span></span><br><span class="line">    Name                  Command               State                       Ports                    </span><br><span class="line">-----------------------------------------------------------------------------------------------------</span><br><span class="line">drone-server   /bin/drone-server                Up      0.0.0.0:4433-&gt;443/tcp, 0.0.0.0:18080-&gt;80/tcp </span><br><span class="line">gogs           /app/gogs/docker/start.sh  ...   Up      0.0.0.0:10022-&gt;22/tcp, 0.0.0.0:3000-&gt;3000/tcp</span><br><span class="line">mysql          docker-entrypoint.sh --exp ...   Up      0.0.0.0:3306-&gt;3306/tcp, 33060/tcp            </span><br><span class="line">traefik        /traefik --api --docker          Up      0.0.0.0:80-&gt;80/tcp, 0.0.0.0:8080-&gt;8080/tcp</span><br></pre></td></tr></table></figure>
+<h2 id="部署-Gogs"><a href="#部署-Gogs" class="headerlink" title="部署 Gogs"></a>部署 Gogs</h2><blockquote>
+<p>这里通过traefik配置的gogs.flywzj.com:3000即可登录配置界面，安装后创建一个新的仓库</p>
+</blockquote>
+<p><img src="/blog/drone/gogs01.png" alt="gogs01"></p>
+<p>注: 数据库主机 —-&gt; mysql:3306 (这里的mysql是container_name)</p>
+<h2 id="启用-Drone"><a href="#启用-Drone" class="headerlink" title="启用 Drone"></a>启用 Drone</h2><blockquote>
+<p>这里通过traefik配置的drone.flywzj.com即可登录，之后输入在gogs上创建的账号和密码即可登录，登录后drone会自动进行同步</p>
 </blockquote>
 <blockquote>
-<p>这里使用了 ceph 进行数据持久化</p>
+<p>点击”ACTIVATE”激活该代码库</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git clone https://github.com/Qihoo360/wayne.git</span></span><br><span class="line"><span class="comment"># cd wayne/hack/kubernetes/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># vim dependency/mysql-pvc.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: mysql-wayne-pvc</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    app: mysql-wayne</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: default-rbd</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="string">"10Gi"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># vim dependency/rabbitmq-pvc.yaml</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: PersistentVolumeClaim</span><br><span class="line">metadata:</span><br><span class="line">  name: rabbitmq-wayne-pvc</span><br><span class="line">  namespace: default</span><br><span class="line">  labels:</span><br><span class="line">    app: rabbitmq-wayne</span><br><span class="line">spec:</span><br><span class="line">  storageClassName: default-rbd</span><br><span class="line">  accessModes:</span><br><span class="line">    - ReadWriteOnce</span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: <span class="string">"5Gi"</span></span><br><span class="line">      </span><br><span class="line"><span class="comment"># kubectl apply -f dependency/</span></span><br><span class="line">persistentvolumeclaim/mysql-wayne-pvc created</span><br><span class="line">deployment.extensions/mysql-wayne created</span><br><span class="line">service/mysql-wayne created</span><br><span class="line">persistentvolumeclaim/rabbitmq-wayne-pvc created</span><br><span class="line">deployment.extensions/rabbitmq-wayne created</span><br><span class="line">service/rabbitmq-wayne created</span><br><span class="line"><span class="comment"># kubectl get pod</span></span><br><span class="line">NAME                              READY   STATUS    RESTARTS   AGE</span><br><span class="line">mysql-wayne-75947575d-mc972       1/1     Running   0          107s</span><br><span class="line">rabbitmq-wayne-7c6dd8f475-l4pqj   1/1     Running   0          106s</span><br><span class="line"></span><br><span class="line"><span class="comment"># kubectl apply -f wayne/</span></span><br><span class="line">configmap/infra-wayne created</span><br><span class="line">deployment.extensions/infra-wayne created</span><br><span class="line">deployment.extensions/infra-wayne-woker created</span><br><span class="line">deployment.extensions/infra-wayne-webhook created</span><br><span class="line">service/infra-wayne created</span><br><span class="line"><span class="comment"># kubectl get pod</span></span><br><span class="line">NAME                                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">infra-wayne-5d84cf49b4-lggzs           1/1     Running   0          7m44s</span><br><span class="line">infra-wayne-webhook-85dcf87c48-w4tcj   1/1     Running   0          7m44s</span><br><span class="line">infra-wayne-woker-84bff6f8c9-mt7h5     1/1     Running   0          7m44s</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/drone/drone01.png" alt="drone01"></p>
 <blockquote>
-<p>现在可以通过 <a href="http://yourip:NodePort" target="_blank" rel="noopener">http://yourip:NodePort</a> 访问 Wayne 平台，默认管理员账号 密码admin:admin。</p>
+<p>进入该代码库，点击”SETTINGS”之后，点击”ACTIVATE REPOSITORY”激活储存库</p>
 </blockquote>
+<p><img src="/blog/drone/drone02.png" alt="drone02"></p>
 <blockquote>
-<p>注: 项目启动后还需要配置集群和 Namespace 等信息才可正常使用。</p>
+<p>激活后配置项如下图所示</p>
 </blockquote>
-<h3 id="配置集群和-Namespace"><a href="#配置集群和-Namespace" class="headerlink" title="配置集群和 Namespace"></a>配置集群和 Namespace</h3><h4 id="配置集群"><a href="#配置集群" class="headerlink" title="配置集群"></a>配置集群</h4><blockquote>
-<p>进入后台创建集群并将 .kube/config 复制并粘贴至该集群下</p>
+<p><img src="/blog/drone/drone03.png" alt="drone03"></p>
+<h2 id="推送代码到-Gogs"><a href="#推送代码到-Gogs" class="headerlink" title="推送代码到 Gogs"></a>推送代码到 Gogs</h2><blockquote>
+<p>注:新建的代码库是无法直接在gogs的web端进行编辑的，需要从远端推送一次后才能在gogs的web端进行编辑</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat .kube/config</span></span><br></pre></td></tr></table></figure>
-<p><img src="/blog/360wayne/wayne01.png" alt="kubeconfig"></p>
-<h4 id="配置-namespace"><a href="#配置-namespace" class="headerlink" title="配置 namespace"></a>配置 namespace</h4><blockquote>
-<p>在 wayne 后台创建命名空间(需在 kubernetes 集群中进行创建,然后与 wayne 进行绑定)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git clone http://gogs.flywzj.com:3000/zhi/test.git</span></span><br><span class="line"><span class="comment"># cd test/</span></span><br><span class="line"><span class="comment"># vim Dockerfile</span></span><br><span class="line">FROM alpine</span><br><span class="line">RUN <span class="built_in">echo</span> hello-world</span><br><span class="line"><span class="comment"># vim .drone.yml</span></span><br><span class="line">kind: pipeline</span><br><span class="line">name: default</span><br><span class="line"></span><br><span class="line">steps:</span><br><span class="line">- name: build</span><br><span class="line">  image: plugins/docker</span><br><span class="line">  settings:</span><br><span class="line">    username:</span><br><span class="line">      from_secret: docker_username</span><br><span class="line">    password:</span><br><span class="line">      from_secret: docker_password  </span><br><span class="line">    repo: wangzhijian/<span class="built_in">test</span></span><br><span class="line">    tags: latest</span><br><span class="line">    dry_run: <span class="literal">true</span></span><br><span class="line"><span class="comment"># git add --all .</span></span><br><span class="line"><span class="comment"># git commit -m "update"</span></span><br><span class="line">[master（根提交） 7dbb251] update</span><br><span class="line"> 2 files changed, 14 insertions(+)</span><br><span class="line"> create mode 100644 .drone.yml</span><br><span class="line"> create mode 100644 Dockerfile</span><br><span class="line"><span class="comment"># git push -u origin master</span></span><br></pre></td></tr></table></figure>
+<p>注:”from_secret”里的密钥需在”SETTINGS” ===&gt; “Secrets” 下进行配置；使用 “dry_run: true” 将不推送到镜像仓库</p>
+<h2 id="查看-Drone"><a href="#查看-Drone" class="headerlink" title="查看 Drone"></a>查看 Drone</h2><blockquote>
+<p>构建中的状态显示如下:</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl create namespace test</span></span><br><span class="line">namespace/<span class="built_in">test</span> created</span><br></pre></td></tr></table></figure>
-<p><img src="/blog/360wayne/wayne02.png" alt="namespaces"></p>
-<h4 id="查看资源状况"><a href="#查看资源状况" class="headerlink" title="查看资源状况"></a>查看资源状况</h4><p><img src="/blog/360wayne/wayne03.png" alt="all"></p>
+<p><img src="/blog/drone/drone04.png" alt="drone04"></p>
 <blockquote>
-<p>配置完成,在左侧边栏的 kubernetes 菜单栏可以查看当前集群的相关 node 信息、deployment 信息以及 PV 信息。</p>
+<p>构建完成显示如下:</p>
 </blockquote>
-<h2 id="应用-Wayne"><a href="#应用-Wayne" class="headerlink" title="应用 Wayne"></a>应用 Wayne</h2><h3 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h3><blockquote>
-<p>返回前台，切换至当前集群的选项卡”创建项目”</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne04.png" alt="app"></p>
-<h3 id="创建部署"><a href="#创建部署" class="headerlink" title="创建部署"></a>创建部署</h3><blockquote>
-<p>进入该项目部署页“创建部署”进行部署，之后“创建部署模板”，之后点击“发布”，在弹出的选择框中选择需要部署的机房并“确认”即可部署到kubernetes。</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne05.png" alt="deployment"></p>
+<p><img src="/blog/drone/drone05.png" alt="drone05"></p>
 <blockquote>
-<p>部署成功后，可以选择“重启”、“下线”:</p>
+<p>点击即可进入查看构建的详细信息:</p>
 </blockquote>
-<p><img src="/blog/360wayne/wayne06.png" alt="pod1"></p>
-<blockquote>
-<p>点击上线机房，通过弹出的选择框可以“进入容器”、“查看日志”:</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne07.png" alt="pod2"></p>
-<h3 id="创建负载均衡"><a href="#创建负载均衡" class="headerlink" title="创建负载均衡"></a>创建负载均衡</h3><blockquote>
-<p>点击该项目下左侧边栏的“负载均衡”项，之后“创建负载均衡”，配置“名称”和“机房”并提交。之后“创建负载均衡模板”,之后点击“发布”，在弹出的选择框中选择需要部署的机房并“确认”即可部署到kubernetes。</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne08.png" alt="service"></p>
-<h3 id="创建ingress"><a href="#创建ingress" class="headerlink" title="创建ingress"></a>创建ingress</h3><blockquote>
-<p>点击该项目下左侧边栏的“ingress”项，之后“创建ingress”，配置“名称”和“机房”并提交。之后“创建ingress模板”,之后点击“发布”，在弹出的选择框中选择需要部署的机房并“确认”即可部署到kubernetes。</p>
-</blockquote>
-<p><img src="/blog/360wayne/wayne09.png" alt="ingress"></p>
-<h3 id="确认部署情况"><a href="#确认部署情况" class="headerlink" title="确认部署情况"></a>确认部署情况</h3><p><img src="/blog/360wayne/wayne10.png" alt="nginx"></p>
-<blockquote>
-<p>注: 这里使用了 https 是因为我之前部署了 TLS 认证的 traefik。</p>
-</blockquote>
+<p><img src="/blog/drone/drone06.png" alt="drone06"></p>
+<p><img src="/blog/drone/drone07.png" alt="drone07"></p>
+<p>附:</p>
 <ul>
-<li>更多详情请访问 Wayne 官方 wiki: <a href="https://github.com/Qihoo360/wayne/wiki" target="_blank" rel="noopener">wayne</a></li>
+<li>docker-compose文档:<a href="https://docs.docker.com/compose/compose-file/" target="_blank" rel="noopener">https://docs.docker.com/compose/compose-file/</a>    </li>
+<li>traefik文档页:<a href="https://docs.traefik.io/" target="_blank" rel="noopener">https://docs.traefik.io/</a></li>
+<li>gogs的GitHub:<a href="https://github.com/gogs/gogs" target="_blank" rel="noopener">https://github.com/gogs/gogs</a></li>
+<li>drone的GitHub:<a href="https://github.com/drone/drone" target="_blank" rel="noopener">https://github.com/drone/drone</a></li>
+<li>drone文档页:<a href="https://docs.drone.io/" target="_blank" rel="noopener">https://docs.drone.io/</a></li>
+<li>drone的插件:<a href="http://plugins.drone.io/" target="_blank" rel="noopener">http://plugins.drone.io/</a></li>
+<li>drone官方构建示例代码:<a href="https://github.com/drone/hello-world/tree/test-docker-plugin" target="_blank" rel="noopener">https://github.com/drone/hello-world/tree/test-docker-plugin</a></li>
+<li>drone官方构建示例:<a href="https://cloud.drone.io/drone/hello-world/7/1/2" target="_blank" rel="noopener">https://cloud.drone.io/drone/hello-world/7/1/2</a></li>
 </ul>
 
       
@@ -648,9 +609,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/kubernetes/" rel="tag"><i class="fa fa-tag"></i> kubernetes</a>
+            <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
           
-            <a href="/tags/wayne/" rel="tag"><i class="fa fa-tag"></i> wayne</a>
+            <a href="/tags/gogs/" rel="tag"><i class="fa fa-tag"></i> gogs</a>
+          
+            <a href="/tags/drone/" rel="tag"><i class="fa fa-tag"></i> drone</a>
           
         </div>
       
@@ -663,8 +626,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/819d304e/" rel="next" title="对etcd集群及kubernetes集群进行升级">
-                <i class="fa fa-chevron-left"></i> 对etcd集群及kubernetes集群进行升级
+              <a href="/blog/runner/" rel="next" title="在kubernetes上部署GitLab Runner">
+                <i class="fa fa-chevron-left"></i> 在kubernetes上部署GitLab Runner
               </a>
             
           </div>
@@ -672,10 +635,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/b5448413/" rel="prev" title="切换 zabbix 认证模式">
-                切换 zabbix 认证模式 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -902,7 +861,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#特性"><span class="nav-number">1.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-Wayne"><span class="nav-number">3.</span> <span class="nav-text">部署 Wayne</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#下载相关文件并部署"><span class="nav-number">3.1.</span> <span class="nav-text">下载相关文件并部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置集群和-Namespace"><span class="nav-number">3.2.</span> <span class="nav-text">配置集群和 Namespace</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置集群"><span class="nav-number">3.2.1.</span> <span class="nav-text">配置集群</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-namespace"><span class="nav-number">3.2.2.</span> <span class="nav-text">配置 namespace</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看资源状况"><span class="nav-number">3.2.3.</span> <span class="nav-text">查看资源状况</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用-Wayne"><span class="nav-number">4.</span> <span class="nav-text">应用 Wayne</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建项目"><span class="nav-number">4.1.</span> <span class="nav-text">创建项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建部署"><span class="nav-number">4.2.</span> <span class="nav-text">创建部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建负载均衡"><span class="nav-number">4.3.</span> <span class="nav-text">创建负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建ingress"><span class="nav-number">4.4.</span> <span class="nav-text">创建ingress</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#确认部署情况"><span class="nav-number">4.5.</span> <span class="nav-text">确认部署情况</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置-docker-compose"><span class="nav-number">1.</span> <span class="nav-text">配置 docker-compose</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-docker-compose"><span class="nav-number">2.</span> <span class="nav-text">部署 docker-compose</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署-Gogs"><span class="nav-number">3.</span> <span class="nav-text">部署 Gogs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启用-Drone"><span class="nav-number">4.</span> <span class="nav-text">启用 Drone</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#推送代码到-Gogs"><span class="nav-number">5.</span> <span class="nav-text">推送代码到 Gogs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看-Drone"><span class="nav-number">6.</span> <span class="nav-text">查看 Drone</span></a></li></ol></div>
             
 
           </div>
