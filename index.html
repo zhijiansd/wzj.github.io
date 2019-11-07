@@ -360,6 +360,315 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/mysql1/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/blog/mysql1/" class="post-title-link" itemprop="https://www.flywzj.com/index.html">MySQL简用</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-07 15:40:37 / 修改时间：15:54:00" itemprop="dateCreated datePublished" datetime="2019-11-07T15:40:37+08:00">2019-11-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/mysql1/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/mysql1/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">6.6k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">11 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="登录MySQL"><a href="#登录MySQL" class="headerlink" title="登录MySQL"></a>登录MySQL</h2><blockquote>
+<p>要连接到服务器，在调用mysql时通常需要提供一个MySQL用户名，并且很可能还需要提供一个密码。如果服务器在您登录的计算机以外的计算机上运行，则还需要指定一个主机名。</p>
+</blockquote>
+<h3 id="在本机登录"><a href="#在本机登录" class="headerlink" title="在本机登录"></a>在本机登录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mysql -u root -p</span></span><br><span class="line">Enter password:</span><br></pre></td></tr></table></figure>
+<ul>
+<li>-u : 指定MySQL用户名</li>
+</ul>
+<ul>
+<li>-P : 指定密码，在出现”Enter password”提示时输入</li>
+</ul>
+<h3 id="在其他主机登录"><a href="#在其他主机登录" class="headerlink" title="在其他主机登录"></a>在其他主机登录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mysql -h 192.168.100.200 -u root -p</span></span><br><span class="line">Enter password:</span><br></pre></td></tr></table></figure>
+<ul>
+<li>-h : 指定MySQL数据库地址</li>
+</ul>
+<ul>
+<li>-u : 指定MySQL用户名</li>
+</ul>
+<ul>
+<li>-P : 指定密码，在出现”Enter password”提示时输入 </li>
+</ul>
+<h2 id="简单的输入查询"><a href="#简单的输入查询" class="headerlink" title="简单的输入查询"></a>简单的输入查询</h2><h3 id="查询数据库版本以及当前日期"><a href="#查询数据库版本以及当前日期" class="headerlink" title="查询数据库版本以及当前日期"></a>查询数据库版本以及当前日期</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SELECT VERSION(), CURRENT_DATE;</span><br><span class="line">+----------------+--------------+</span><br><span class="line">| VERSION()      | CURRENT_DATE |</span><br><span class="line">+----------------+--------------+</span><br><span class="line">| 5.5.60-MariaDB | 2019-11-06   |</span><br><span class="line">+----------------+--------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>以下查询等价:</p>
+<ul>
+<li><blockquote>
+<p>SELECT VERSION(), CURRENT_DATE;</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li><blockquote>
+<p>select version(), current_date;</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li><blockquote>
+<p>SeLeCt vErSiOn(), current_DATE;</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="执行多个语句"><a href="#执行多个语句" class="headerlink" title="执行多个语句"></a>执行多个语句</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SELECT VERSION(); SELECT NOW();</span><br><span class="line">+----------------+</span><br><span class="line">| VERSION()      |</span><br><span class="line">+----------------+</span><br><span class="line">| 5.5.60-MariaDB |</span><br><span class="line">+----------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">+---------------------+</span><br><span class="line">| NOW()               |</span><br><span class="line">+---------------------+</span><br><span class="line">| 2019-11-06 20:38:17 |</span><br><span class="line">+---------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="MySQL所处状态的含义"><a href="#MySQL所处状态的含义" class="headerlink" title="MySQL所处状态的含义"></a>MySQL所处状态的含义</h3><table>
+<thead>
+<tr>
+<th>提示符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&gt;</td>
+<td>准备进行新查询</td>
+</tr>
+<tr>
+<td>-&gt;</td>
+<td>等待多行查询的下一行</td>
+</tr>
+<tr>
+<td>‘&gt;</td>
+<td>等待下一行，等待以单引号(‘)开头的字符串的完成</td>
+</tr>
+<tr>
+<td>“&gt;</td>
+<td>等待下一行，等待以双引号(“)开头的字符串的完成</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>等待下一行，等待以反引号(`)开头的标识符的完成</td>
+</tr>
+<tr>
+<td>/*&gt;</td>
+<td>等待下一行，等待以/*开头的注释的完成</td>
+</tr>
+</tbody>
+</table>
+<h2 id="创建和使用数据库"><a href="#创建和使用数据库" class="headerlink" title="创建和使用数据库"></a>创建和使用数据库</h2><h3 id="查看数据库"><a href="#查看数据库" class="headerlink" title="查看数据库"></a>查看数据库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; show databases;</span><br><span class="line">+--------------------+</span><br><span class="line">| Database           |</span><br><span class="line">+--------------------+</span><br><span class="line">| information_schema |</span><br><span class="line">| mysql              |</span><br><span class="line">| performance_schema |</span><br><span class="line">| <span class="built_in">test</span>               |</span><br><span class="line">| zabbix             |</span><br><span class="line">+--------------------+</span><br><span class="line">5 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="创建新数据库"><a href="#创建新数据库" class="headerlink" title="创建新数据库"></a>创建新数据库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; CREATE DATABASE newtest;</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="进入相关数据库"><a href="#进入相关数据库" class="headerlink" title="进入相关数据库"></a>进入相关数据库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; use <span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+<h3 id="在登录MySQL时调用"><a href="#在登录MySQL时调用" class="headerlink" title="在登录MySQL时调用"></a>在登录MySQL时调用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mysql -u root -p test</span></span><br><span class="line">Enter password: </span><br><span class="line">......</span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="创建表"><a href="#创建表" class="headerlink" title="创建表"></a>创建表</h2><h3 id="查看表"><a href="#查看表" class="headerlink" title="查看表"></a>查看表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; show tables;</span><br><span class="line">+----------------+</span><br><span class="line">| Tables_in_test |</span><br><span class="line">+----------------+</span><br><span class="line">| customers      |</span><br><span class="line">| orderitems     |</span><br><span class="line">| orders         |</span><br><span class="line">| productnotes   |</span><br><span class="line">| products       |</span><br><span class="line">| vendors        |</span><br><span class="line">+----------------+</span><br><span class="line">6 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="创建表-1"><a href="#创建表-1" class="headerlink" title="创建表"></a>创建表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TABLE pet (name VARCHAR(20), owner VARCHAR(20),species VARCHAR(20), sex CHAR(1), birth DATE, death DATE);</span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="查看表结构信息"><a href="#查看表结构信息" class="headerlink" title="查看表结构信息"></a>查看表结构信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DESC pet;</span><br><span class="line">+---------+-------------+------+-----+---------+-------+</span><br><span class="line">| Field   | Type        | Null | Key | Default | Extra |</span><br><span class="line">+---------+-------------+------+-----+---------+-------+</span><br><span class="line">| name    | varchar(20) | YES  |     | NULL    |       |</span><br><span class="line">| owner   | varchar(20) | YES  |     | NULL    |       |</span><br><span class="line">| species | varchar(20) | YES  |     | NULL    |       |</span><br><span class="line">| sex     | char(1)     | YES  |     | NULL    |       |</span><br><span class="line">| birth   | date        | YES  |     | NULL    |       |</span><br><span class="line">| death   | date        | YES  |     | NULL    |       |</span><br><span class="line">+---------+-------------+------+-----+---------+-------+</span><br><span class="line">6 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="将数据加载到表中"><a href="#将数据加载到表中" class="headerlink" title="将数据加载到表中"></a>将数据加载到表中</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO pet</span><br><span class="line">          VALUES (<span class="string">'Puffball'</span>,<span class="string">'Diane'</span>,<span class="string">'hamster'</span>,<span class="string">'f'</span>,<span class="string">'1999-03-30'</span>,NULL);</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="查看该表数据"><a href="#查看该表数据" class="headerlink" title="查看该表数据"></a>查看该表数据</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT * FROM pet;</span><br><span class="line">+----------+-------+---------+------+------------+-------+</span><br><span class="line">| name     | owner | species | sex  | birth      | death |</span><br><span class="line">+----------+-------+---------+------+------------+-------+</span><br><span class="line">| Puffball | Diane | hamster | f    | 1999-03-30 | NULL  |</span><br><span class="line">+----------+-------+---------+------+------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="更新表项"><a href="#更新表项" class="headerlink" title="更新表项"></a>更新表项</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; UPDATE pet SET name = <span class="string">'Tom'</span> WHERE owner = <span class="string">'Diane'</span>;</span><br><span class="line">Query OK, 1 row affected (0.02 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 0</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT * FROM pet;</span><br><span class="line">+------+-------+---------+------+------------+-------+</span><br><span class="line">| name | owner | species | sex  | birth      | death |</span><br><span class="line">+------+-------+---------+------+------------+-------+</span><br><span class="line">| Tom  | Diane | hamster | f    | 1999-03-30 | NULL  |</span><br><span class="line">+------+-------+---------+------+------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="一些语句"><a href="#一些语句" class="headerlink" title="一些语句"></a>一些语句</h2><h3 id="查看服务器使用的默认命令选项和系统变量值"><a href="#查看服务器使用的默认命令选项和系统变量值" class="headerlink" title="查看服务器使用的默认命令选项和系统变量值"></a>查看服务器使用的默认命令选项和系统变量值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mysqltest --verbose --help</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如上命令适用于MariaDB，MySQL使用命令mysqld。</p>
+</blockquote>
+<h3 id="显示允许的SHOW语句"><a href="#显示允许的SHOW语句" class="headerlink" title="显示允许的SHOW语句"></a>显示允许的SHOW语句</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; HELP SHOW;</span><br></pre></td></tr></table></figure>
+<h3 id="显示服务器状态信息"><a href="#显示服务器状态信息" class="headerlink" title="显示服务器状态信息"></a>显示服务器状态信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW STATUS;</span><br></pre></td></tr></table></figure>
+<h3 id="显示服务器支持的权限"><a href="#显示服务器支持的权限" class="headerlink" title="显示服务器支持的权限"></a>显示服务器支持的权限</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW PRIVILEGES;</span><br></pre></td></tr></table></figure>
+<h2 id="显示授予用户-所有用户或特定用户-的安全权限"><a href="#显示授予用户-所有用户或特定用户-的安全权限" class="headerlink" title="显示授予用户(所有用户或特定用户)的安全权限"></a>显示授予用户(所有用户或特定用户)的安全权限</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW GRANTS;</span><br></pre></td></tr></table></figure>
+<h2 id="显示服务器错误消息"><a href="#显示服务器错误消息" class="headerlink" title="显示服务器错误消息"></a>显示服务器错误消息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW ERRORS;</span><br></pre></td></tr></table></figure>
+<h2 id="显示服务器警告消息"><a href="#显示服务器警告消息" class="headerlink" title="显示服务器警告消息"></a>显示服务器警告消息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW WARNINGS;</span><br></pre></td></tr></table></figure>
+<h2 id="显示系统中正在运行的所有进程-即当前正在执行的查询"><a href="#显示系统中正在运行的所有进程-即当前正在执行的查询" class="headerlink" title="显示系统中正在运行的所有进程(即当前正在执行的查询)"></a>显示系统中正在运行的所有进程(即当前正在执行的查询)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW PROCESSLIST;</span><br></pre></td></tr></table></figure>
+<h2 id="显示当前数据库中每个表的相关信息"><a href="#显示当前数据库中每个表的相关信息" class="headerlink" title="显示当前数据库中每个表的相关信息"></a>显示当前数据库中每个表的相关信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt;  show table status;</span><br></pre></td></tr></table></figure>
+<h2 id="显示系统变量的名称和值"><a href="#显示系统变量的名称和值" class="headerlink" title="显示系统变量的名称和值"></a>显示系统变量的名称和值</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW VARIABLEs;</span><br></pre></td></tr></table></figure>
+<h2 id="显示服务器所支持的权限"><a href="#显示服务器所支持的权限" class="headerlink" title="显示服务器所支持的权限"></a>显示服务器所支持的权限</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW PRIVILEGES;</span><br></pre></td></tr></table></figure>
+<h2 id="显示可用的存储引擎和默认存储引擎"><a href="#显示可用的存储引擎和默认存储引擎" class="headerlink" title="显示可用的存储引擎和默认存储引擎"></a>显示可用的存储引擎和默认存储引擎</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW ENGINES;</span><br><span class="line">+--------------------+---------+----------------------------------------------------------------------------+--------------+------+------------+</span><br><span class="line">| Engine             | Support | Comment                                                                    | Transactions | XA   | Savepoints |</span><br><span class="line">+--------------------+---------+----------------------------------------------------------------------------+--------------+------+------------+</span><br><span class="line">| MEMORY             | YES     | Hash based, stored <span class="keyword">in</span> memory, useful <span class="keyword">for</span> temporary tables                  | NO           | NO   | NO         |</span><br><span class="line">| MRG_MYISAM         | YES     | Collection of identical MyISAM tables                                      | NO           | NO   | NO         |</span><br><span class="line">| CSV                | YES     | CSV storage engine                                                         | NO           | NO   | NO         |</span><br><span class="line">| BLACKHOLE          | YES     | /dev/null storage engine (anything you write to it disappears)             | NO           | NO   | NO         |</span><br><span class="line">| MyISAM             | YES     | MyISAM storage engine                                                      | NO           | NO   | NO         |</span><br><span class="line">| InnoDB             | DEFAULT | Percona-XtraDB, Supports transactions, row-level locking, and foreign keys | YES          | YES  | YES        |</span><br><span class="line">| ARCHIVE            | YES     | Archive storage engine                                                     | NO           | NO   | NO         |</span><br><span class="line">| FEDERATED          | YES     | FederatedX pluggable storage engine                                        | YES          | NO   | YES        |</span><br><span class="line">| PERFORMANCE_SCHEMA | YES     | Performance Schema                                                         | NO           | NO   | NO         |</span><br><span class="line">| Aria               | YES     | Crash-safe tables with MyISAM heritage                                     | NO           | NO   | NO         |</span><br><span class="line">+--------------------+---------+----------------------------------------------------------------------------+--------------+------+------------+</span><br><span class="line">10 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="显示相关服务器插件的信息"><a href="#显示相关服务器插件的信息" class="headerlink" title="显示相关服务器插件的信息"></a>显示相关服务器插件的信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; SHOW PLUGINS;</span><br></pre></td></tr></table></figure>
+<p>附:</p>
+<ul>
+<li>MySQL文档页:<a href="https://dev.mysql.com/doc/" target="_blank" rel="noopener">https://dev.mysql.com/doc/</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/es/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -1412,203 +1721,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/501be2e/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="ZhiJian">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="ZhiJian">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/blog/501be2e/" class="post-title-link" itemprop="https://www.flywzj.com/index.html">Harbor从1.6.2升级到1.7.4</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-03-18 10:38:59 / 修改时间：17:21:18" itemprop="dateCreated datePublished" datetime="2019-03-18T10:38:59+08:00">2019-03-18</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/blog/501be2e/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/501be2e/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">3.7k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">6 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Harbor最新的V1.7版本又添加了一些新的功能:</p>
-<ul>
-<li>在线GC（垃圾回收）- 现在 Harbor 可以清理从后端存储中已删除的镜像且在执行GC操作之前不再要求中断 Harbor 的运行。支持按需垃圾收集，使管理员能够手动配置运行docker注册表垃圾收集或使用cron计划自动配置</li>
-<li>镜像构建历史 - 可查看容器镜像的构建历史和内容</li>
-<li>镜像复制（Image Retag）- 提供了在镜像上传至Harbor后重新创建镜像tag的能力。此功能在CI流水线中提升镜像到生产状态或者通过编程方式重新tag镜像，亦或将特定镜像重新tag或者移动到其它仓库或者项目等场景中特别有用</li>
-<li>支持使用Helm Chart部署Harbor，使用户能够获得Harbor服务的高可用性</li>
-<li>支持Logger自定义，使用户能够自定义正在运行的作业的STDOUT / STDERR / FILE / DB记录器。</li>
-</ul>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/blog/501be2e/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-         
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-    
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1658,7 +1770,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">16</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1681,7 +1793,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1742,7 +1856,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">24</span>
+                      
+                    
+                    <span class="site-state-item-count">25</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1843,7 +1959,7 @@
     
       <span class="post-meta-item-text">站点总字数：</span>
     
-    <span title="站点总字数">191k</span>
+    <span title="站点总字数">198k</span>
   
 
   
@@ -1854,7 +1970,7 @@
     
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
     
-    <span title="站点阅读时长">5:18</span>
+    <span title="站点阅读时长">5:29</span>
   
 </div>
 
