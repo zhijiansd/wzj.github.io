@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="该篇主要为检索数据、过滤数据以及使用正则表达式进行搜索。">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL之检索过滤数据篇">
+<meta property="og:url" content="https://www.flywzj.com/blog/mysql2/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="该篇主要为检索数据、过滤数据以及使用正则表达式进行搜索。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-08T08:46:02.933Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL之检索过滤数据篇">
+<meta name="twitter:description" content="该篇主要为检索数据、过滤数据以及使用正则表达式进行搜索。">
+
+
+
+
+
+
+  <link rel="canonical" href="https://www.flywzj.com/blog/mysql2/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MySQL之检索过滤数据篇 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/mysql2/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL之检索过滤数据篇
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-08 16:42:50 / 修改时间：16:46:02" itemprop="dateCreated datePublished" datetime="2019-11-08T16:42:50+08:00">2019-11-08</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/mysql2/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/mysql2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">14k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">23 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>该篇主要为检索数据、过滤数据以及使用正则表达式进行搜索。</p>
+<a id="more"></a>
+<h2 id="检索数据"><a href="#检索数据" class="headerlink" title="检索数据"></a>检索数据</h2><blockquote>
+<p>SELECT用于检索从一个或多个表中选择的行，并且可以包括UNION语句和子查询。</p>
+</blockquote>
+<h3 id="检索单个列"><a href="#检索单个列" class="headerlink" title="检索单个列"></a>检索单个列</h3><blockquote>
+<p>所需的列名在SELECT关键字之后给出， FROM关键字指出从其中检索数据的表名。如下即为从users表中检索passwd列。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT passwd FROM users;</span><br><span class="line">+----------------------------------+</span><br><span class="line">| passwd                           |</span><br><span class="line">+----------------------------------+</span><br><span class="line">| 5fce1b3e34b520afeffb37ce08c7cd66 |</span><br><span class="line">| d41d8cd98f00b204e9800998ecf8427e |</span><br><span class="line">+----------------------------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="检索多个列"><a href="#检索多个列" class="headerlink" title="检索多个列"></a>检索多个列</h3><blockquote>
+<p>与检索单个列唯一的不同是必须在SELECT关键字后给出多个列名，列名之间必须以逗号分隔。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT <span class="built_in">alias</span>,passwd FROM users;</span><br><span class="line">+-------+----------------------------------+</span><br><span class="line">| <span class="built_in">alias</span> | passwd                           |</span><br><span class="line">+-------+----------------------------------+</span><br><span class="line">| Admin | 5fce1b3e34b520afeffb37ce08c7cd66 |</span><br><span class="line">| guest | d41d8cd98f00b204e9800998ecf8427e |</span><br><span class="line">+-------+----------------------------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="检索所有列"><a href="#检索所有列" class="headerlink" title="检索所有列"></a>检索所有列</h3><blockquote>
+<p>使用通配符”*”即可检索所有列</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT * FROM pet;</span><br><span class="line">+------+-------+---------+------+------------+-------+</span><br><span class="line">| name | owner | species | sex  | birth      | death |</span><br><span class="line">+------+-------+---------+------+------------+-------+</span><br><span class="line">| Tom  | Diane | hamster | f    | 1999-03-30 | NULL  |</span><br><span class="line">+------+-------+---------+------+------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="检索不同的行"><a href="#检索不同的行" class="headerlink" title="检索不同的行"></a>检索不同的行</h3><blockquote>
+<p>使用关键字DISTINCT指示MySQL只返回不同的值。即如groupid为8的值有10个，则只返回唯一的一个。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT DISTINCT groupid FROM hosts_groups;</span><br><span class="line">+---------+</span><br><span class="line">| groupid |</span><br><span class="line">+---------+</span><br><span class="line">|       4 |</span><br><span class="line">|       5 |</span><br><span class="line">|       8 |</span><br><span class="line">|       9 |</span><br><span class="line">|      10 |</span><br><span class="line">|      11 |</span><br><span class="line">|      12 |</span><br><span class="line">|      13 |</span><br><span class="line">|      14 |</span><br><span class="line">|      21 |</span><br><span class="line">|      22 |</span><br><span class="line">|      23 |</span><br><span class="line">|      24 |</span><br><span class="line">|      25 |</span><br><span class="line">|      26 |</span><br><span class="line">+---------+</span><br><span class="line">15 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.11 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="限制结果"><a href="#限制结果" class="headerlink" title="限制结果"></a>限制结果</h3><blockquote>
+<p>SELECT语句返回所有匹配的行，它们可能是指定表中的每个行。为了返回第一行或前几行，可使用LIMIT子句。</p>
+</blockquote>
+<h4 id="返回不多于5行"><a href="#返回不多于5行" class="headerlink" title="返回不多于5行"></a>返回不多于5行</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT hostid FROM hosts_groups LIMIT 5;</span><br><span class="line">+--------+</span><br><span class="line">| hostid |</span><br><span class="line">+--------+</span><br><span class="line">|  10001 |</span><br><span class="line">|  10047 |</span><br><span class="line">|  10048 |</span><br><span class="line">|  10050 |</span><br><span class="line">|  10074 |</span><br><span class="line">+--------+</span><br><span class="line">5 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h4 id="返回从第5行开始的5行"><a href="#返回从第5行开始的5行" class="headerlink" title="返回从第5行开始的5行"></a>返回从第5行开始的5行</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT hostid FROM hosts_groups LIMIT 5,5;</span><br><span class="line">+--------+</span><br><span class="line">| hostid |</span><br><span class="line">+--------+</span><br><span class="line">|  10075 |</span><br><span class="line">|  10076 |</span><br><span class="line">|  10077 |</span><br><span class="line">|  10078 |</span><br><span class="line">|  10079 |</span><br><span class="line">+--------+</span><br><span class="line">5 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>检索出来的第一行为行0而不是行1.因此，LIMIT 1,1 将检索出第二行而不是第一行。</li>
+</ul>
+<ul>
+<li>如果没有足够的行，将只返回它能返回的最大行。</li>
+</ul>
+<h3 id="完全限定表名"><a href="#完全限定表名" class="headerlink" title="完全限定表名"></a>完全限定表名</h3><blockquote>
+<p>即同时使用表名和列字。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT pet.name,pet.birth FROM pet;</span><br><span class="line">+------+------------+</span><br><span class="line">| name | birth      |</span><br><span class="line">+------+------------+</span><br><span class="line">| Tom  | 1999-03-30 |</span><br><span class="line">+------+------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="排序检索数据"><a href="#排序检索数据" class="headerlink" title="排序检索数据"></a>排序检索数据</h2><h3 id="排序数据"><a href="#排序数据" class="headerlink" title="排序数据"></a>排序数据</h3><h4 id="非排序状态"><a href="#非排序状态" class="headerlink" title="非排序状态"></a>非排序状态</h4><blockquote>
+<p>原始数据并没有特定的顺序</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|         194 |  10001 |      10 |</span><br><span class="line">|         189 |  10047 |      12 |</span><br><span class="line">|         188 |  10048 |      12 |</span><br><span class="line">|         187 |  10050 |       8 |</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<h4 id="排序状态"><a href="#排序状态" class="headerlink" title="排序状态"></a>排序状态</h4><blockquote>
+<p>为了明确地用SELECT语句对检索出的数据进行排序，可使用ORDER BY子句。ORDER BY子句取一个或多个列的名字，以此对输出进行排序。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups ORDER BY hostgroupid;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|          92 |  10084 |       4 |</span><br><span class="line">|         175 |  10093 |       8 |</span><br><span class="line">|         176 |  10169 |      12 |</span><br><span class="line">|         177 |  10095 |       8 |</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<h3 id="按多个列进行排序"><a href="#按多个列进行排序" class="headerlink" title="按多个列进行排序"></a>按多个列进行排序</h3><blockquote>
+<p>为了按多个列排序，只要指定列名，列名之间用逗号分开即可(就像选择多个列时所做的那样)。在按多个列排序时，排序完全按所规定的顺序进行。(如下即为首先按groupid,然后再按hostgroupid进行排序)</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups ORDER BY groupid,hostgroupid;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|          92 |  10084 |       4 |</span><br><span class="line">|         544 |  10388 |       5 |</span><br><span class="line">|         618 |  10425 |       5 |</span><br><span class="line">|         620 |  10426 |       5 |</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<h3 id="按列位置排序"><a href="#按列位置排序" class="headerlink" title="按列位置排序"></a>按列位置排序</h3><blockquote>
+<p>首先按第1列(hostgroupid),然后再按第3列(groupid)进行排序</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups ORDER BY 1,3;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|          92 |  10084 |       4 |</span><br><span class="line">|         175 |  10093 |       8 |</span><br><span class="line">|         176 |  10169 |      12 |</span><br><span class="line">|         177 |  10095 |       8 |</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<h3 id="指定排序方向"><a href="#指定排序方向" class="headerlink" title="指定排序方向"></a>指定排序方向</h3><blockquote>
+<p>默认的排序顺序为升序排序(从A到Z)。还可以使用ORDER BY子句以降序(从Z到A)顺序排序。为了进行降序排序，必须指定DESC关键字。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups ORDER BY hostgroupid  DESC;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|         631 |  10431 |      21 |</span><br><span class="line">|         630 |  10431 |       5 |</span><br><span class="line">|         629 |  10430 |      21 |</span><br><span class="line">|         628 |  10430 |       5 |</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+<h3 id="指定多列降序排序"><a href="#指定多列降序排序" class="headerlink" title="指定多列降序排序"></a>指定多列降序排序</h3><blockquote>
+<p>首先按groupid进行降序排序,然后再按hostgroupid进行降序排序</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups ORDER BY groupid DESC,hostgroupid;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|         457 |  10344 |      21 |</span><br><span class="line">|         545 |  10388 |      21 |</span><br><span class="line">|         619 |  10425 |      21 |</span><br><span class="line">|         621 |  10426 |      21 |</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<h2 id="过滤数据"><a href="#过滤数据" class="headerlink" title="过滤数据"></a>过滤数据</h2><blockquote>
+<p>数据库表一般包含大量的数据，很少需要检索表中所有行。通常只会根据特定操作或报告的需要提取表数据的子集。只检索所需数据需要指定搜索条件(search criteria)，搜索条件也称为过滤条件(filter condition)。</p>
+</blockquote>
+<h3 id="使用WHERE子句"><a href="#使用WHERE子句" class="headerlink" title="使用WHERE子句"></a>使用WHERE子句</h3><blockquote>
+<p>在SELECT语句中，数据根据WHERE子句中指定的搜索条件进行过滤。WHERE子句在表名(FROM子句)之后给出。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>操作符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  =</td>
+<td>等于</td>
+</tr>
+<tr>
+<td> &lt;&gt;</td>
+<td>不等于</td>
+</tr>
+<tr>
+<td> !=</td>
+<td>不等于</td>
+</tr>
+<tr>
+<td>  &lt;</td>
+<td>小于</td>
+</tr>
+<tr>
+<td> &lt;=</td>
+<td>小于等于</td>
+</tr>
+<tr>
+<td> !&lt;</td>
+<td>不小于</td>
+</tr>
+<tr>
+<td>  &gt;</td>
+<td>大于</td>
+</tr>
+<tr>
+<td> &gt;=</td>
+<td>大于等于</td>
+</tr>
+<tr>
+<td> !&gt;</td>
+<td>不大于</td>
+</tr>
+<tr>
+<td>BETWEEN</td>
+<td>在指定的两个值之间</td>
+</tr>
+<tr>
+<td>IS NULL</td>
+<td>为NULL的值</td>
+</tr>
+</tbody>
+</table>
+<h3 id="检查单个值"><a href="#检查单个值" class="headerlink" title="检查单个值"></a>检查单个值</h3><blockquote>
+<p>检索groupid值等于5的行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups WHERE groupid=5;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|         544 |  10388 |       5 |</span><br><span class="line">|         618 |  10425 |       5 |</span><br><span class="line">|         620 |  10426 |       5 |</span><br><span class="line">|         622 |  10427 |       5 |</span><br><span class="line">|         624 |  10428 |       5 |</span><br><span class="line">|         626 |  10429 |       5 |</span><br><span class="line">|         628 |  10430 |       5 |</span><br><span class="line">|         630 |  10431 |       5 |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">8 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.02 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>列出hostgroupid值小于100的行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups WHERE hostgroupid &lt; 100;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|          92 |  10084 |       4 |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>列出hostgroupid值小于等于100的行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups WHERE hostgroupid &lt;= 100;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|          92 |  10084 |       4 |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="不匹配检查"><a href="#不匹配检查" class="headerlink" title="不匹配检查"></a>不匹配检查</h3><blockquote>
+<p>列出除了guest用户外的所有用户</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT <span class="built_in">alias</span> FROM users WHERE <span class="built_in">alias</span> &lt;&gt; <span class="string">'guest'</span>;</span><br><span class="line">+-------+</span><br><span class="line">| <span class="built_in">alias</span> |</span><br><span class="line">+-------+</span><br><span class="line">| Admin |</span><br><span class="line">+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT <span class="built_in">alias</span> FROM users WHERE <span class="built_in">alias</span> != <span class="string">'guest'</span>;</span><br><span class="line">+-------+</span><br><span class="line">| <span class="built_in">alias</span> |</span><br><span class="line">+-------+</span><br><span class="line">| Admin |</span><br><span class="line">+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>单引号用来限定字符串。如果将值与串类型的列进行比较，则需要限定引号。用来与数值列进行比较的值不用引号。</p>
+</blockquote>
+<h3 id="范围值检查"><a href="#范围值检查" class="headerlink" title="范围值检查"></a>范围值检查</h3><blockquote>
+<p>可使用BETWEEN操作符检查某个范围的值。该操作符需要两个值，即范围的开始值和结束值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups WHERE hostgroupid between 170 and 180;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|         175 |  10093 |       8 |</span><br><span class="line">|         176 |  10169 |      12 |</span><br><span class="line">|         177 |  10095 |       8 |</span><br><span class="line">|         178 |  10094 |       8 |</span><br><span class="line">|         179 |  10096 |       8 |</span><br><span class="line">|         180 |  10097 |       8 |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">6 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="空值检查"><a href="#空值检查" class="headerlink" title="空值检查"></a>空值检查</h3><blockquote>
+<p>在一个列不包含值时，称其为包含空值NULL。它与字段包含0、空字符串或仅仅包含空格不同。检查具有NULL值的列使用IS NULL子句。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT name FROM pet WHERE death IS NULL;</span><br><span class="line">+------+</span><br><span class="line">| name |</span><br><span class="line">+------+</span><br><span class="line">| Tom  |</span><br><span class="line">+------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="组合WHERE子句"><a href="#组合WHERE子句" class="headerlink" title="组合WHERE子句"></a>组合WHERE子句</h2><blockquote>
+<p>操作符(operator)是用来联结或改变WHERE子句中的子句的关键字。也称为逻辑操作符(logical operator)。</p>
+</blockquote>
+<h3 id="与AND操作符组合进行过滤"><a href="#与AND操作符组合进行过滤" class="headerlink" title="与AND操作符组合进行过滤"></a>与AND操作符组合进行过滤</h3><blockquote>
+<p>AND操作符用来指示检索满足所有给定条件的行。</p>
+</blockquote>
+<blockquote>
+<p>检索groupid等于8且hostgroupid介于170和180之间的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups WHERE groupid = <span class="string">'8'</span> AND hostgroupid BETWEEN 170 AND 180;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|         175 |  10093 |       8 |</span><br><span class="line">|         177 |  10095 |       8 |</span><br><span class="line">|         178 |  10094 |       8 |</span><br><span class="line">|         179 |  10096 |       8 |</span><br><span class="line">|         180 |  10097 |       8 |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">5 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="与OR操作符组合进行过滤"><a href="#与OR操作符组合进行过滤" class="headerlink" title="与OR操作符组合进行过滤"></a>与OR操作符组合进行过滤</h3><blockquote>
+<p>OR操作符用来指示检索匹配任一给定条件的行。</p>
+</blockquote>
+<blockquote>
+<p>匹配hostid等于10429或groupid等于21的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups WHERE hostid = <span class="string">'10429'</span> OR groupid = <span class="string">'21'</span>;</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|         457 |  10344 |      21 |</span><br><span class="line">|         545 |  10388 |      21 |</span><br><span class="line">|         619 |  10425 |      21 |</span><br><span class="line">|         621 |  10426 |      21 |</span><br><span class="line">|         623 |  10427 |      21 |</span><br><span class="line">|         625 |  10428 |      21 |</span><br><span class="line">|         626 |  10429 |       5 |</span><br><span class="line">|         627 |  10429 |      21 |</span><br><span class="line">|         629 |  10430 |      21 |</span><br><span class="line">|         631 |  10431 |      21 |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">10 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.02 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="计算次序"><a href="#计算次序" class="headerlink" title="计算次序"></a>计算次序</h3><blockquote>
+<p>任何时候使用具有AND和OR操作符的WHERE子句，都应该使用圆括号明确地分组操作符。</p>
+</blockquote>
+<blockquote>
+<p>检索groupid等于4或者12且hostgroupid大于200的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT hostgroupid,hostid FROM hosts_groups WHERE ( groupid = <span class="string">'4'</span> OR groupid = <span class="string">'14'</span> ) AND hostgroupid &gt; 200;</span><br><span class="line">+-------------+--------+</span><br><span class="line">| hostgroupid | hostid |</span><br><span class="line">+-------------+--------+</span><br><span class="line">|         201 |  10173 |</span><br><span class="line">|         202 |  10174 |</span><br><span class="line">|         203 |  10175 |</span><br><span class="line">+-------------+--------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="IN操作符"><a href="#IN操作符" class="headerlink" title="IN操作符"></a>IN操作符</h2><blockquote>
+<p>IN操作符用来指定条件范围，范围中的每个条件都可以进行匹配。 IN的取值由逗号分隔，全都括在圆括号中。</p>
+</blockquote>
+<blockquote>
+<p>检索groupid等于4和13的所有行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT * FROM hosts_groups WHERE groupid IN (<span class="string">'4'</span>,<span class="string">'13'</span>);</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">| hostgroupid | hostid | groupid |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">|          92 |  10084 |       4 |</span><br><span class="line">|         190 |  10170 |      13 |</span><br><span class="line">+-------------+--------+---------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="NOT操作符"><a href="#NOT操作符" class="headerlink" title="NOT操作符"></a>NOT操作符</h2><blockquote>
+<p>NOT操作符的功能就是否定它之后所跟的任何条件。</p>
+</blockquote>
+<blockquote>
+<p>检索interface下type不等于1的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT hostid,<span class="built_in">type</span> FROM interface WHERE not <span class="built_in">type</span> = <span class="string">'1'</span>;</span><br><span class="line">+--------+------+</span><br><span class="line">| hostid | <span class="built_in">type</span> |</span><br><span class="line">+--------+------+</span><br><span class="line">|  10388 |    2 |</span><br><span class="line">|  10425 |    2 |</span><br><span class="line">+--------+------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="用通配符进行过滤"><a href="#用通配符进行过滤" class="headerlink" title="用通配符进行过滤"></a>用通配符进行过滤</h2><blockquote>
+<p>通配符是用来匹配值的一部分的特殊字符，本身实际是SQL的WHERE子句中有特殊含义的字符。为在搜索子句中使用通配符，必须使用LIKE操作符。通配符搜索只能用于文本字段(串)。</p>
+</blockquote>
+<h3 id="百分号通配符"><a href="#百分号通配符" class="headerlink" title="百分号通配符"></a>百分号通配符</h3><blockquote>
+<p>％表示任何字符出现任意次数。可在搜索模式中任意位置使用，并且可以使用多个通配符。</p>
+</blockquote>
+<blockquote>
+<p>除了一个或多个字符外， %还能匹配0个字符。 %代表搜索模式中给定位置的0个、 1个或多个字符。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT userid,lastaccess FROM sessions WHERE lastaccess LIKE <span class="string">'1%9%'</span>;</span><br><span class="line">+--------+------------+</span><br><span class="line">| userid | lastaccess |</span><br><span class="line">+--------+------------+</span><br><span class="line">|      1 | 1571994757 |</span><br><span class="line">|      2 | 1564566998 |</span><br><span class="line">+--------+------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT userid,lastaccess FROM sessions WHERE lastaccess LIKE <span class="string">'%32%'</span>;</span><br><span class="line">+--------+------------+</span><br><span class="line">| userid | lastaccess |</span><br><span class="line">+--------+------------+</span><br><span class="line">|      2 | 1564583212 |</span><br><span class="line">|      2 | 1564583221 |</span><br><span class="line">+--------+------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="下划线通配符"><a href="#下划线通配符" class="headerlink" title="下划线通配符"></a>下划线通配符</h3><blockquote>
+<p>_只匹配单个字符。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT hostid,<span class="built_in">type</span> FROM interface WHERE hostid LIKE <span class="string">'1048_'</span>;</span><br><span class="line">+--------+------+</span><br><span class="line">| hostid | <span class="built_in">type</span> |</span><br><span class="line">+--------+------+</span><br><span class="line">|  10480 |    1 |</span><br><span class="line">|  10481 |    1 |</span><br><span class="line">|  10482 |    1 |</span><br><span class="line">|  10483 |    1 |</span><br><span class="line">+--------+------+</span><br><span class="line">4 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="使用正则表达式进行搜索"><a href="#使用正则表达式进行搜索" class="headerlink" title="使用正则表达式进行搜索"></a>使用正则表达式进行搜索</h2><blockquote>
+<p>正则表达式是用来匹配文本的特殊的串（字符集合）。</p>
+</blockquote>
+<blockquote>
+<p>MySQL中的正则表达式匹配不区分大小写(即，大写和小写都匹配)。为区分大<br>小写，可使用BINARY关键字。</p>
+</blockquote>
+<blockquote>
+<p>LIKE与REGEXP的差别:LIKE匹配整个列。如果被匹配的文本在列值中出现， LIKE将不会找到它，相应的行也不被返回(除非使用通配符)。而REGEXP在列值内进行匹配，如果被匹配的文本在列值中出现，REGEXP将会找到它，相应的行将被返回。</p>
+</blockquote>
+<h3 id="基本字符匹配"><a href="#基本字符匹配" class="headerlink" title="基本字符匹配"></a>基本字符匹配</h3><blockquote>
+<p>匹配groupid列包含12的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT groupid FROM hosts_groups WHERE groupid REGEXP <span class="string">'12'</span> ORDER BY groupid;</span><br><span class="line">+---------+</span><br><span class="line">| groupid |</span><br><span class="line">+---------+</span><br><span class="line">|      12 |</span><br><span class="line">|      12 |</span><br><span class="line">|      12 |</span><br><span class="line">|      12 |</span><br><span class="line">|      12 |</span><br><span class="line">|      12 |</span><br><span class="line">+---------+</span><br><span class="line">6 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>匹配不区分大小写:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT prod_name FROM products WHERE prod_name REGEXP BINARY <span class="string">'Fuses'</span>;</span><br><span class="line">+-----------+</span><br><span class="line">| prod_name |</span><br><span class="line">+-----------+</span><br><span class="line">| Fuses     |</span><br><span class="line">+-----------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="进行OR匹配"><a href="#进行OR匹配" class="headerlink" title="进行OR匹配"></a>进行OR匹配</h3><blockquote>
+<p>使用”|”匹配多个串之一(或者为这个串，或者为另一个串）</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT hostgroupid FROM hosts_groups WHERE hostgroupid REGEXP <span class="string">'630|660'</span> ORDER BY hostgroupid;</span><br><span class="line">+-------------+</span><br><span class="line">| hostgroupid |</span><br><span class="line">+-------------+</span><br><span class="line">|         630 |</span><br><span class="line">|         660 |</span><br><span class="line">+-------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="匹配几个字符之一"><a href="#匹配几个字符之一" class="headerlink" title="匹配几个字符之一"></a>匹配几个字符之一</h3><blockquote>
+<p>通过指定一组用”[ ]”括起来的字符来匹配任何单一字符。</p>
+</blockquote>
+<blockquote>
+<p>除非把字符”|”括在一个集合中，否则它将应用于整个串。字符集合也可以被否定，即，它匹配除指定字符外的任何东西。为否定一个字符集，在集合的开始处放置一个”^”即可。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT <span class="built_in">alias</span> FROM users WHERE <span class="built_in">alias</span> REGEXP <span class="string">'[cd]'</span> ORDER BY <span class="built_in">alias</span>;</span><br><span class="line">+--------+</span><br><span class="line">| <span class="built_in">alias</span>  |</span><br><span class="line">+--------+</span><br><span class="line">| Admin  |</span><br><span class="line">| flyabc |</span><br><span class="line">| flyabd |</span><br><span class="line">+--------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT <span class="built_in">alias</span> FROM users WHERE <span class="built_in">alias</span> REGEXP <span class="string">'c|d'</span> ORDER BY <span class="built_in">alias</span>;</span><br><span class="line">+--------+</span><br><span class="line">| <span class="built_in">alias</span>  |</span><br><span class="line">+--------+</span><br><span class="line">| Admin  |</span><br><span class="line">| flyabc |</span><br><span class="line">| flyabd |</span><br><span class="line">+--------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="匹配范围"><a href="#匹配范围" class="headerlink" title="匹配范围"></a>匹配范围</h3><blockquote>
+<p>集合可用来定义要匹配的一个或多个字符。[0-9]匹配数字0到9，[a-z]匹配任意字母字符。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT <span class="built_in">alias</span> FROM users WHERE <span class="built_in">alias</span> REGEXP <span class="string">'[e-g]'</span> ORDER BY <span class="built_in">alias</span>;</span><br><span class="line">+--------+</span><br><span class="line">| <span class="built_in">alias</span>  |</span><br><span class="line">+--------+</span><br><span class="line">| flyabc |</span><br><span class="line">| flyabd |</span><br><span class="line">| guest  |</span><br><span class="line">+--------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="匹配特殊字符"><a href="#匹配特殊字符" class="headerlink" title="匹配特殊字符"></a>匹配特殊字符</h3><blockquote>
+<p>为了匹配特殊字符，必须用”\“为前导。”\-“表示查找”-“，”\.”表示查找”.”。为了匹配反斜杠”\”字符本身，需要使用”\\”。</p>
+</blockquote>
+<h3 id="匹配字符类"><a href="#匹配字符类" class="headerlink" title="匹配字符类"></a>匹配字符类</h3><pre><code>类    |   说明
+</code></pre><p>———-|———-<br>[:alnum:] |  任意字母和数字(同[a-zA-Z0-9])<br>[:alpha:] |  任意字符(同[a-zA-Z])<br>[:blank:] |  空格和制表(同[\t])<br>[:cntrl:] |  ASCII控制字符(ASCII 0到31和127)<br>[:digit:] |  任意数字(同[0-9])<br>[:graph:] |  与[:print:]相同，但不包括空格<br>[:lower:] |  任意小写字母(同[a-z])<br>[:print:] |  任意可打印字符<br>[:punct:] |  既不在[:alnum:]又不在[:cntrl:]中的任意字符<br>[:space:] |  包括空格在内的任意空白字符(同[\f\n\r\t\v])<br>[:upper:] |  任意大写字母(同[A-Z])<br>[:xdigit:]|  任意十六进制数字(同[a-fA-F0-9])</p>
+<h3 id="匹配多个实例"><a href="#匹配多个实例" class="headerlink" title="匹配多个实例"></a>匹配多个实例</h3><table>
+<thead>
+<tr>
+<th>元字符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>*</td>
+<td>0个或多个匹配</td>
+</tr>
+<tr>
+<td>+</td>
+<td>1个或多个匹配(等于{1,})</td>
+</tr>
+<tr>
+<td>?</td>
+<td>0个或1个匹配(等于{0,1})</td>
+</tr>
+<tr>
+<td>{n}</td>
+<td>指定数目的匹配</td>
+</tr>
+<tr>
+<td>{n,}</td>
+<td>不少于指定数目的匹配</td>
+</tr>
+<tr>
+<td>{n,m}</td>
+<td>匹配数目的范围(m不超过255)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[:digit:]匹配任意数字，{4}确切地要求它前面的字符（任意数字）出现4次</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT name FROM applications WHERE name REGEXP <span class="string">'[[:digit:]]&#123;4&#125;'</span> ORDER BY name;</span><br><span class="line">+-----------+</span><br><span class="line">| name      |</span><br><span class="line">+-----------+</span><br><span class="line">| http-8080 |</span><br><span class="line">| http-8443 |</span><br><span class="line">| jk-8009   |</span><br><span class="line">+-----------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT name FROM applications WHERE name REGEXP <span class="string">'[0-9][0-9][0-9][0-9]'</span> ORDER BY name;</span><br><span class="line">+-----------+</span><br><span class="line">| name      |</span><br><span class="line">+-----------+</span><br><span class="line">| http-8080 |</span><br><span class="line">| http-8443 |</span><br><span class="line">| jk-8009   |</span><br><span class="line">+-----------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="定位符"><a href="#定位符" class="headerlink" title="定位符"></a>定位符</h3><table>
+<thead>
+<tr>
+<th>元字符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>    ^</td>
+<td>文本的开始</td>
+</tr>
+<tr>
+<td>    $</td>
+<td>文本的结尾</td>
+</tr>
+<tr>
+<td>[[:&lt;:]]</td>
+<td>词的开始</td>
+</tr>
+<tr>
+<td>[[:&gt;:]]</td>
+<td>词的结尾</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>匹配以r结尾的行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; SELECT name FROM applications WHERE name REGEXP <span class="string">'[r]$'</span> ORDER BY name;</span><br><span class="line">+-------------------+</span><br><span class="line">| name              |</span><br><span class="line">+-------------------+</span><br><span class="line">| Garbage collector |</span><br><span class="line">| Zabbix server     |</span><br><span class="line">| Zabbix server     |</span><br><span class="line">| Zabbix server     |</span><br><span class="line">+-------------------+</span><br><span class="line">4 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>注1 : ^有两种用法，在集合中，用它来否定该集合，否则，用来指串的开始处。</li>
+</ul>
+<ul>
+<li>注2 : 可在不使用数据库表的情况下用SELET来测试正则表达式。GEGEXP检查总是返回0(没有匹配)或1(匹配)。相应语法如下:<br>SELECT ‘hello’ REGEXP ‘[0-9]’。</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"><i class="fa fa-tag"></i> mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/mysql1/" rel="next" title="MySQL简用">
+                <i class="fa fa-chevron-left"></i> MySQL简用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#检索数据"><span class="nav-number">1.</span> <span class="nav-text">检索数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#检索单个列"><span class="nav-number">1.1.</span> <span class="nav-text">检索单个列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检索多个列"><span class="nav-number">1.2.</span> <span class="nav-text">检索多个列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检索所有列"><span class="nav-number">1.3.</span> <span class="nav-text">检索所有列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检索不同的行"><span class="nav-number">1.4.</span> <span class="nav-text">检索不同的行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#限制结果"><span class="nav-number">1.5.</span> <span class="nav-text">限制结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#返回不多于5行"><span class="nav-number">1.5.1.</span> <span class="nav-text">返回不多于5行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#返回从第5行开始的5行"><span class="nav-number">1.5.2.</span> <span class="nav-text">返回从第5行开始的5行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#完全限定表名"><span class="nav-number">1.6.</span> <span class="nav-text">完全限定表名</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排序检索数据"><span class="nav-number">2.</span> <span class="nav-text">排序检索数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#排序数据"><span class="nav-number">2.1.</span> <span class="nav-text">排序数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#非排序状态"><span class="nav-number">2.1.1.</span> <span class="nav-text">非排序状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#排序状态"><span class="nav-number">2.1.2.</span> <span class="nav-text">排序状态</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#按多个列进行排序"><span class="nav-number">2.2.</span> <span class="nav-text">按多个列进行排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#按列位置排序"><span class="nav-number">2.3.</span> <span class="nav-text">按列位置排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指定排序方向"><span class="nav-number">2.4.</span> <span class="nav-text">指定排序方向</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指定多列降序排序"><span class="nav-number">2.5.</span> <span class="nav-text">指定多列降序排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤数据"><span class="nav-number">3.</span> <span class="nav-text">过滤数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用WHERE子句"><span class="nav-number">3.1.</span> <span class="nav-text">使用WHERE子句</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检查单个值"><span class="nav-number">3.2.</span> <span class="nav-text">检查单个值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不匹配检查"><span class="nav-number">3.3.</span> <span class="nav-text">不匹配检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#范围值检查"><span class="nav-number">3.4.</span> <span class="nav-text">范围值检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#空值检查"><span class="nav-number">3.5.</span> <span class="nav-text">空值检查</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组合WHERE子句"><span class="nav-number">4.</span> <span class="nav-text">组合WHERE子句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#与AND操作符组合进行过滤"><span class="nav-number">4.1.</span> <span class="nav-text">与AND操作符组合进行过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#与OR操作符组合进行过滤"><span class="nav-number">4.2.</span> <span class="nav-text">与OR操作符组合进行过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#计算次序"><span class="nav-number">4.3.</span> <span class="nav-text">计算次序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IN操作符"><span class="nav-number">5.</span> <span class="nav-text">IN操作符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NOT操作符"><span class="nav-number">6.</span> <span class="nav-text">NOT操作符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用通配符进行过滤"><span class="nav-number">7.</span> <span class="nav-text">用通配符进行过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#百分号通配符"><span class="nav-number">7.1.</span> <span class="nav-text">百分号通配符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下划线通配符"><span class="nav-number">7.2.</span> <span class="nav-text">下划线通配符</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用正则表达式进行搜索"><span class="nav-number">8.</span> <span class="nav-text">使用正则表达式进行搜索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本字符匹配"><span class="nav-number">8.1.</span> <span class="nav-text">基本字符匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进行OR匹配"><span class="nav-number">8.2.</span> <span class="nav-text">进行OR匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#匹配几个字符之一"><span class="nav-number">8.3.</span> <span class="nav-text">匹配几个字符之一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#匹配范围"><span class="nav-number">8.4.</span> <span class="nav-text">匹配范围</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#匹配特殊字符"><span class="nav-number">8.5.</span> <span class="nav-text">匹配特殊字符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#匹配字符类"><span class="nav-number">8.6.</span> <span class="nav-text">匹配字符类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#匹配多个实例"><span class="nav-number">8.7.</span> <span class="nav-text">匹配多个实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定位符"><span class="nav-number">8.8.</span> <span class="nav-text">定位符</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">212k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">5:53</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
