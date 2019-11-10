@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="本篇主要关于计算字段、数据处理函数、分组汇总数据以及子查询。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-10T10:54:33.483Z">
+<meta property="og:updated_time" content="2019-11-10T11:05:33.220Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL之数据处理篇">
 <meta name="twitter:description" content="本篇主要关于计算字段、数据处理函数、分组汇总数据以及子查询。">
@@ -406,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2019-11-10 18:50:28 / 修改时间：18:54:33" itemprop="dateCreated datePublished" datetime="2019-11-10T18:50:28+08:00">2019-11-10</time>
+              <time title="创建时间：2019-11-10 18:50:28 / 修改时间：19:05:33" itemprop="dateCreated datePublished" datetime="2019-11-10T18:50:28+08:00">2019-11-10</time>
             
 
             
@@ -578,8 +578,56 @@
 <blockquote>
 <p>常用文本处理函数</p>
 </blockquote>
-<pre><code>函数    |       说明
-</code></pre><p>————|——————<br>Left()      |  返回串左边的字符<br>Length()    |  返回串的长度<br>Locate()    |  找出串的一个子串<br>Lower()     |  将串转换为小写<br>LTrim()     |  去掉串左边的空格<br>Right()     |  返回串右边的字符<br>RTrim()     |  去掉串右边的空格<br>Soundex()   |  返回串的SOUNDEX值<br>SubString() |  返回子串的字符<br>Upper()     |  将串转换为大写</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">函数</th>
+<th style="text-align:center">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Left()</td>
+<td style="text-align:center">返回串左边的字符</td>
+</tr>
+<tr>
+<td style="text-align:left">Length()</td>
+<td style="text-align:center">返回串的长度</td>
+</tr>
+<tr>
+<td style="text-align:left">Locate()</td>
+<td style="text-align:center">找出串的一个子串</td>
+</tr>
+<tr>
+<td style="text-align:left">Lower()</td>
+<td style="text-align:center">将串转换为小写</td>
+</tr>
+<tr>
+<td style="text-align:left">LTrim()</td>
+<td style="text-align:center">去掉串左边的空格</td>
+</tr>
+<tr>
+<td style="text-align:left">Right()</td>
+<td style="text-align:center">返回串右边的字符</td>
+</tr>
+<tr>
+<td style="text-align:left">RTrim()</td>
+<td style="text-align:center">去掉串右边的空格</td>
+</tr>
+<tr>
+<td style="text-align:left">Soundex()</td>
+<td style="text-align:center">返回串的SOUNDEX值</td>
+</tr>
+<tr>
+<td style="text-align:left">SubString()</td>
+<td style="text-align:center">返回子串的字符</td>
+</tr>
+<tr>
+<td style="text-align:left">Upper()</td>
+<td style="text-align:center">将串转换为大写</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p>使用UPPER()函数将文本转换为大写</p>
 </blockquote>
@@ -1147,18 +1195,49 @@
 <h3 id="SELECT子句顺序"><a href="#SELECT子句顺序" class="headerlink" title="SELECT子句顺序"></a>SELECT子句顺序</h3><table>
 <thead>
 <tr>
-<th>子句</th>
-<th>说明</th>
-<th>是否必须使用</th>
+<th style="text-align:left">子句</th>
+<th style="text-align:right">说明</th>
+<th style="text-align:center">是否必须使用</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td></td>
+<td style="text-align:left">SELECT</td>
+<td style="text-align:right">要返回的列或表达式</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td style="text-align:left">FROM</td>
+<td style="text-align:right">从中检索数据的表</td>
+<td style="text-align:center">仅在从表选择数据时使用</td>
+</tr>
+<tr>
+<td style="text-align:left">WHERE</td>
+<td style="text-align:right">行级过滤</td>
+<td style="text-align:center">否</td>
+</tr>
+<tr>
+<td style="text-align:left">GROUP BY</td>
+<td style="text-align:right">分组说明</td>
+<td style="text-align:center">仅在按组计算聚集时使用</td>
+</tr>
+<tr>
+<td style="text-align:left">HAVING</td>
+<td style="text-align:right">组级过滤</td>
+<td style="text-align:center">否</td>
+</tr>
+<tr>
+<td style="text-align:left">ORDER BY</td>
+<td style="text-align:right">输出排序顺序</td>
+<td style="text-align:center">否</td>
+</tr>
+<tr>
+<td style="text-align:left">LIMIT</td>
+<td style="text-align:right">要检索的行数</td>
+<td style="text-align:center">否</td>
 </tr>
 </tbody>
 </table>
-<p>SELECT   |要返回的列或表达式|是<br>FROM     |从中检索数据的表|仅在从表选择数据时使用<br>WHERE    |行级过滤     |否<br>GROUP BY |分组说明     |仅在按组计算聚集时使用<br>HAVING   |组级过滤     |否<br>ORDER BY | 输出排序顺序|否<br>LIMIT    |要检索的行数 |否</p>
 <h2 id="使用子查询"><a href="#使用子查询" class="headerlink" title="使用子查询"></a>使用子查询</h2><h3 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h3><blockquote>
 <p>子查询(subquery)，即嵌套在其他查询中的查询。</p>
 </blockquote>
