@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="本篇主要关于联结表、高级联结、组合查询以及全文本搜索。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-12T14:39:39.351Z">
+<meta property="og:updated_time" content="2019-11-12T14:45:10.369Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL之联结和组合查询篇">
 <meta name="twitter:description" content="本篇主要关于联结表、高级联结、组合查询以及全文本搜索。">
@@ -406,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2019-11-12 22:35:07 / 修改时间：22:39:39" itemprop="dateCreated datePublished" datetime="2019-11-12T22:35:07+08:00">2019-11-12</time>
+              <time title="创建时间：2019-11-12 22:35:07 / 修改时间：22:45:10" itemprop="dateCreated datePublished" datetime="2019-11-12T22:35:07+08:00">2019-11-12</time>
             
 
             
@@ -575,16 +575,16 @@
 <blockquote>
 <p>假如某物品（其ID为DTNTR）存在问题，如果要知道生产该物品的供应商生产的其他物品是否也存在这些问题。此时此查询要求首先找到生产ID为DTNTR的物品的供应商，然后找出这个供应商生产的其他物品。</p>
 </blockquote>
-<blockquote>
-<p>方法1 : 使用子查询</p>
-</blockquote>
+<ul>
+<li>方法1 : 使用子查询</li>
+</ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT prod_id,prod_name FROM products WHERE vend_id = (SELECT vend_id FROM products WHERE prod_id = <span class="string">'DTNTR'</span>) ;</span><br><span class="line">+---------+----------------+</span><br><span class="line">| prod_id | prod_name      |</span><br><span class="line">+---------+----------------+</span><br><span class="line">| DTNTR   | Detonator      |</span><br><span class="line">| FB      | Bird seed      |</span><br><span class="line">| FC      | Carrots        |</span><br><span class="line">| SAFE    | Safe           |</span><br><span class="line">| SLING   | Sling          |</span><br><span class="line">| TNT1    | TNT (1 stick)  |</span><br><span class="line">| TNT2    | TNT (5 sticks) |</span><br><span class="line">+---------+----------------+</span><br><span class="line">7 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>注 : 内部的SELECT语句返回生产ID为DTNTR的物品供应商的vend_id。该ID用于外部查询的WHERE子句中，以便检索出这个供应商生产的所有物品。</p>
 </blockquote>
-<blockquote>
-<p>方法2 : 使用联结</p>
-</blockquote>
+<ul>
+<li>方法2 : 使用联结</li>
+</ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT p1.prod_id,p1.prod_name FROM products AS p1,products AS p2 WHERE p1.vend_id = p2.vend_id AND p2.prod_id = <span class="string">'DTNTR'</span>;</span><br><span class="line">+---------+----------------+</span><br><span class="line">| prod_id | prod_name      |</span><br><span class="line">+---------+----------------+</span><br><span class="line">| DTNTR   | Detonator      |</span><br><span class="line">| FB      | Bird seed      |</span><br><span class="line">| FC      | Carrots        |</span><br><span class="line">| SAFE    | Safe           |</span><br><span class="line">| SLING   | Sling          |</span><br><span class="line">| TNT1    | TNT (1 stick)  |</span><br><span class="line">| TNT2    | TNT (5 sticks) |</span><br><span class="line">+---------+----------------+</span><br><span class="line">7 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>注 : 此查询中需要的两个表实际上是相同的表，因此products表在FROM子句中出现了两次。虽然这是完全合法的，但对products的引用具有二义性，因为SQL不知道你引用的是products表中的哪个实例。为解决此问题，使用了表别名。 products的第一次出现为别名p1，第二次出现为别名p2。现在可以将这些别名用作表名。 WHERE（通过匹配p1中的vend_id和p2中的vend_id）首先联结两个表，然后按第二个表中的prod_id过滤数据，返回所需的数据。</p>
