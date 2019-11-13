@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="本篇主要关于表的创建与使用、插入、更新和删除数据。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-13T11:11:22.843Z">
+<meta property="og:updated_time" content="2019-11-13T11:27:07.023Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL之表的创建与使用篇">
 <meta name="twitter:description" content="本篇主要关于表的创建与使用、插入、更新和删除数据。">
@@ -406,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2019-11-13 19:01:54 / 修改时间：19:11:22" itemprop="dateCreated datePublished" datetime="2019-11-13T19:01:54+08:00">2019-11-13</time>
+              <time title="创建时间：2019-11-13 19:01:54 / 修改时间：19:27:07" itemprop="dateCreated datePublished" datetime="2019-11-13T19:01:54+08:00">2019-11-13</time>
             
 
             
@@ -515,10 +515,10 @@
 <h4 id="表创建基础"><a href="#表创建基础" class="headerlink" title="表创建基础"></a>表创建基础</h4><blockquote>
 <p>为利用CREATE TABLE创建表，必须给出下列信息:</p>
 <ul>
-<li>1.新表的名字，在关键字CREATE TABLE之后给出。</li>
+<li>新表的名字，在关键字CREATE TABLE之后给出。</li>
 </ul>
 <ul>
-<li>2.表列的名字和定义，用逗号分隔。</li>
+<li>表列的名字和定义，用逗号分隔。</li>
 </ul>
 </blockquote>
 <blockquote>
@@ -551,7 +551,7 @@
 <p>主键值必须唯一。即，表中的每个行必须具有唯一的主键值。如果主键使用单个列，则它的值必须唯一。如果使用多个列，则这些列的组合值必须唯一。</p>
 </blockquote>
 <blockquote>
-<p>创建由多个列组成的主键，应该以逗号分隔的列表给出各列名</p>
+<p>创建由多个列组成的主键，应该以逗号分隔的列表给出各列名。</p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TABLE test2</span><br><span class="line">(</span><br><span class="line">name      int        NOT NULL,</span><br><span class="line">email     int        NOT NULL,</span><br><span class="line">id        int        NOT NULL,</span><br><span class="line">address   char(50)   NOT NULL,</span><br><span class="line">city      char(50)   NOT NULL,</span><br><span class="line">PRIMARY KEY(name,email)</span><br><span class="line">) ENGINE=InnoDB;</span><br><span class="line">Query OK, 0 rows affected (0.06 sec)</span><br></pre></td></tr></table></figure>
 <blockquote>
@@ -584,11 +584,11 @@
 <p>理想状态下，当表中存储数据以后，该表就不应该再被更新。</p>
 </blockquote>
 <blockquote>
-<p>给表增加一个名为phone的列，并明确其数据类型</p>
+<p>给表增加一个名为phone的列，并明确其数据类型。</p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; ALTER TABLE test3 ADD phone CHAR(20);</span><br><span class="line">Query OK, 1 row affected (0.18 sec)                </span><br><span class="line">Records: 1  Duplicates: 0  Warnings: 0</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>删除刚刚添加的列</p>
+<p>删除刚刚添加的列。</p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; ALTER TABLE test3 DROP COLUMN phone;</span><br><span class="line">Query OK, 1 row affected (0.05 sec)                </span><br><span class="line">Records: 1  Duplicates: 0  Warnings: 0</span><br></pre></td></tr></table></figure>
 <blockquote>
