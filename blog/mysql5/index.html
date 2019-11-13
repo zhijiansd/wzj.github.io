@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本篇主要关于表的创建与使用、插入、更新和删除数据。">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL之表的创建与使用篇">
+<meta property="og:url" content="https://www.flywzj.com/blog/mysql5/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="本篇主要关于表的创建与使用、插入、更新和删除数据。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-13T11:11:22.843Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL之表的创建与使用篇">
+<meta name="twitter:description" content="本篇主要关于表的创建与使用、插入、更新和删除数据。">
+
+
+
+
+
+
+  <link rel="canonical" href="https://www.flywzj.com/blog/mysql5/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MySQL之表的创建与使用篇 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/mysql5/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL之表的创建与使用篇
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-13 19:01:54 / 修改时间：19:11:22" itemprop="dateCreated datePublished" datetime="2019-11-13T19:01:54+08:00">2019-11-13</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/kubernetes/" itemprop="url" rel="index"><span itemprop="name">kubernetes</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/mysql5/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/mysql5/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">11k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">19 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本篇主要关于表的创建与使用、插入、更新和删除数据。</p>
+<a id="more"></a>
+<h2 id="创建和操纵表"><a href="#创建和操纵表" class="headerlink" title="创建和操纵表"></a>创建和操纵表</h2><h3 id="创建表"><a href="#创建表" class="headerlink" title="创建表"></a>创建表</h3><blockquote>
+<p>使用SQL的CREATE TABLE语句来创建表</p>
+</blockquote>
+<h4 id="表创建基础"><a href="#表创建基础" class="headerlink" title="表创建基础"></a>表创建基础</h4><blockquote>
+<p>为利用CREATE TABLE创建表，必须给出下列信息:</p>
+<ul>
+<li>1.新表的名字，在关键字CREATE TABLE之后给出。</li>
+</ul>
+<ul>
+<li>2.表列的名字和定义，用逗号分隔。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>CREATE TABLE语句也可能会包括其他关键字或选项，但至少要包括表的名字和列的细节。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TABLE new (</span><br><span class="line">cust_id       int        NOT NULL AUTO_INCREMENT,</span><br><span class="line">cust_name     char(50)   NOT NULL,</span><br><span class="line">cust_address  char(50)   NULL,</span><br><span class="line">cust_city     char(50)   NULL,</span><br><span class="line">cust_state    char(5)    NULL,</span><br><span class="line">cust_zip      char(10)   NULL,</span><br><span class="line">cust_country  char(50)   NULL,</span><br><span class="line">cust_contact  char(50)   NULL,</span><br><span class="line">cust_email    char(255)  NULL,</span><br><span class="line">PRIMARY KEY(cust_id)</span><br><span class="line">) ENGINE=InnoDB;</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>实际的表定义（所有列）括在圆括号之中。各列之间用逗号分隔。每列的定义以列名（它在表中必须是唯一的）开始，之后跟列的数据类型。表的主键可以在创建表时用PRIMARY KEY关键字指定。整条语句由右圆括号后的分号结束。</li>
+</ul>
+<blockquote>
+<p>在创建新表时，指定的表名必须不存在，否则将出错。为防止意外覆盖已有的表，SQL要求首先手工删除该表，再重建，而不是通过创建表来覆盖。如果仅需在一个表不存在时创建，应在表名后给出IF NOT EXISTS。</p>
+</blockquote>
+<h4 id="使用NULL值"><a href="#使用NULL值" class="headerlink" title="使用NULL值"></a>使用NULL值</h4><blockquote>
+<p>NULL值就是没有值或缺值。允许NULL值的列也允许在插入行时不给出该列的值。</p>
+</blockquote>
+<blockquote>
+<p>不允许NULL值的列不接受该列没有值的行，换句话说，在插入或更新行时，该列必须有值。</p>
+</blockquote>
+<blockquote>
+<p>每个表列或者是NULL列，或者是NOT NULL列，这种状态在创建时由表的定义规定。NULL为默认设置，如果不指定NOT NULL，则认为指定的是NULL。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TABLE test1</span><br><span class="line">(</span><br><span class="line">num       int        NOT NULL AUTO_INCREMENT,</span><br><span class="line">date      datetime   NOT NULL,</span><br><span class="line">id        int        NOT NULL,</span><br><span class="line">PRIMARY KEY(num)</span><br><span class="line">) ENGINE=InnoDB;</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>该表定义的3个列都包含关键字NOT NULL，即插入相关列时都需要输入相应值。</li>
+</ul>
+<blockquote>
+<p>不要把NULL值与空串相混淆。NULL值是没有值，它不是空串。如果指定’’（两个单引号，其间没有字符），这在NOT NULL列中是允许的。空串是一个有效的值，它不是无值。NULL值用关键字NULL而不是空串指定。</p>
+</blockquote>
+<h4 id="主键"><a href="#主键" class="headerlink" title="主键"></a>主键</h4><blockquote>
+<p>主键值必须唯一。即，表中的每个行必须具有唯一的主键值。如果主键使用单个列，则它的值必须唯一。如果使用多个列，则这些列的组合值必须唯一。</p>
+</blockquote>
+<blockquote>
+<p>创建由多个列组成的主键，应该以逗号分隔的列表给出各列名</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TABLE test2</span><br><span class="line">(</span><br><span class="line">name      int        NOT NULL,</span><br><span class="line">email     int        NOT NULL,</span><br><span class="line">id        int        NOT NULL,</span><br><span class="line">address   char(50)   NOT NULL,</span><br><span class="line">city      char(50)   NOT NULL,</span><br><span class="line">PRIMARY KEY(name,email)</span><br><span class="line">) ENGINE=InnoDB;</span><br><span class="line">Query OK, 0 rows affected (0.06 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>主键为其值唯一标识表中每个行的列。主键中只能使用不允许NULL值的列。允许NULL值的列不能作为唯一标识。</p>
+</blockquote>
+<h4 id="使用AUTO-INCREMENT"><a href="#使用AUTO-INCREMENT" class="headerlink" title="使用AUTO_INCREMENT"></a>使用AUTO_INCREMENT</h4><blockquote>
+<p>AUTO_INCREMENT，每当增加一行时自动增量。每次执行一个INSERT操作时，自动对该列增量，给该列赋予下一个可用的值。每个表只允许一个AUTO_INCREMENT列，而且它必须被索引。</p>
+</blockquote>
+<blockquote>
+<p>SELECT last_insert_id()返回最后一个AUTO_INCREMENT值。</p>
+</blockquote>
+<h4 id="指定默认值"><a href="#指定默认值" class="headerlink" title="指定默认值"></a>指定默认值</h4><blockquote>
+<p>如果在插入行时没有给出值，SQL允许指定此时使用的默认值。默认值用CREATE TABLE语句的列定义中的DEFAULT关键字指定。不允许使用函数，只支持常量作为默认值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TABLE test3</span><br><span class="line">(</span><br><span class="line">name      char(50)   NOT NULL,</span><br><span class="line">email     char(255)  NOT NULL,</span><br><span class="line">city      char(50)   NOT NULL,</span><br><span class="line">country   char(50)   NOT NULL DEFAULT <span class="string">'CN'</span>,</span><br><span class="line">PRIMARY KEY(name,email)</span><br><span class="line">) ENGINE=InnoDB;</span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这里给country列添加文本DEFAULT ‘CN’来指示MySQL在未给出country列值的情况下指定值为CN。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO test3(</span><br><span class="line">name,</span><br><span class="line">email,</span><br><span class="line">city) </span><br><span class="line">VALUES(</span><br><span class="line"><span class="string">'wang'</span>,</span><br><span class="line"><span class="string">'wang@wangzhijian.cn'</span>,</span><br><span class="line"><span class="string">'Bei Jing'</span></span><br><span class="line">);</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; select * from test3;</span><br><span class="line">+------+---------------------+----------+---------+</span><br><span class="line">| name | email               | city     | country |</span><br><span class="line">+------+---------------------+----------+---------+</span><br><span class="line">| wang | wang@wangzhijian.cn | Bei Jing | CN      |</span><br><span class="line">+------+---------------------+----------+---------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="更新表"><a href="#更新表" class="headerlink" title="更新表"></a>更新表</h3><blockquote>
+<p>使用ALTER TABLE更改表结构，必须给出下面的信息:</p>
+<ul>
+<li>在ALTER TABLE之后给出要更改的表名（该表必须存在，否则将出错）。</li>
+</ul>
+<ul>
+<li>所做更改的列表。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>理想状态下，当表中存储数据以后，该表就不应该再被更新。</p>
+</blockquote>
+<blockquote>
+<p>给表增加一个名为phone的列，并明确其数据类型</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; ALTER TABLE test3 ADD phone CHAR(20);</span><br><span class="line">Query OK, 1 row affected (0.18 sec)                </span><br><span class="line">Records: 1  Duplicates: 0  Warnings: 0</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>删除刚刚添加的列</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; ALTER TABLE test3 DROP COLUMN phone;</span><br><span class="line">Query OK, 1 row affected (0.05 sec)                </span><br><span class="line">Records: 1  Duplicates: 0  Warnings: 0</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>复杂的表结构更改一般需要手动删除过程，它涉及以下步骤:</p>
+</blockquote>
+<ul>
+<li>用新的列布局创建一个新表。</li>
+</ul>
+<ul>
+<li>使用INSERT SELECT语句从旧表复制数据到新表。如果有必要，可使用转换函数和计算字段。</li>
+</ul>
+<ul>
+<li>检验包含所需数据的新表。</li>
+</ul>
+<ul>
+<li>重命名旧表（如果确定，可以删除它）。</li>
+</ul>
+<ul>
+<li>用旧表原来的名字重命名新表。</li>
+</ul>
+<ul>
+<li>根据需要，重新创建触发器、存储过程、索引和外键。</li>
+</ul>
+<blockquote>
+<p>外键用来进行跨表交叉引用相关数据，外键约束可帮助保持此分散数据的一致性。添加外键使用ALTER TABLE语句。</p>
+</blockquote>
+<blockquote>
+<p>将test3表的name字段设置为外键，与twotest的主键cust_name进行关联。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; ALTER TABLE test3 ADD CONSTRAINT fk_test3_twotest FOREIGN KEY(name) REFERENCES twotest(cust_name);</span><br><span class="line">Query OK, 1 row affected (0.09 sec)                </span><br><span class="line">Records: 1  Duplicates: 0  Warnings: 0</span><br></pre></td></tr></table></figure>
+<ul>
+<li>使用ALTER TABLE要极为小心，应该在进行改动前做一个完整的备份（表结构和数据的备份）。数据库表的更改不能撤销，如果增加了不需要的列，可能不能删除它们。类似地，如果删除了不应该删除的列，可能会丢失该列中的所有数据。</li>
+</ul>
+<h3 id="删除表"><a href="#删除表" class="headerlink" title="删除表"></a>删除表</h3><blockquote>
+<p>使用DROP TABLE语句即可删除表。删除表没有确认，也不能撤销，执行这条语句将永久删除该表。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DROP TABLE test2;</span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="重命名表"><a href="#重命名表" class="headerlink" title="重命名表"></a>重命名表</h3><blockquote>
+<p>使用RENAME TABLE语句可以重命名一个表。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; RENAME TABLE test3 TO <span class="built_in">test</span>;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>重命名多个表</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; RENAME TABLE <span class="built_in">test</span> TO test1,twotest TO test2;</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="插入数据"><a href="#插入数据" class="headerlink" title="插入数据"></a>插入数据</h2><h3 id="数据插入"><a href="#数据插入" class="headerlink" title="数据插入"></a>数据插入</h3><blockquote>
+<p>INSERT是用来插入（或添加）行到数据库表的。插入可以用几种方式使用:</p>
+</blockquote>
+<ul>
+<li>插入完整的行；</li>
+</ul>
+<ul>
+<li>插入行的一部分；</li>
+</ul>
+<ul>
+<li>插入多行；</li>
+</ul>
+<ul>
+<li>插入某些查询的结果。</li>
+</ul>
+<h3 id="插入完整的行"><a href="#插入完整的行" class="headerlink" title="插入完整的行"></a>插入完整的行</h3><blockquote>
+<p>把数据插入表中的最简单的方法是使用基本的INSERT语法，它要求指定表名和被插入到新行中的值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO customers </span><br><span class="line">VALUES(NULL,</span><br><span class="line"><span class="string">'Pierce'</span>,</span><br><span class="line"><span class="string">'100 Main Street'</span>,</span><br><span class="line"><span class="string">'Los Angeles'</span>,</span><br><span class="line"><span class="string">'CA'</span>,</span><br><span class="line"><span class="string">'90046'</span>,</span><br><span class="line"><span class="string">'USA'</span>,</span><br><span class="line">NULL,</span><br><span class="line">NULL);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>插入一个新用户到customers表。存储到每个表列中的数据在VALUES子句中给出，对每个列必须提供一个值。如果某个列没有值，应该使用NULL值（假定表允许对该列指定空值）。各个列必须以它们在表定义中出现的次序填充。</li>
+</ul>
+<ul>
+<li>第一列cust_id也为NULL。这是因为每次插入一个新行时，该列由MySQL自动增量。此列不能省略，所以指定一个NULL值（它被MySQL忽略， MySQL在这里插入下一个可用的值）。</li>
+</ul>
+<ul>
+<li>编写该种依赖于特定列次序的SQL语句是很不安全的。因为无法保证下一次表结构变动后各个列保持依然完全相同的次序。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO customers(cust_name,</span><br><span class="line">cust_address,</span><br><span class="line">cust_city,</span><br><span class="line">cust_state,</span><br><span class="line">cust_zip,</span><br><span class="line">cust_country,</span><br><span class="line">cust_contact,</span><br><span class="line">cust_email) </span><br><span class="line">VALUES(<span class="string">'George'</span>,</span><br><span class="line"><span class="string">'101 Main Street'</span>,</span><br><span class="line"><span class="string">'Los Angeles'</span>,</span><br><span class="line"><span class="string">'CA'</span>,</span><br><span class="line"><span class="string">'90047'</span>,</span><br><span class="line"><span class="string">'USA'</span>,</span><br><span class="line">NULL,</span><br><span class="line">NULL);</span><br><span class="line">Query OK, 1 row affected (0.02 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在插入行时， MySQL将用VALUES列表中的相应值填入列表中的对应项。因为提供了列名， VALUES必须以其指定的次序匹配指定的列名，不一定按各个列出现在实际表中的次序。其优点是，即使表的结构改变，此INSERT语句仍然能正确工作。</li>
+</ul>
+<blockquote>
+<p>使用列的列表能使SQL代码继续发挥作用，即使表结构发生了变化。</p>
+</blockquote>
+<blockquote>
+<p>不管使用哪种INSERT语法，都必须给出VALUES的正确数目。如果不提供列名，则必须给每个表列提供一个值。如果提供列名，则必须对每个列出的列给出一个值。如果不这样，将产生一条错误消息，相应的行插入不成功。</p>
+</blockquote>
+<blockquote>
+<p>如果表的定义允许，则可以在INSERT操作中省略某些列。省略的列必须满足以下某个条件:</p>
+<ul>
+<li>该列定义为允许NULL值（无值或空值）。</li>
+</ul>
+<ul>
+<li>在表定义中给出默认值。这表示如果不给出值，将使用默认值。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>如果对表中不允许NULL值且没有默认值的列不给出值，则MySQL将产生一条错误消息，并且相应的行插入不成功。</p>
+</blockquote>
+<h3 id="插入多个行"><a href="#插入多个行" class="headerlink" title="插入多个行"></a>插入多个行</h3><blockquote>
+<p>可使用多条INSERT语句来插入多行，一次提交它们，每条语句用一个分号结束。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO customers(cust_name,</span><br><span class="line">cust_address,</span><br><span class="line">cust_city,</span><br><span class="line">cust_state,</span><br><span class="line">cust_zip,</span><br><span class="line">cust_country) </span><br><span class="line">VALUES(<span class="string">'Tom'</span>,</span><br><span class="line"><span class="string">'109 Main Street'</span>,</span><br><span class="line"><span class="string">'Los Angeles'</span>,</span><br><span class="line"><span class="string">'CA'</span>,</span><br><span class="line"><span class="string">'90056'</span>,</span><br><span class="line"><span class="string">'USA'</span>);</span><br><span class="line">INSERT INTO customers(cust_name,</span><br><span class="line">cust_address,</span><br><span class="line">cust_city,</span><br><span class="line">cust_state,</span><br><span class="line">cust_zip,</span><br><span class="line">cust_country) </span><br><span class="line">VALUES(<span class="string">'Jack'</span>,</span><br><span class="line"><span class="string">'66 Galaxy Way'</span>,</span><br><span class="line"><span class="string">'New York'</span>,</span><br><span class="line"><span class="string">'NY'</span>,</span><br><span class="line"><span class="string">'11213'</span>,</span><br><span class="line"><span class="string">'USA'</span>);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>每条INSERT语句中的列名（和次序）相同也可插入多行。其中单条INSERT语句有多组值，每组值用一对圆括号括起来，用逗号分隔。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO customers(cust_name,</span><br><span class="line">cust_address,</span><br><span class="line">cust_city,</span><br><span class="line">cust_state,</span><br><span class="line">cust_zip,</span><br><span class="line">cust_country) </span><br><span class="line">VALUES(</span><br><span class="line"><span class="string">'David'</span>,</span><br><span class="line"><span class="string">'212 Main Street'</span>,</span><br><span class="line"><span class="string">'Los Angeles'</span>,</span><br><span class="line"><span class="string">'CA'</span>,</span><br><span class="line"><span class="string">'90099'</span>,</span><br><span class="line"><span class="string">'USA'</span>),</span><br><span class="line">(</span><br><span class="line"><span class="string">'Kevin'</span>,</span><br><span class="line"><span class="string">'189 Galaxy Way'</span>,</span><br><span class="line"><span class="string">'New York'</span>,</span><br><span class="line"><span class="string">'NY'</span>,</span><br><span class="line"><span class="string">'11289'</span>,</span><br><span class="line"><span class="string">'USA'</span></span><br><span class="line">);</span><br><span class="line">Query OK, 2 rows affected (0.00 sec)</span><br><span class="line">Records: 2  Duplicates: 0  Warnings: 0</span><br></pre></td></tr></table></figure>
+<h3 id="插入检索出的数据"><a href="#插入检索出的数据" class="headerlink" title="插入检索出的数据"></a>插入检索出的数据</h3><blockquote>
+<p>INSERT一般用来给表插入一个指定列值的行。但是， INSERT还存在另一种形式，可以利用它将一条SELECT语句的结果插入表中。这就是所谓的INSERT SELECT，顾名思义，它是由一条INSERT语句和一条SELECT语句组成的。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TABLE new (</span><br><span class="line">cust_id       int        NOT NULL AUTO_INCREMENT,</span><br><span class="line">cust_name     char(50)   NOT NULL,</span><br><span class="line">cust_address  char(50)   NULL,</span><br><span class="line">cust_city     char(50)   NULL,</span><br><span class="line">cust_state    char(5)    NULL,</span><br><span class="line">cust_zip      char(10)   NULL,</span><br><span class="line">cust_country  char(50)   NULL,</span><br><span class="line">cust_contact  char(50)   NULL,</span><br><span class="line">cust_email    char(255)  NULL,</span><br><span class="line">PRIMARY KEY(cust_id)</span><br><span class="line">) ENGINE=InnoDB;</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO new(</span><br><span class="line">cust_name,</span><br><span class="line">cust_address,</span><br><span class="line">cust_city,</span><br><span class="line">cust_state,</span><br><span class="line">cust_zip,</span><br><span class="line">cust_country) </span><br><span class="line">VALUES(</span><br><span class="line"><span class="string">'wang'</span>,</span><br><span class="line"><span class="string">'100 Xianbei Road'</span>,</span><br><span class="line"><span class="string">'Bei Jing'</span>,</span><br><span class="line"><span class="string">'BJ'</span>,</span><br><span class="line"><span class="string">'66666'</span>,</span><br><span class="line"><span class="string">'CN'</span>),</span><br><span class="line">(</span><br><span class="line"><span class="string">'li'</span>,</span><br><span class="line"><span class="string">'200 Nanjingxi Road'</span>,</span><br><span class="line"><span class="string">'Shang Hai'</span>,</span><br><span class="line"><span class="string">'NY'</span>,</span><br><span class="line"><span class="string">'99999'</span>,</span><br><span class="line"><span class="string">'CN'</span></span><br><span class="line">);</span><br><span class="line">Query OK, 2 rows affected (0.01 sec)</span><br><span class="line">Records: 2  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT * FROM new;</span><br><span class="line">+---------+-----------+--------------------+-----------+------------+----------+--------------+--------------+------------+</span><br><span class="line">| cust_id | cust_name | cust_address       | cust_city | cust_state | cust_zip | cust_country | cust_contact | cust_email |</span><br><span class="line">+---------+-----------+--------------------+-----------+------------+----------+--------------+--------------+------------+</span><br><span class="line">|       1 | wang      | 100 Xianbei Road   | Bei Jing  | BJ         | 66666    | CN           | NULL         | NULL       |</span><br><span class="line">|       2 | li        | 200 Nanjingxi Road | Shang Hai | NY         | 99999    | CN           | NULL         | NULL       |</span><br><span class="line">+---------+-----------+--------------------+-----------+------------+----------+--------------+--------------+------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO customers(</span><br><span class="line">cust_name,</span><br><span class="line">cust_address,</span><br><span class="line">cust_city,</span><br><span class="line">cust_state,</span><br><span class="line">cust_zip,</span><br><span class="line">cust_country) </span><br><span class="line">SELECT cust_name,</span><br><span class="line">cust_address,</span><br><span class="line">cust_city,</span><br><span class="line">cust_state,</span><br><span class="line">cust_zip,</span><br><span class="line">cust_country</span><br><span class="line">FROM new;</span><br><span class="line">Query OK, 2 rows affected (0.01 sec)</span><br><span class="line">Records: 2  Duplicates: 0  Warnings: 0</span><br></pre></td></tr></table></figure>
+<ul>
+<li>SELECT语句从new检索出要插入的值，而不是列出它们。SELECT中列出的每个列对应于customers表名后所跟的列表中的每个列。这条语句将插入多少行有赖于new表中有多少行。如果这个表为空，则没有行被插入（也不产生错误，因为操作仍然是合法的）。如果这个表确实含有数据，则所有数据将被插入到customers。</li>
+</ul>
+<blockquote>
+<p>INSERT SELECT中的列名: MySQL不关心SELECT返回的列名。它使用的是列的位置，因此SELECT中的第一列（不管其列名）将用来填充表列中指定的第一个列，第二列将用来填充表列中指定的第二个列，如此等等。所以使用时谨记不要插入错误了。</p>
+</blockquote>
+<blockquote>
+<p>INSERT SELECT中SELECT语句可包含WHERE子句以过滤插入的数据。</p>
+</blockquote>
+<h2 id="更新和删除数据"><a href="#更新和删除数据" class="headerlink" title="更新和删除数据"></a>更新和删除数据</h2><h3 id="更新数据"><a href="#更新数据" class="headerlink" title="更新数据"></a>更新数据</h3><blockquote>
+<p>可使用UPDATE语句更新（修改）表中的数据。UPDATE的两种使用方式如下:</p>
+<ul>
+<li>更新表中特定行</li>
+</ul>
+<ul>
+<li>更新表中所有行</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>在使用UPDATE时一定不要省略WHERE子句。因为稍不注意，就会更新表中所有行。</p>
+</blockquote>
+<blockquote>
+<p>基本的UPDATE语句由3部分组成，分别是:</p>
+<ul>
+<li>要更新的表</li>
+</ul>
+<ul>
+<li>列名和它们的新值</li>
+</ul>
+<ul>
+<li>确定要更新行的过滤条件</li>
+</ul>
+</blockquote>
+<h4 id="更新单列"><a href="#更新单列" class="headerlink" title="更新单列"></a>更新单列</h4><blockquote>
+<p>UPDATE语句以要更新的表的名字开始。SET命令用来将新值赋给被更新的列。WHERE子句指定更新哪一行。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; UPDATE test1 </span><br><span class="line">SET email = <span class="string">'zhi@wangzhijian.cn'</span> </span><br><span class="line">WHERE name = <span class="string">'wang'</span>;</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 0</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; select * from test1;</span><br><span class="line">+------+--------------------+----------+---------+</span><br><span class="line">| name | email              | city     | country |</span><br><span class="line">+------+--------------------+----------+---------+</span><br><span class="line">| wang | zhi@wangzhijian.cn | Bei Jing | CN      |</span><br><span class="line">+------+--------------------+----------+---------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h4 id="更新多个列"><a href="#更新多个列" class="headerlink" title="更新多个列"></a>更新多个列</h4><blockquote>
+<p>在更新多个列时，只需要使用单个SET命令，每个“列=值”对之间用逗号分隔（最后一列之后不用逗号）。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; UPDATE test1</span><br><span class="line">SET email = <span class="string">'sh@wangzhijian.cn'</span>,</span><br><span class="line">city = <span class="string">'Shang Hai'</span></span><br><span class="line">WHERE name = <span class="string">'wang'</span>;</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 0</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; select * from test1;</span><br><span class="line">+------+-------------------+-----------+---------+</span><br><span class="line">| name | email             | city      | country |</span><br><span class="line">+------+-------------------+-----------+---------+</span><br><span class="line">| wang | sh@wangzhijian.cn | Shang Hai | CN      |</span><br><span class="line">+------+-------------------+-----------+---------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>UPDATE语句中可以使用子查询，使得能用SELECT语句检索出的数据更新列数据。</p>
+</blockquote>
+<blockquote>
+<p>如果用UPDATE语句更新多行，并且在更新这些行中的一行或多行时出一个现错误，则整个UPDATE操作被取消（错误发生前更新的所有行被恢复到它们原来的值）。为即使是发生错误，也继续进行更新，可使用IGNORE关键字，如:UPDATE IGNORE test1 ……。</p>
+</blockquote>
+<h4 id="删除列"><a href="#删除列" class="headerlink" title="删除列"></a>删除列</h4><blockquote>
+<p>为了删除某个列的值，可设置它为NULL（假如表定义允许NULL值）。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; UPDATE test1 </span><br><span class="line">SET city = NULL </span><br><span class="line">WHERE name = <span class="string">'wang'</span>;</span><br><span class="line">Query OK, 1 row affected, 1 warning (0.01 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 1</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; select * from test1;</span><br><span class="line">+------+-------------------+------+---------+</span><br><span class="line">| name | email             | city | country |</span><br><span class="line">+------+-------------------+------+---------+</span><br><span class="line">| wang | sh@wangzhijian.cn |      | CN      |</span><br><span class="line">+------+-------------------+------+---------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h3><blockquote>
+<p>使用DELETE语句从一个表中删除（去掉）数据可以使用两种方式：</p>
+<ul>
+<li>从表中删除特定的行</li>
+</ul>
+<ul>
+<li>从表中删除所有行</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>在使用DELETE时一定不要省略WHERE子句。因为稍不注意，就会错误地删除表中所有行。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELETE FROM customers </span><br><span class="line">WHERE cust_id = 10007;</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>DELETE FROM指定从中删除数据的表名，而WHERE子句过滤要删除的行。</li>
+</ul>
+<blockquote>
+<p>DELETE不需要列名或通配符。DELETE删除整行而不是删除列。为了删除指定的列，请使用UPDATE语句。</p>
+</blockquote>
+<blockquote>
+<p>如果想从表中删除所有行，不要使用DELETE。可使用TRUNCATE TABLE语句，它完成相同的工作，但速度更快（TRUNCATE实际是删除原来的表并重新创建一个表，而不是逐行删除表中的数据）。</p>
+</blockquote>
+<h3 id="更新和删除的指导原则"><a href="#更新和删除的指导原则" class="headerlink" title="更新和删除的指导原则"></a>更新和删除的指导原则</h3><ul>
+<li>除非确实打算更新和删除每一行，否则绝对不要使用不带WHERE子句的UPDATE或DELETE语句。</li>
+</ul>
+<ul>
+<li>保证每个表都有主键，尽可能像WHERE子句那样使用它（可以指定各主键、多个值或值的范围）。</li>
+</ul>
+<ul>
+<li>在对UPDATE或DELETE语句使用WHERE子句前，应该先用SELECT进行测试，保证它过滤的是正确的记录，以防编写的WHERE子句不正确。</li>
+</ul>
+<ul>
+<li>使用强制实施引用完整性的数据库，这样MySQL将不允许删除具有与其他表相关联的数据的行。</li>
+<li></li>
+</ul>
+<ul>
+<li>应该非常小心地使用UPDATE和DELETE语句。</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"><i class="fa fa-tag"></i> mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/mysql4/" rel="next" title="MySQL之联结和组合查询篇">
+                <i class="fa fa-chevron-left"></i> MySQL之联结和组合查询篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">20</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建和操纵表"><span class="nav-number">1.</span> <span class="nav-text">创建和操纵表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建表"><span class="nav-number">1.1.</span> <span class="nav-text">创建表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#表创建基础"><span class="nav-number">1.1.1.</span> <span class="nav-text">表创建基础</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用NULL值"><span class="nav-number">1.1.2.</span> <span class="nav-text">使用NULL值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#主键"><span class="nav-number">1.1.3.</span> <span class="nav-text">主键</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用AUTO-INCREMENT"><span class="nav-number">1.1.4.</span> <span class="nav-text">使用AUTO_INCREMENT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指定默认值"><span class="nav-number">1.1.5.</span> <span class="nav-text">指定默认值</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新表"><span class="nav-number">1.2.</span> <span class="nav-text">更新表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除表"><span class="nav-number">1.3.</span> <span class="nav-text">删除表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重命名表"><span class="nav-number">1.4.</span> <span class="nav-text">重命名表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入数据"><span class="nav-number">2.</span> <span class="nav-text">插入数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据插入"><span class="nav-number">2.1.</span> <span class="nav-text">数据插入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插入完整的行"><span class="nav-number">2.2.</span> <span class="nav-text">插入完整的行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插入多个行"><span class="nav-number">2.3.</span> <span class="nav-text">插入多个行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插入检索出的数据"><span class="nav-number">2.4.</span> <span class="nav-text">插入检索出的数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新和删除数据"><span class="nav-number">3.</span> <span class="nav-text">更新和删除数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#更新数据"><span class="nav-number">3.1.</span> <span class="nav-text">更新数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#更新单列"><span class="nav-number">3.1.1.</span> <span class="nav-text">更新单列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更新多个列"><span class="nav-number">3.1.2.</span> <span class="nav-text">更新多个列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除列"><span class="nav-number">3.1.3.</span> <span class="nav-text">删除列</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除数据"><span class="nav-number">3.2.</span> <span class="nav-text">删除数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新和删除的指导原则"><span class="nav-number">3.3.</span> <span class="nav-text">更新和删除的指导原则</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">264k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">7:21</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
