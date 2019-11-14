@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本篇主要关于视图和存储过程。">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL之视图和存储过程篇">
+<meta property="og:url" content="https://www.flywzj.com/blog/mysql6/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="本篇主要关于视图和存储过程。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-14T13:58:25.852Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL之视图和存储过程篇">
+<meta name="twitter:description" content="本篇主要关于视图和存储过程。">
+
+
+
+
+
+
+  <link rel="canonical" href="https://www.flywzj.com/blog/mysql6/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MySQL之视图和存储过程篇 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/mysql6/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL之视图和存储过程篇
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-14 21:54:32 / 修改时间：21:58:25" itemprop="dateCreated datePublished" datetime="2019-11-14T21:54:32+08:00">2019-11-14</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/mysql6/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/mysql6/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">10k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">17 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本篇主要关于视图和存储过程。</p>
+<a id="more"></a>
+<h2 id="视图"><a href="#视图" class="headerlink" title="视图"></a>视图</h2><h3 id="为什么使用视图"><a href="#为什么使用视图" class="headerlink" title="为什么使用视图"></a>为什么使用视图</h3><blockquote>
+<p>视图是虚拟的表。与包含数据的表不一样，视图只包含使用时动态检索数据的查询。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT cust_name,cust_contact FROM customers,orders,orderitems WHERE customers.cust_id = orders.cust_id AND orderitems.order_num =orders.order_num AND prod_id = <span class="string">'FC'</span>;</span><br><span class="line">+-----------+--------------+</span><br><span class="line">| cust_name | cust_contact |</span><br><span class="line">+-----------+--------------+</span><br><span class="line">| E Fudd    | E Fudd       |</span><br><span class="line">+-----------+--------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>此查询用来检索订购了某个特定产品的客户。任何需要这个数据的人都必须理解相关表的结构，并且知道如何创建查询和对表进行联结。如果要检索其他产品的相同数据，则必须修改最后是WHERE子句。</li>
+</ul>
+<ul>
+<li>假如可以把整个查询包装成一个虚拟表，则可以如下轻松地检索出相同的数据:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT cust_name,cust_contact FROM st WHERE prod_id = <span class="string">'FC'</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这就是视图的作用。st是一个视图，作为视图，它不包含表中应该有的任何列或数据，它包含的是一个SQL查询（与上面用以正确联结表的相同的查询）。</li>
+</ul>
+<h3 id="视图的一些常见应用"><a href="#视图的一些常见应用" class="headerlink" title="视图的一些常见应用"></a>视图的一些常见应用</h3><ul>
+<li>重用SQL语句。</li>
+</ul>
+<ul>
+<li>简化复杂的SQL操作。在编写查询后，可以方便地重用它而不必知道它的基本查询细节。</li>
+</ul>
+<ul>
+<li>使用表的组成部分而不是整个表。</li>
+</ul>
+<ul>
+<li>保护数据。可以给用户授予表的特定部分的访问权限而不是整个表的访问权限。</li>
+</ul>
+<ul>
+<li>更改数据格式和表示。视图可返回与底层表的表示和格式不同的数据。</li>
+</ul>
+<blockquote>
+<p>视图本身不包含数据，因此它们返回的数据是从其他表中检索出来的。在添加或更改这些表中的数据时，视图将返回改变过的数据。</p>
+</blockquote>
+<blockquote>
+<p>因为视图不包含数据，所以每次使用视图时，都必须处理查询执行时所需的任一个检索。如果你用多个联结和过滤创建了复杂的视图或者嵌套了视图，可能会发现性能下降得很厉害。因此，在部署使用了大量视图的应用前，应该进行测试。</p>
+</blockquote>
+<h3 id="视图的规则和限制"><a href="#视图的规则和限制" class="headerlink" title="视图的规则和限制"></a>视图的规则和限制</h3><ul>
+<li>与表一样，视图必须唯一命名（不能给视图取与别的视图或表相同的名字）。</li>
+</ul>
+<ul>
+<li>对于可以创建的视图数目没有限制。</li>
+</ul>
+<ul>
+<li>为了创建视图，必须具有足够的访问权限。这些限制通常由数据库管理人员授予。</li>
+</ul>
+<ul>
+<li>视图可以嵌套，即可以利用从其他视图中检索数据的查询来构造一个视图。</li>
+</ul>
+<ul>
+<li>ORDER BY可以用在视图中，但如果从该视图检索数据SELECT中也含有ORDER BY，那么该视图中的ORDER BY将被覆盖。</li>
+</ul>
+<ul>
+<li>视图不能索引，也不能有关联的触发器或默认值。</li>
+</ul>
+<ul>
+<li>视图可以和表一起使用。例如，编写一条联结表和视图的SELECT语句。</li>
+</ul>
+<h3 id="创建视图"><a href="#创建视图" class="headerlink" title="创建视图"></a>创建视图</h3><ul>
+<li>视图用CREATE VIEW语句来创建。</li>
+</ul>
+<ul>
+<li>使用SHOW CREATE VIEW viewname;来查看创建视图的语句。</li>
+</ul>
+<ul>
+<li>用DROP删除视图，其语法为DROP VIEW viewname。</li>
+</ul>
+<ul>
+<li>更新视图时，可以先用DROP再用CREATE，也可以直接用CREATE OR REPLACE VIEW。如果要更新的视图不存在，则第2条更新语句会创建一个视图；如果要更新的视图存在，则第条更新语句会替换原有视图。</li>
+</ul>
+<h3 id="利用视图简化复杂的联结"><a href="#利用视图简化复杂的联结" class="headerlink" title="利用视图简化复杂的联结"></a>利用视图简化复杂的联结</h3><blockquote>
+<p>视图的最常见的应用之一是隐藏复杂的SQL，这通常都会涉及联结。</p>
+</blockquote>
+<blockquote>
+<p> 创建一个名为pro的视图以联结三个表</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE VIEW pro AS </span><br><span class="line">SELECT cust_name,cust_contact,prod_id </span><br><span class="line">FROM customers,orders,orderitems </span><br><span class="line">WHERE customers.cust_id = orders.cust_id </span><br><span class="line">AND orderitems.order_num = orders.order_num;</span><br><span class="line">Query OK, 0 rows affected (0.03 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>列出订购了任意产品的所有客户</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT * FROM pro;</span><br><span class="line">+----------------+--------------+---------+</span><br><span class="line">| cust_name      | cust_contact | prod_id |</span><br><span class="line">+----------------+--------------+---------+</span><br><span class="line">| Coyote Inc.    | Y Lee        | ANV01   |</span><br><span class="line">| Coyote Inc.    | Y Lee        | ANV02   |</span><br><span class="line">| Coyote Inc.    | Y Lee        | TNT2    |</span><br><span class="line">| Coyote Inc.    | Y Lee        | FB      |</span><br><span class="line">| Coyote Inc.    | Y Lee        | FB      |</span><br><span class="line">| Coyote Inc.    | Y Lee        | OL1     |</span><br><span class="line">| Coyote Inc.    | Y Lee        | SLING   |</span><br><span class="line">| Coyote Inc.    | Y Lee        | ANV03   |</span><br><span class="line">| Wascals        | Jim Jones    | JP2000  |</span><br><span class="line">| Yosemite Place | Y Sam        | TNT2    |</span><br><span class="line">| E Fudd         | E Fudd       | FC      |</span><br><span class="line">+----------------+--------------+---------+</span><br><span class="line">11 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>检索订购了产品FC的客户</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT cust_name,cust_contact FROM pro WHERE prod_id = <span class="string">'FC'</span>;</span><br><span class="line">+-----------+--------------+</span><br><span class="line">| cust_name | cust_contact |</span><br><span class="line">+-----------+--------------+</span><br><span class="line">| E Fudd    | E Fudd       |</span><br><span class="line">+-----------+--------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>视图极大地简化了复杂SQL语句的使用。利用视图，可一次性编写基础的SQL，然后根据需要多次使用。</p>
+</blockquote>
+<h3 id="用视图重新格式化检索出的数据"><a href="#用视图重新格式化检索出的数据" class="headerlink" title="用视图重新格式化检索出的数据"></a>用视图重新格式化检索出的数据</h3><blockquote>
+<p>在单个组合计算列中返回供应商名和位置</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT Concat(RTrim(vend_name),<span class="string">'('</span>,RTrim(vend_country),<span class="string">')'</span>) AS vend_title FROM vendors ORDER BY vend_name;</span><br><span class="line">+------------------------+</span><br><span class="line">| vend_title             |</span><br><span class="line">+------------------------+</span><br><span class="line">| ACME(USA)              |</span><br><span class="line">| Anvils R Us(USA)       |</span><br><span class="line">| Furball Inc.(USA)      |</span><br><span class="line">| Jet Set(England)       |</span><br><span class="line">| Jouets Et Ours(France) |</span><br><span class="line">| LT Supplies(USA)       |</span><br><span class="line">+------------------------+</span><br><span class="line">6 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>把该语句转换为视图</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE VIEW location AS SELECT Concat(RTrim(vend_name),<span class="string">'('</span>,RTrim(vend_country),<span class="string">')'</span>) AS vend_title FROM vendors ORDER BY vend_name;</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT * FROM location;</span><br><span class="line">+------------------------+</span><br><span class="line">| vend_title             |</span><br><span class="line">+------------------------+</span><br><span class="line">| ACME(USA)              |</span><br><span class="line">| Anvils R Us(USA)       |</span><br><span class="line">| Furball Inc.(USA)      |</span><br><span class="line">| Jet Set(England)       |</span><br><span class="line">| Jouets Et Ours(France) |</span><br><span class="line">| LT Supplies(USA)       |</span><br><span class="line">+------------------------+</span><br><span class="line">6 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="用视图过滤不想要的数据"><a href="#用视图过滤不想要的数据" class="headerlink" title="用视图过滤不想要的数据"></a>用视图过滤不想要的数据</h3><blockquote>
+<p>定义视图，过滤没有电子邮件的客户</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE VIEW mail AS SELECT cust_id,cust_name,cust_email FROM customers WHERE cust_email IS NOT NULL;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT * FROM mail;</span><br><span class="line">+---------+----------------+---------------------+</span><br><span class="line">| cust_id | cust_name      | cust_email          |</span><br><span class="line">+---------+----------------+---------------------+</span><br><span class="line">|   10001 | Coyote Inc.    | ylee@coyote.com     |</span><br><span class="line">|   10003 | Wascals        | rabbit@wascally.com |</span><br><span class="line">|   10004 | Yosemite Place | sam@yosemite.com    |</span><br><span class="line">+---------+----------------+---------------------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>WHERE子句与WHERE子句:如果从视图检索数据时使用了一条WHERE子句，则两组子句（一组在视图中，另一组是传递给视图的）将自动组合。</p>
+</blockquote>
+<h3 id="使用视图与计算字段"><a href="#使用视图与计算字段" class="headerlink" title="使用视图与计算字段"></a>使用视图与计算字段</h3><blockquote>
+<p>检索某个特定订单的物品，计算每种物品的总价格</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE VIEW orderexpanded AS </span><br><span class="line">SELECT order_num,</span><br><span class="line">prod_id,</span><br><span class="line">quantity,</span><br><span class="line">item_price,</span><br><span class="line">quantity*item_price AS expanded_price </span><br><span class="line">FROM orderitems;</span><br><span class="line">Query OK, 0 rows affected (0.02 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>检索订单20005的详细内容</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT * FROM orderexpanded WHERE order_num = 20005;</span><br><span class="line">+-----------+---------+----------+------------+----------------+</span><br><span class="line">| order_num | prod_id | quantity | item_price | expanded_price |</span><br><span class="line">+-----------+---------+----------+------------+----------------+</span><br><span class="line">|     20005 | ANV01   |       10 |       5.99 |          59.90 |</span><br><span class="line">|     20005 | ANV02   |        3 |       9.99 |          29.97 |</span><br><span class="line">|     20005 | TNT2    |        5 |      10.00 |          50.00 |</span><br><span class="line">|     20005 | FB      |        1 |      10.00 |          10.00 |</span><br><span class="line">+-----------+---------+----------+------------+----------------+</span><br><span class="line">4 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="更新视图"><a href="#更新视图" class="headerlink" title="更新视图"></a>更新视图</h3><blockquote>
+<p>通常，视图是可更新的（即，可以对它们使用INSERT、UPDATE和DELETE）。更新一个视图将更新其基表。如果你对视图增加或删除行，实际上是对其基表增加或删除行。</p>
+</blockquote>
+<blockquote>
+<p>如果视图定义中有以下操作，则不能进行视图的更新:</p>
+</blockquote>
+<ul>
+<li>分组(使用GROUP BY和HAVING)</li>
+</ul>
+<ul>
+<li>联结</li>
+</ul>
+<ul>
+<li>子查询</li>
+</ul>
+<ul>
+<li>并</li>
+</ul>
+<ul>
+<li>聚集函数(Min()、 Count()、 Sum()等)</li>
+</ul>
+<ul>
+<li>DISTINCT</li>
+</ul>
+<ul>
+<li>导出(计算)列</li>
+</ul>
+<blockquote>
+<p>一般，应该将视图用于检索（SELECT语句）而不用于更新（INSERT、UPDATE和DELETE）。</p>
+</blockquote>
+<h3 id="查看与删除视图"><a href="#查看与删除视图" class="headerlink" title="查看与删除视图"></a>查看与删除视图</h3><blockquote>
+<p>查看视图</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SHOW TABLE STATUS;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>查看具体视图</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SHOW CREATE VIEW pro;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>删除视图</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DROP VIEW pro;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="存储过程"><a href="#存储过程" class="headerlink" title="存储过程"></a>存储过程</h2><blockquote>
+<p>存储过程简单来说，就是为以后的使用而保存的一条或多条MySQL语句的集合。可将其视为批文件，虽然它们的作用<br>不仅限于批处理。</p>
+</blockquote>
+<h3 id="使用存储过程的理由"><a href="#使用存储过程的理由" class="headerlink" title="使用存储过程的理由"></a>使用存储过程的理由</h3><ul>
+<li>通过把处理封装在容易使用的单元中，简化复杂的操作。</li>
+</ul>
+<ul>
+<li>由于不要求反复建立一系列处理步骤，这保证了数据的完整性。如果所有开发人员和应用程序都使用同一（试验和测试）存储过程，则所使用的代码都是相同的。这一点的延伸就是防止错误。需要执行的步骤越多，出错的可能<br>性就越大。防止错误保证了数据的一致性。</li>
+</ul>
+<ul>
+<li>简化对变动的管理。如果表名、列名或业务逻辑（或别的内容）有变化，只需要更改存储过程的代码。使用它的人员甚至不需要知道这些变化。</li>
+</ul>
+<ul>
+<li>提高性能。</li>
+</ul>
+<ul>
+<li>存在一些只能用在单个请求中的MySQL元素和特性，存储过程可以使用它们来编写功能更强更灵活的代码</li>
+</ul>
+<blockquote>
+<p>换句话说，使用存储过程有3个主要的好处，即简单、安全、高性能。</p>
+</blockquote>
+<h3 id="存储过程的缺陷"><a href="#存储过程的缺陷" class="headerlink" title="存储过程的缺陷"></a>存储过程的缺陷</h3><ul>
+<li>一般来说，存储过程的编写比基本SQL语句复杂，编写存储过程需要更高的技能，更丰富的经验。</li>
+</ul>
+<ul>
+<li>你可能没有创建存储过程的安全访问权限。许多数据库管理员限制存储过程的创建权限，允许用户使用存储过程，但不允许他们创建存储过程。</li>
+</ul>
+<h3 id="执行存储过程"><a href="#执行存储过程" class="headerlink" title="执行存储过程"></a>执行存储过程</h3><blockquote>
+<p>MySQL称存储过程的执行为调用，因此MySQL执行存储过程的语句为CALL。 CALL接受存储过程的名字以及需要传递给它的任意参数。</p>
+</blockquote>
+<h3 id="创建存储过程"><a href="#创建存储过程" class="headerlink" title="创建存储过程"></a>创建存储过程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELIMITER //</span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE PROCEDURE proc() BEGIN SELECT Avg(prod_price) AS priceaverage FROM products; END//</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELIMITER ;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>DELIMITER //告诉命令行实用程序使用</li>
+</ul>
+<ul>
+<li>此存储过程名为proc，用CREATE PROCEDURE proc()语句定义。如果存储过程接受参数，它们将在()中列举出来。此存储过程没有参数，但后跟的()仍然需要。</li>
+</ul>
+<ul>
+<li>BEGIN和END语句用来限定存储过程体</li>
+</ul>
+<ul>
+<li>END //标志存储过程结束</li>
+</ul>
+<ul>
+<li>最后，使用DELIMITER ;恢复为原来的语句分隔符</li>
+</ul>
+<ul>
+<li>除\符号外，任何字符都可以用作语句分隔符</li>
+</ul>
+<blockquote>
+<p>默认的MySQL语句分隔符为;。 mysql命令行实用程序也使用;作为语句分隔符。如果命令行实用程序要解释存储过程自身内的;字符，则它们最终不会成为存储过程的成分，这会使存储过程中的SQL出现句法错误。</p>
+</blockquote>
+<h3 id="执行存储过程-1"><a href="#执行存储过程-1" class="headerlink" title="执行存储过程"></a>执行存储过程</h3><blockquote>
+<p>MySQL称存储过程的执行为调用，因此MySQL执行存储过程的语句为CALL。CALL接受存储过程的名字以及需要传递给它的任意参数。同时因为存储过程实际上是一种函数，所以存储过程名后需要有()符号（即使不传递参数也需要）。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CALL proc();</span><br><span class="line">+--------------+</span><br><span class="line">| priceaverage |</span><br><span class="line">+--------------+</span><br><span class="line">|    16.133571 |</span><br><span class="line">+--------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="列出所有存储过程"><a href="#列出所有存储过程" class="headerlink" title="列出所有存储过程"></a>列出所有存储过程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SHOW PROCEDURE STATUS;</span><br></pre></td></tr></table></figure>
+<h3 id="查看存储过程"><a href="#查看存储过程" class="headerlink" title="查看存储过程"></a>查看存储过程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SHOW PROCEDURE STATUS WHERE db=<span class="string">'test'</span>;</span><br><span class="line">+------+------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+</span><br><span class="line">| Db   | Name | Type      | Definer        | Modified            | Created             | Security_type | Comment | character_set_client | collation_connection | Database Collation |</span><br><span class="line">+------+------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+</span><br><span class="line">| <span class="built_in">test</span> | proc | PROCEDURE | root@localhost | 2019-11-01 15:01:05 | 2019-11-01 15:01:05 | DEFINER       |         | utf8                 | utf8_general_ci      | latin1_swedish_ci  |</span><br><span class="line">+------+------+-----------+----------------+---------------------+---------------------+---------------+---------+----------------------+----------------------+--------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="删除存储过程"><a href="#删除存储过程" class="headerlink" title="删除存储过程"></a>删除存储过程</h3><blockquote>
+<p>存储过程在创建之后，被保存在服务器上以供使用，直至被删除。请注意这里没有使用后面的()，只给出存储过程名。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DROP PROCEDURE proc;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果指定的过程不存在，则DROP PROCEDURE将产生一个错误。当过程存在想删除它时（如果过程不存在也<br>不产生错误）可使用DROP PROCEDURE IF EXISTS。</p>
+</blockquote>
+<h3 id="使用参数"><a href="#使用参数" class="headerlink" title="使用参数"></a>使用参数</h3><blockquote>
+<p>一般，存储过程并不显示结果，而是把结果返回给你指定的变量。</p>
+</blockquote>
+<blockquote>
+<p>变量(variable)内存中一个特定的位置，用来临时存储数据。</p>
+</blockquote>
+<h4 id="带变量的存储过程"><a href="#带变量的存储过程" class="headerlink" title="带变量的存储过程"></a>带变量的存储过程</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELIMITER //</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE PROCEDURE pro(</span><br><span class="line">OUT p1 DECIMAL(8,2),</span><br><span class="line">OUT p2 DECIMAL(8,2),</span><br><span class="line">OUT p3 DECIMAL(8,2)</span><br><span class="line">) </span><br><span class="line">BEGIN </span><br><span class="line">SELECT Min(prod_price)</span><br><span class="line">INTO p1</span><br><span class="line">FROM products;</span><br><span class="line">SELECT Max(prod_price)</span><br><span class="line">INTO p2</span><br><span class="line">FROM products;</span><br><span class="line">SELECT Avg(prod_price)</span><br><span class="line">INTO p3</span><br><span class="line">FROM products;</span><br><span class="line">END //</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELIMITER ;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这里指定了p1、p2、p3这3个参数，每个参数具有必须指定的类型(这里是十进制值)。</li>
+</ul>
+<ul>
+<li>OUT指出相应的参数用来从存储过程传出一个值（返回给调用者）。</li>
+</ul>
+<ul>
+<li>然后通过指定INTO关键字用SELECT语句来检索值，然后保存到相应的变量。</li>
+</ul>
+<blockquote>
+<p>MySQL支持IN（传递给存储过程）、OUT（从存储过程传出）和INOUT（对存储过程传入和传出）类型的参数。存储过程的代码位于BEGIN和END语句内。</p>
+</blockquote>
+<h4 id="指定变量名"><a href="#指定变量名" class="headerlink" title="指定变量名"></a>指定变量名</h4><blockquote>
+<p>所有MySQL变量都必须以@开始。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CALL pro(@pricelow,@pricehigh,@priceaverage);</span><br><span class="line">Query OK, 1 row affected, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h4 id="进行检索"><a href="#进行检索" class="headerlink" title="进行检索"></a>进行检索</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT @pricelow;</span><br><span class="line">+-----------+</span><br><span class="line">| @pricelow |</span><br><span class="line">+-----------+</span><br><span class="line">|      2.50 |</span><br><span class="line">+-----------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT @pricelow,@pricehigh,@priceaverage;</span><br><span class="line">+-----------+------------+---------------+</span><br><span class="line">| @pricelow | @pricehigh | @priceaverage |</span><br><span class="line">+-----------+------------+---------------+</span><br><span class="line">|      2.50 |      55.00 |         16.13 |</span><br><span class="line">+-----------+------------+---------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h4 id="同时使用IN和OUT参数"><a href="#同时使用IN和OUT参数" class="headerlink" title="同时使用IN和OUT参数"></a>同时使用IN和OUT参数</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELIMITER //</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE PROCEDURE abc(</span><br><span class="line">IN onumber INT,</span><br><span class="line">OUT ototal DECIMAL(8,2)</span><br><span class="line">)</span><br><span class="line">BEGIN</span><br><span class="line">SELECT Sum(item_price*quantity)</span><br><span class="line">FROM orderitems</span><br><span class="line">WHERE order_num = onumber</span><br><span class="line">INTO ototal;</span><br><span class="line">END //</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELIMITER ;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>onumber定义为IN，因为订单号被传入存储过程。</li>
+</ul>
+<ul>
+<li>ototal定义为OUT，因为要从存储过程返回合计。</li>
+</ul>
+<ul>
+<li>WHERE子句使用onumber选择正确的行，INTO使用ototal存储计算出来的合计。</li>
+</ul>
+<blockquote>
+<p>调用该存储进程</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CALL abc(20005,@total);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>显示此合计</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT @total;</span><br><span class="line">+--------+</span><br><span class="line">| @total |</span><br><span class="line">+--------+</span><br><span class="line">| 149.87 |</span><br><span class="line">+--------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"><i class="fa fa-tag"></i> mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/mysql5/" rel="next" title="MySQL之表的创建与使用篇">
+                <i class="fa fa-chevron-left"></i> MySQL之表的创建与使用篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">21</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#视图"><span class="nav-number">1.</span> <span class="nav-text">视图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么使用视图"><span class="nav-number">1.1.</span> <span class="nav-text">为什么使用视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#视图的一些常见应用"><span class="nav-number">1.2.</span> <span class="nav-text">视图的一些常见应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#视图的规则和限制"><span class="nav-number">1.3.</span> <span class="nav-text">视图的规则和限制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建视图"><span class="nav-number">1.4.</span> <span class="nav-text">创建视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用视图简化复杂的联结"><span class="nav-number">1.5.</span> <span class="nav-text">利用视图简化复杂的联结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用视图重新格式化检索出的数据"><span class="nav-number">1.6.</span> <span class="nav-text">用视图重新格式化检索出的数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用视图过滤不想要的数据"><span class="nav-number">1.7.</span> <span class="nav-text">用视图过滤不想要的数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用视图与计算字段"><span class="nav-number">1.8.</span> <span class="nav-text">使用视图与计算字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新视图"><span class="nav-number">1.9.</span> <span class="nav-text">更新视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看与删除视图"><span class="nav-number">1.10.</span> <span class="nav-text">查看与删除视图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#存储过程"><span class="nav-number">2.</span> <span class="nav-text">存储过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用存储过程的理由"><span class="nav-number">2.1.</span> <span class="nav-text">使用存储过程的理由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#存储过程的缺陷"><span class="nav-number">2.2.</span> <span class="nav-text">存储过程的缺陷</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行存储过程"><span class="nav-number">2.3.</span> <span class="nav-text">执行存储过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建存储过程"><span class="nav-number">2.4.</span> <span class="nav-text">创建存储过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行存储过程-1"><span class="nav-number">2.5.</span> <span class="nav-text">执行存储过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#列出所有存储过程"><span class="nav-number">2.6.</span> <span class="nav-text">列出所有存储过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看存储过程"><span class="nav-number">2.7.</span> <span class="nav-text">查看存储过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除存储过程"><span class="nav-number">2.8.</span> <span class="nav-text">删除存储过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用参数"><span class="nav-number">2.9.</span> <span class="nav-text">使用参数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#带变量的存储过程"><span class="nav-number">2.9.1.</span> <span class="nav-text">带变量的存储过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指定变量名"><span class="nav-number">2.9.2.</span> <span class="nav-text">指定变量名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#进行检索"><span class="nav-number">2.9.3.</span> <span class="nav-text">进行检索</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#同时使用IN和OUT参数"><span class="nav-number">2.9.4.</span> <span class="nav-text">同时使用IN和OUT参数</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">275k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">7:38</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
