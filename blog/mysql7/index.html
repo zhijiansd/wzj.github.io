@@ -108,20 +108,25 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="ZhiJian">
-<meta property="og:url" content="https://www.flywzj.com/archives/index.html">
+  <meta name="description" content="关于游标和触发器。">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL之游标和触发器篇">
+<meta property="og:url" content="https://www.flywzj.com/blog/mysql7/index.html">
 <meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="关于游标和触发器。">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-15T13:46:11.614Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ZhiJian">
+<meta name="twitter:title" content="MySQL之游标和触发器篇">
+<meta name="twitter:description" content="关于游标和触发器。">
 
 
 
 
 
 
-  <link rel="canonical" href="https://www.flywzj.com/archives/">
+  <link rel="canonical" href="https://www.flywzj.com/blog/mysql7/">
 
 
 
@@ -131,7 +136,7 @@
   };
 </script>
 
-  <title>归档 | ZhiJian</title>
+  <title>MySQL之游标和触发器篇 | ZhiJian</title>
   
 
 
@@ -180,7 +185,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -268,7 +273,7 @@
         
         
           
-          <li class="menu-item menu-item-archives menu-item-active">
+          <li class="menu-item menu-item-archives">
 
     
     
@@ -339,420 +344,441 @@
           
             
 
-    
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-    
-
-  
-
-
           
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
 
-      
-      <span class="archive-page-counter">
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/mysql7/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
         
         
+          <h1 class="post-title" itemprop="name headline">MySQL之游标和触发器篇
+              
+            
+          </h1>
         
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-15 21:42:25 / 修改时间：21:46:11" itemprop="dateCreated datePublished" datetime="2019-11-15T21:42:25+08:00">2019-11-15</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
           
-        
-        嗯..! 目前共计 22 篇日志。 继续努力。
-      </span>
-      
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a></span>
 
-      
-
-        
-        
-        
-
-        
+                
+                
+              
+            </span>
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2019">2019</h1>
-          </div>
-        
-        
 
-        
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/mysql7/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/mysql7/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
+          
+          
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/mysql7/" itemprop="url">
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
               
-                <span itemprop="name">MySQL之游标和触发器篇</span>
+
               
-            </a>
-        
-      </h2>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">5.5k</span>
+              
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-11-15T21:42:25+08:00" content="2019-11-15">
-          11-15
-        </time>
-      </div>
+              
+                <span class="post-meta-divider">|</span>
+              
 
-    </header>
-  </article>
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">9 分钟</span>
+              
+            </div>
+          
 
+          
 
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/mysql6/" itemprop="url">
-              
-                <span itemprop="name">MySQL之视图和存储过程篇</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-11-14T21:54:32+08:00" content="2019-11-14">
-          11-14
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/mysql5/" itemprop="url">
-              
-                <span itemprop="name">MySQL之表的创建与使用篇</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-11-13T19:01:54+08:00" content="2019-11-13">
-          11-13
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+      
+        <p>关于游标和触发器。</p>
+<a id="more"></a>
+<h2 id="游标"><a href="#游标" class="headerlink" title="游标"></a>游标</h2><blockquote>
+<p>游标（cursor）是一个存储在MySQL服务器上的数据库查询，它不是一条SELECT语句，而是被该语句检索出来的结果集。在存储了游标之后，应用程序可以根据需要滚动或浏览其中的数据。</p>
+</blockquote>
+<blockquote>
+<p>游标主要用于交互式应用，其中用户需要滚动屏幕上的数据，并对数据进行浏览或做出更改。MySQL游标只能用于存储过程（和函数）。</p>
+</blockquote>
+<h3 id="游标的属性"><a href="#游标的属性" class="headerlink" title="游标的属性"></a>游标的属性</h3><blockquote>
+<p>游标具有以下属性:</p>
+<ul>
+<li>不敏感：服务器可能会或可能不会复制其结果表</li>
+</ul>
+<ul>
+<li>只读：不可更新</li>
+</ul>
+<ul>
+<li>不可滚动：只能在一个方向上遍历，不能跳过行</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>游标声明必须出现在处理程序声明之前，变量和条件声明之后。</p>
+</blockquote>
+<h3 id="使用游标的步骤"><a href="#使用游标的步骤" class="headerlink" title="使用游标的步骤"></a>使用游标的步骤</h3><blockquote>
+<p>使用游标涉及几个明确的步骤:</p>
+</blockquote>
+<ul>
+<li>在能够使用游标前，必须声明(定义)它。这个过程实际上没有检索数据，它只是定义要使用的SELECT语句。</li>
+</ul>
+<ul>
+<li>一旦声明后，必须打开游标以供使用。这个过程用前面定义的SELECT语句把数据实际检索出来。</li>
+</ul>
+<ul>
+<li>对于填有数据的游标，根据需要取出(检索)各行。</li>
+</ul>
+<ul>
+<li>在结束游标使用时，必须关闭游标。</li>
+</ul>
+<blockquote>
+<p>在声明游标后，可根据需要频繁地打开和关闭游标。在游标打开后，可根据需要频繁地执行取操作。</p>
+</blockquote>
+<h3 id="创建游标"><a href="#创建游标" class="headerlink" title="创建游标"></a>创建游标</h3><blockquote>
+<p>游标用DECLARE语句创建。</p>
+</blockquote>
+<blockquote>
+<p>存储过程处理完成后，游标就消失(因为它局限于存储过程)。这里使用游标检索单行(第一行)。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELIMITER //</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE PROCEDURE my()</span><br><span class="line">BEGIN</span><br><span class="line">DECLARE mw INT;</span><br><span class="line">DECLARE me CURSOR</span><br><span class="line">FOR</span><br><span class="line">SELECT order_num FROM orders;</span><br><span class="line">OPEN me;</span><br><span class="line">FETCH me INTO mw;</span><br><span class="line">SELECT mw;</span><br><span class="line">CLOSE me;</span><br><span class="line">END //</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DELIMITER ;</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CALL my();</span><br><span class="line">+-------+</span><br><span class="line">| mw    |</span><br><span class="line">+-------+</span><br><span class="line">| 20005 |</span><br><span class="line">+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>DECLARE语句声明一个游标，并将其与一条SELECT语句相关联，该语句检索该游标要遍历的行。要在以后获取行，请使用一条FETCH语句。SELECT语句检索的列数必须与语句中指定的输出变量数匹配 FETCH。该SELECT语句不能有INTO子句。</li>
+</ul>
+<ul>
+<li>OPEN语句初始化游标的结果集。</li>
+</ul>
+<ul>
+<li>FETCH语句获取SELECT与指定游标（必须是打开的）关联的语句的下一行，并向前移动游标指针。如果存在行，则将提取的列存储在命名变量中。SELECT语句检索的列数必须与语句中指定的输出变量数匹配FETCH。</li>
+</ul>
+<ul>
+<li>CLOSE释放游标使用的所有内部内存和资源，在每个游标不再需要时都应该关闭。</li>
+</ul>
+<ul>
+<li>如果不明确关闭游标，MySQL将会在到达END语句时自动关闭它。如果未显式关闭游标BEGIN … END，则在声明游标的末尾将其关闭。</li>
+</ul>
+<h3 id="打开和关闭游标"><a href="#打开和关闭游标" class="headerlink" title="打开和关闭游标"></a>打开和关闭游标</h3><blockquote>
+<p>打开游标</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OPEN me;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关闭游标</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CLOSE me;</span><br></pre></td></tr></table></figure>
+<h2 id="触发器"><a href="#触发器" class="headerlink" title="触发器"></a>触发器</h2><blockquote>
+<p>触发器是与表关联的命名数据库对象，并在表发生特定事件时激活。只有表才支持触发器，视图不支持（临时表也不支持）。</p>
+</blockquote>
+<blockquote>
+<p>触发器是MySQL响应以下任意语句而自动执行的一条MySQL语句(或位于BEGIN和END语句之间的一组语句):</p>
+<ul>
+<li>DELETE;</li>
+</ul>
+<ul>
+<li>INSERT;</li>
+</ul>
+<ul>
+<li>UPDATE。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>其他MySQL语句不支持触发器。</p>
+</blockquote>
+<h3 id="创建触发器"><a href="#创建触发器" class="headerlink" title="创建触发器"></a>创建触发器</h3><blockquote>
+<p>在创建触发器时，需要给出4条信息:</p>
+</blockquote>
+<ul>
+<li>唯一的触发器名;</li>
+</ul>
+<ul>
+<li>触发器关联的表;</li>
+</ul>
+<ul>
+<li>触发器应该响应的活动(DELETE、 INSERT或UPDATE);</li>
+</ul>
+<ul>
+<li>触发器何时执行(处理之前或之后)。</li>
+</ul>
+<blockquote>
+<p>最好是在数据库范围内使用唯一的触发器名。</p>
+</blockquote>
+<blockquote>
+<p>触发器按每个表每个事件每次地定义，每个表每个事件每次只允许一个触发器。因此，每个表最多支持6个触发器(每条INSERT、 UPDATE和DELETE的之前和之后)。单一触发器不能与多个事件或多个表关联，所以，如果你需要一个对INSERT和UPDATE操作执行的触发器，则应该定义两个触发器。</p>
+</blockquote>
+<blockquote>
+<p>通常，将BEFORE用于数据验证和净化（目的是保证插入表中的数据确实是需要的数据）。如果BEFORE触发器失败，则MySQL将不执行请求的操作。此外，如果BEFORE触发器或语句本身失败，MySQL将不执行AFTER触发器（如果有的话）。</p>
+</blockquote>
+<blockquote>
+<p>将触发器与表相关联，以激活INSERT操作。触发器充当累加器，将插入表中各列之一的值相加。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CREATE TABLE account (acct_num INT, amount DECIMAL(10,2));</span><br><span class="line">Query OK, 0 rows affected (0.03 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; CREATE TRIGGER ins_sum BEFORE INSERT ON account</span><br><span class="line">       FOR EACH ROW SET @sum = @sum + NEW.amount;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SET @sum = 0;</span><br><span class="line">mysql&gt; INSERT INTO account VALUES(137,14.98),(141,1937.50),(97,-100.00);</span><br><span class="line">mysql&gt; SELECT @sum AS <span class="string">'Total amount inserted'</span>;</span><br><span class="line">+-----------------------+</span><br><span class="line">| Total amount inserted |</span><br><span class="line">+-----------------------+</span><br><span class="line">|               1852.48 |</span><br><span class="line">+-----------------------+</span><br></pre></td></tr></table></figure>
+<ul>
+<li>CREATE TRIGGER语句创建了一个ins_sum与account表关联的名为触发器。</li>
+</ul>
+<ul>
+<li>关键字BEFORE表示触发动作时间。在这种情况下，触发器在插入表中的每一行之前激活。</li>
+</ul>
+<ul>
+<li>关键字INSERT表示触发事件；即激活触发器的操作类型。</li>
+</ul>
+<ul>
+<li>FOR EACH ROW 定义了触发器主体；也就是说，每当触发触发器时执行的语句，对于受触发事件影响的每一行都会发生一次。使用SET将插入amount列中的值累积到用户变量中，NEW.amount意味着“要插入到新行中的amount列的值”。</li>
+</ul>
+<h3 id="使用触发器"><a href="#使用触发器" class="headerlink" title="使用触发器"></a>使用触发器</h3><h4 id="INSERT触发器"><a href="#INSERT触发器" class="headerlink" title="INSERT触发器"></a>INSERT触发器</h4><blockquote>
+<p>INSERT触发器在INSERT语句执行之前或之后执行。需要知道以下几点:</p>
+<ul>
+<li>在INSERT触发器代码内，可引用一个名为NEW的虚拟表，访问被插入的行。</li>
+</ul>
+<ul>
+<li>在BEFORE INSERT触发器中， NEW中的值也可以被更新(允许更改被插入的值)。</li>
+</ul>
+<ul>
+<li>对于AUTO_INCREMENT列， NEW在INSERT执行之前包含0，在INSERT执行之后包含新的自动生成值。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>创建一个名为new的触发器</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TRIGGER new AFTER INSERT ON orders FOR EACH ROW SET @sum = NEW.order_num;</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; INSERT INTO orders(order_date,cust_id) VALUES(Now(),10002);</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT @sum;</span><br><span class="line">+-------+</span><br><span class="line">| @sum  |</span><br><span class="line">+-------+</span><br><span class="line">| 20016 |</span><br><span class="line">+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>插入一个新订单到orders表时，MySQL生成一个新订单号并保存到order_num中。触发器从NEW.order_num取得这个值并返回它。此触发器必须按照AFTER INSERT执行，因为在BEFOREINSERT语句执行之前，新order_num还没有生成。</li>
+</ul>
+<ul>
+<li>orders包含3个列。order_date和cust_id必须给出，order_num由MySQL自动生成。</li>
+</ul>
+<h4 id="DELETE触发器"><a href="#DELETE触发器" class="headerlink" title="DELETE触发器"></a>DELETE触发器</h4><blockquote>
+<p>DELETE触发器在DELETE语句执行之前或之后执行。需要知道以下两点:</p>
+<ul>
+<li>在DELETE触发器代码内，你可以引用一个名为OLD的虚拟表，访问被删除的行。</li>
+</ul>
+<ul>
+<li>OLD中的值全都是只读的，不能更新。</li>
+</ul>
+</blockquote>
+<h4 id="UPDATE触发器"><a href="#UPDATE触发器" class="headerlink" title="UPDATE触发器"></a>UPDATE触发器</h4><blockquote>
+<p>UPDATE触发器在UPDATE语句执行之前或之后执行。需要知道以下几点:</p>
+<ul>
+<li>在UPDATE触发器代码中，可以引用一个名为OLD的虚拟表访问以前(UPDATE语句前)的值，引用一个名为NEW的虚拟表访问新更新的值。</li>
+</ul>
+<ul>
+<li>在BEFORE UPDATE触发器中，NEW中的值可能也被更新(允许更改将要用于UPDATE语句中的值)。</li>
+</ul>
+<ul>
+<li>OLD中的值全都是只读的，不能更新。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>使用UPDATE保证地区名缩写总是大写:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; CREATE TRIGGER up BEFORE UPDATE ON vendors FOR EACH ROW SET NEW.vend_state = Upper(NEW.vend_state);</span><br><span class="line">Query OK, 0 rows affected (0.03 sec)</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; UPDATE vendors SET vend_state=<span class="string">'ld'</span> WHERE vend_id=1005;</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 0</span><br><span class="line"></span><br><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SELECT vend_state FROM vendors WHERE vend_id=1005;</span><br><span class="line">+------------+</span><br><span class="line">| vend_state |</span><br><span class="line">+------------+</span><br><span class="line">| LD         |</span><br><span class="line">+------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>每次更新一个行时，NEW.vend_state中的值（将用来更新表行的值）都用Upper(NEW.vend_state)替换。</li>
+</ul>
+<h3 id="删除触发器"><a href="#删除触发器" class="headerlink" title="删除触发器"></a>删除触发器</h3><h4 id="查询触发器"><a href="#查询触发器" class="headerlink" title="查询触发器"></a>查询触发器</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; SHOW TRIGGERS;</span><br><span class="line">+---------+--------+--------+--------------------------+--------+---------+----------+----------------+----------------------+----------------------+--------------------+</span><br><span class="line">| Trigger | Event  | Table  | Statement                | Timing | Created | sql_mode | Definer        | character_set_client | collation_connection | Database Collation |</span><br><span class="line">+---------+--------+--------+--------------------------+--------+---------+----------+----------------+----------------------+----------------------+--------------------+</span><br><span class="line">| new     | INSERT | orders | SET @sum = NEW.order_num | AFTER  | NULL    |          | root@localhost | utf8                 | utf8_general_ci      | latin1_swedish_ci  |</span><br><span class="line">+---------+--------+--------+--------------------------+--------+---------+----------+----------------+----------------------+----------------------+--------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h4 id="删除触发器-1"><a href="#删除触发器-1" class="headerlink" title="删除触发器"></a>删除触发器</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [<span class="built_in">test</span>]&gt; DROP TRIGGER new;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/mysql4/" itemprop="url">
-              
-                <span itemprop="name">MySQL之联结和组合查询篇</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-11-12T22:35:07+08:00" content="2019-11-12">
-          11-12
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/mysql3/" itemprop="url">
-              
-                <span itemprop="name">MySQL之数据处理篇</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-11-10T18:50:28+08:00" content="2019-11-10">
-          11-10
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/mysql2/" itemprop="url">
-              
-                <span itemprop="name">MySQL之检索过滤数据篇</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-11-08T16:42:50+08:00" content="2019-11-08">
-          11-08
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/mysql1/" itemprop="url">
-              
-                <span itemprop="name">MySQL简用</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-11-07T15:40:37+08:00" content="2019-11-07">
-          11-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/es/" itemprop="url">
-              
-                <span itemprop="name">Elastic Stack 7集群在kubernetes上的部署实践</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-07-07T16:33:29+08:00" content="2019-07-07">
-          07-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/kafka/" itemprop="url">
-              
-                <span itemprop="name">kubernetes部署kafka集群</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-07-07T13:39:19+08:00" content="2019-07-07">
-          07-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/drone/" itemprop="url">
-              
-                <span itemprop="name">Drone + Gogs 执行自动构建</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-04-28T17:01:57+08:00" content="2019-04-28">
-          04-28
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
     </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"><i class="fa fa-tag"></i> mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/mysql6/" rel="next" title="MySQL之视图和存储过程篇">
+                <i class="fa fa-chevron-left"></i> MySQL之视图和存储过程篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" href="/archives/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
-  </nav>
+  </article>
 
 
+  </div>
 
 
           </div>
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -773,8 +799,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -953,6 +988,22 @@
       </section>
 
       
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#游标"><span class="nav-number">1.</span> <span class="nav-text">游标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#游标的属性"><span class="nav-number">1.1.</span> <span class="nav-text">游标的属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用游标的步骤"><span class="nav-number">1.2.</span> <span class="nav-text">使用游标的步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建游标"><span class="nav-number">1.3.</span> <span class="nav-text">创建游标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#打开和关闭游标"><span class="nav-number">1.4.</span> <span class="nav-text">打开和关闭游标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#触发器"><span class="nav-number">2.</span> <span class="nav-text">触发器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建触发器"><span class="nav-number">2.1.</span> <span class="nav-text">创建触发器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用触发器"><span class="nav-number">2.2.</span> <span class="nav-text">使用触发器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#INSERT触发器"><span class="nav-number">2.2.1.</span> <span class="nav-text">INSERT触发器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DELETE触发器"><span class="nav-number">2.2.2.</span> <span class="nav-text">DELETE触发器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UPDATE触发器"><span class="nav-number">2.2.3.</span> <span class="nav-text">UPDATE触发器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除触发器"><span class="nav-number">2.3.</span> <span class="nav-text">删除触发器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#查询触发器"><span class="nav-number">2.3.1.</span> <span class="nav-text">查询触发器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除触发器-1"><span class="nav-number">2.3.2.</span> <span class="nav-text">删除触发器</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
 
       
 
@@ -1130,6 +1181,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
 
   
 
