@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="关于事务处理、使用字符集和校对顺序、安全管理。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-16T11:32:54.658Z">
+<meta property="og:updated_time" content="2019-11-16T11:37:32.641Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL之事务处理和安全管理篇">
 <meta name="twitter:description" content="关于事务处理、使用字符集和校对顺序、安全管理。">
@@ -406,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2019-11-16 19:04:23 / 修改时间：19:32:54" itemprop="dateCreated datePublished" datetime="2019-11-16T19:04:23+08:00">2019-11-16</time>
+              <time title="创建时间：2019-11-16 19:04:23 / 修改时间：19:37:32" itemprop="dateCreated datePublished" datetime="2019-11-16T19:04:23+08:00">2019-11-16</time>
             
 
             
@@ -487,7 +487,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">22 分钟</span>
+                <span title="阅读时长">21 分钟</span>
               
             </div>
           
@@ -739,7 +739,7 @@
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left">ALL (PRIVILEGES)</td>
+<td style="text-align:left">ALL [PRIVILEGES]</td>
 <td style="text-align:right">“所有权限”的同义词</td>
 <td style="text-align:center">服务器管理</td>
 </tr>
@@ -763,9 +763,153 @@
 <td style="text-align:right">Create_role_priv</td>
 <td style="text-align:center">服务器管理</td>
 </tr>
+<tr>
+<td style="text-align:left">CREATE ROUTINE</td>
+<td style="text-align:right">Create_routine_priv</td>
+<td style="text-align:center">存储的过程</td>
+</tr>
+<tr>
+<td style="text-align:left">CREATE TABLESPACE</td>
+<td style="text-align:right">Create_tablespace_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">CREATE TEMPORARY TABLES</td>
+<td style="text-align:right">Create_tmp_table_priv</td>
+<td style="text-align:center">临时表</td>
+</tr>
+<tr>
+<td style="text-align:left">CREATE USER</td>
+<td style="text-align:right">Create_user_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">CREATE VIEW</td>
+<td style="text-align:right">Create_view_priv</td>
+<td style="text-align:center">观看次数</td>
+</tr>
+<tr>
+<td style="text-align:left">DELETE</td>
+<td style="text-align:right">Delete_priv</td>
+<td style="text-align:center">表</td>
+</tr>
+<tr>
+<td style="text-align:left">DROP</td>
+<td style="text-align:right">Drop_priv</td>
+<td style="text-align:center">数据库，表或视图</td>
+</tr>
+<tr>
+<td style="text-align:left">DROP ROLE</td>
+<td style="text-align:right">Drop_role_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">EVENT</td>
+<td style="text-align:right">Event_priv</td>
+<td style="text-align:center">资料库</td>
+</tr>
+<tr>
+<td style="text-align:left">EXECUTE</td>
+<td style="text-align:right">Execute_priv</td>
+<td style="text-align:center">存储的例程</td>
+</tr>
+<tr>
+<td style="text-align:left">FILE</td>
+<td style="text-align:right">File_priv</td>
+<td style="text-align:center">服务器主机上的文件访问</td>
+</tr>
+<tr>
+<td style="text-align:left">GRANT OPTION</td>
+<td style="text-align:right">Grant_priv</td>
+<td style="text-align:center">数据库，表或存储的例程</td>
+</tr>
+<tr>
+<td style="text-align:left">INDEX</td>
+<td style="text-align:right">Index_priv</td>
+<td style="text-align:center">表</td>
+</tr>
+<tr>
+<td style="text-align:left">INSERT</td>
+<td style="text-align:right">Insert_priv</td>
+<td style="text-align:center">表或列</td>
+</tr>
+<tr>
+<td style="text-align:left">LOCK TABLES</td>
+<td style="text-align:right">Lock_tables_priv</td>
+<td style="text-align:center">资料库</td>
+</tr>
+<tr>
+<td style="text-align:left">PROCESS</td>
+<td style="text-align:right">Process_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">PROXY</td>
+<td style="text-align:right">见proxies_priv表</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">REFERENCES</td>
+<td style="text-align:right">References_priv</td>
+<td style="text-align:center">数据库或表</td>
+</tr>
+<tr>
+<td style="text-align:left">RELOAD</td>
+<td style="text-align:right">Reload_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">REPLICATION CLIENT</td>
+<td style="text-align:right">Repl_client_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">REPLICATION SLAVE</td>
+<td style="text-align:right">Repl_slave_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">SELECT</td>
+<td style="text-align:right">Select_priv</td>
+<td style="text-align:center">表或列</td>
+</tr>
+<tr>
+<td style="text-align:left">SHOW DATABASES</td>
+<td style="text-align:right">Show_db_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">SHOW VIEW</td>
+<td style="text-align:right">Show_view_priv</td>
+<td style="text-align:center">观看次数</td>
+</tr>
+<tr>
+<td style="text-align:left">SHUTDOWN</td>
+<td style="text-align:right">Shutdown_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">SUPER</td>
+<td style="text-align:right">Super_priv</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
+<tr>
+<td style="text-align:left">TRIGGER</td>
+<td style="text-align:right">Trigger_priv</td>
+<td style="text-align:center">表</td>
+</tr>
+<tr>
+<td style="text-align:left">UPDATE</td>
+<td style="text-align:right">Update_priv</td>
+<td style="text-align:center">表或列</td>
+</tr>
+<tr>
+<td style="text-align:left">USAGE</td>
+<td style="text-align:right">“无特权”的同义词</td>
+<td style="text-align:center">服务器管理</td>
+</tr>
 </tbody>
 </table>
-<p>CREATE ROUTINE           |Create_routine_priv|存储的过程<br>CREATE TABLESPACE       |Create_tablespace_priv|服务器管理<br>CREATE TEMPORARY TABLES|Create_tmp_table_priv |临时表<br>CREATE USER               |Create_user_priv  |服务器管理<br>CREATE VIEW               |Create_view_priv  |观看次数<br>DELETE                   |Delete_priv          |表<br>DROP                   |Drop_priv          |数据库，表或视图<br>DROP ROLE               |Drop_role_priv       |服务器管理<br>EVENT                   |Event_priv          |资料库<br>EXECUTE                   |Execute_priv      |存储的例程<br>FILE                   |File_priv          |服务器主机上的文件访问<br>GRANT OPTION           |Grant_priv          |数据库，表或存储的例程<br>INDEX                   |Index_priv          |表<br>INSERT                   |Insert_priv          |表或列<br>LOCK TABLES               |Lock_tables_priv  |资料库<br>PROCESS                   |Process_priv      |服务器管理<br>PROXY                   |见proxies_priv表  |服务器管理<br>REFERENCES               |References_priv      |数据库或表<br>RELOAD                   |Reload_priv          |服务器管理<br>REPLICATION CLIENT       |Repl_client_priv  |服务器管理<br>REPLICATION SLAVE       |Repl_slave_priv      |服务器管理<br>SELECT                   |Select_priv          |表或列<br>SHOW DATABASES           |Show_db_priv      |服务器管理<br>SHOW VIEW               |Show_view_priv      |观看次数<br>SHUTDOWN               |Shutdown_priv      |服务器管理<br>SUPER                   |Super_priv          |服务器管理<br>TRIGGER                   |Trigger_priv      |表<br>UPDATE                   |Update_priv          |表或列<br>USAGE                   |“无特权”的同义词  |服务器管理</p>
 <h5 id="GRANT和REVOKE允许的动态权限"><a href="#GRANT和REVOKE允许的动态权限" class="headerlink" title="GRANT和REVOKE允许的动态权限"></a>GRANT和REVOKE允许的动态权限</h5><table>
 <thead>
 <tr>
@@ -1257,7 +1401,7 @@
     
       <span class="post-meta-item-text">站点总字数：</span>
     
-    <span title="站点总字数">294k</span>
+    <span title="站点总字数">293k</span>
   
 
   
@@ -1268,7 +1412,7 @@
     
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
     
-    <span title="站点阅读时长">8:09</span>
+    <span title="站点阅读时长">8:08</span>
   
 </div>
 
