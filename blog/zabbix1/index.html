@@ -121,7 +121,7 @@
 <meta property="og:image" content="https://www.flywzj.com/blog/zabbix1/zabbix3.png">
 <meta property="og:image" content="https://www.flywzj.com/blog/zabbix1/zabbix4.png">
 <meta property="og:image" content="https://www.flywzj.com/blog/zabbix1/zabbix5.png">
-<meta property="og:updated_time" content="2019-11-18T11:53:59.827Z">
+<meta property="og:updated_time" content="2019-11-18T12:28:47.288Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Zabbix批量监控网络设备">
 <meta name="twitter:description" content="之前写过关于如何安装使用Zabbix，但是关于批量监控属于空白，写一篇备忘。同时这里不再阐述如何安装zabbix，经过这么多年的发展，zabbix的官方文档很详细，当然更好的的是，它有中文文档。">
@@ -412,7 +412,7 @@
                 
               
 
-              <time title="创建时间：2019-11-18 19:48:19 / 修改时间：19:53:59" itemprop="dateCreated datePublished" datetime="2019-11-18T19:48:19+08:00">2019-11-18</time>
+              <time title="创建时间：2019-11-18 19:48:19 / 修改时间：20:28:47" itemprop="dateCreated datePublished" datetime="2019-11-18T19:48:19+08:00">2019-11-18</time>
             
 
             
@@ -545,8 +545,44 @@
 <li>SNMP OID: 1.3.6.1.2.1.1.1.0,该值具有共性，如无法发现请根据具体设备OID更改<br>配置完成记得点击更新以提交更改。</li>
 </ul>
 </blockquote>
-<pre><code>参数   |    描述
-</code></pre><p>———–|————<br>名称(Name) |规则名称，唯一。<br>由agent代理程序自动发现(Discovery by proxy)|没有agent代理程序(no proxy)表示由Zabbix server 执行发现。<br>IP范围(IP range)|发现规则中的IP地址范围。支持 : 单个IP、IP段(192.168.1-10.1-255)、子网掩码(192.168.4.0/24)，范围值之间使用逗号隔开。<br>更新间隔(Update interval)|定义Zabbix多久执行一次规则，支持:30s，1m，2h，1d。<br>检查(Checks)|支持的checks: SSH，LDAP，SMTP，FTP，HTTP，HTTPS，POP，NNTP，IMAP，TCP，Telnet，Zabbix agent，SNMPv1 agent，SNMPv2 agent，SNMPv3 agent，ICMP ping。<br>设备唯一标识(Device uniqueness criteria)|唯一标准如下: IP地址 - 使用 IP 地址作为设备唯一性标识，不处理多IP设备。如果具有相同IP的设备已经存在，则将认为已经发现，并且不会添加新的主机。 发现检查类型 - 使用 SNMP 或者 Zabbix agent 的 check 作为唯一标识。<br>启用(Enabled)| 选中该复选框，该规则处于活动状态，并将由Zabbix server执行。如果未标记，则该规则无效，它不会被执行。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:right">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">名称(Name)</td>
+<td style="text-align:right">规则名称，唯一。</td>
+</tr>
+<tr>
+<td style="text-align:left">由agent代理程序自动发现(Discovery by proxy)</td>
+<td style="text-align:right">没有agent代理程序(no proxy)表示由Zabbix server 执行发现。</td>
+</tr>
+<tr>
+<td style="text-align:left">IP范围(IP range)</td>
+<td style="text-align:right">发现规则中的IP地址范围。支持 : 单个IP、IP段(192.168.1-10.1-255)、子网掩码(192.168.4.0/24)，范围值之间使用逗号隔开。</td>
+</tr>
+<tr>
+<td style="text-align:left">更新间隔(Update interval)</td>
+<td style="text-align:right">定义Zabbix多久执行一次规则，支持:30s，1m，2h，1d。</td>
+</tr>
+<tr>
+<td style="text-align:left">检查(Checks)</td>
+<td style="text-align:right">支持的checks: SSH，LDAP，SMTP，FTP，HTTP，HTTPS，POP，NNTP，IMAP，TCP，Telnet，Zabbix agent，SNMPv1 agent，SNMPv2 agent，SNMPv3 agent，ICMP ping。</td>
+</tr>
+<tr>
+<td style="text-align:left">设备唯一标识(Device uniqueness criteria)</td>
+<td style="text-align:right">唯一标准如下: IP地址 - 使用 IP 地址作为设备唯一性标识，不处理多IP设备。如果具有相同IP的设备已经存在，则将认为已经发现，并且不会添加新的主机。 发现检查类型 - 使用 SNMP 或者 Zabbix agent 的 check 作为唯一标识。</td>
+</tr>
+<tr>
+<td style="text-align:left">启用(Enabled)</td>
+<td style="text-align:right">选中该复选框，该规则处于活动状态，并将由Zabbix server执行。如果未标记，则该规则无效，它不会被执行。</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p>配置完成后可至 监测 –&gt; 自动发现 查看是否已监测到相应设备。</p>
 </blockquote>
@@ -588,7 +624,7 @@
 <blockquote>
 <p>最后，记得点击更新以提交配置。</p>
 </blockquote>
-<blockquote>
+<h2 id="进行查看"><a href="#进行查看" class="headerlink" title="进行查看"></a>进行查看</h2><blockquote>
 <p>之后，可至 配置 –&gt; 主机 查看是否已添加设备至相应群组并链接模板(可能需要等待相应时间，等待时间与设备多少，以及服务器性能有关)</p>
 </blockquote>
 <p><img src="/blog/zabbix1/zabbix4.png" alt="zabbix4"></p>
@@ -908,7 +944,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#自动发现规则-Discovery"><span class="nav-number">1.</span> <span class="nav-text">自动发现规则(Discovery)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动作-Actions"><span class="nav-number">2.</span> <span class="nav-text">动作(Actions)</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#自动发现规则-Discovery"><span class="nav-number">1.</span> <span class="nav-text">自动发现规则(Discovery)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动作-Actions"><span class="nav-number">2.</span> <span class="nav-text">动作(Actions)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进行查看"><span class="nav-number">3.</span> <span class="nav-text">进行查看</span></a></li></ol></div>
             
 
           </div>
