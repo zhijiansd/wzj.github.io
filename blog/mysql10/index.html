@@ -108,32 +108,25 @@
 
 
 
-  <meta name="description" content="GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。">
-<meta name="keywords" content="kubernetes,gitlab,runnner,CI,CD">
+  <meta name="description" content="MySQL服务器管理">
+<meta name="keywords" content="mysql">
 <meta property="og:type" content="article">
-<meta property="og:title" content="在kubernetes上部署GitLab Runner">
-<meta property="og:url" content="https://www.flywzj.com/blog/runner/index.html">
+<meta property="og:title" content="MySQL服务器管理">
+<meta property="og:url" content="https://www.flywzj.com/blog/mysql10/index.html">
 <meta property="og:site_name" content="ZhiJian">
-<meta property="og:description" content="GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。">
+<meta property="og:description" content="MySQL服务器管理">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://www.flywzj.com/blog/runner/run01.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/runner/run02.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/runner/run03.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/runner/run04.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/runner/run05.png">
-<meta property="og:image" content="https://www.flywzj.com/blog/runner/run06.png">
-<meta property="og:updated_time" content="2019-04-11T10:27:34.612Z">
+<meta property="og:updated_time" content="2019-11-18T11:27:00.448Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="在kubernetes上部署GitLab Runner">
-<meta name="twitter:description" content="GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。">
-<meta name="twitter:image" content="https://www.flywzj.com/blog/runner/run01.png">
+<meta name="twitter:title" content="MySQL服务器管理">
+<meta name="twitter:description" content="MySQL服务器管理">
 
 
 
 
 
 
-  <link rel="canonical" href="https://www.flywzj.com/blog/runner/">
+  <link rel="canonical" href="https://www.flywzj.com/blog/mysql10/">
 
 
 
@@ -143,7 +136,7 @@
   };
 </script>
 
-  <title>在kubernetes上部署GitLab Runner | ZhiJian</title>
+  <title>MySQL服务器管理 | ZhiJian</title>
   
 
 
@@ -371,7 +364,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/runner/">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/mysql10/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ZhiJian">
@@ -388,7 +381,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">在kubernetes上部署GitLab Runner
+          <h1 class="post-title" itemprop="name headline">MySQL服务器管理
               
             
           </h1>
@@ -413,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2019-04-11 17:23:10 / 修改时间：18:27:34" itemprop="dateCreated datePublished" datetime="2019-04-11T17:23:10+08:00">2019-04-11</time>
+              <time title="创建时间：2019-11-18 19:24:43 / 修改时间：19:27:00" itemprop="dateCreated datePublished" datetime="2019-11-18T19:24:43+08:00">2019-11-18</time>
             
 
             
@@ -435,7 +428,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/kubernetes/" itemprop="url" rel="index"><span itemprop="name">kubernetes</span></a></span>
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a></span>
 
                 
                 
@@ -450,8 +443,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/runner/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/runner/" itemprop="commentCount"></span>
+                <a href="/blog/mysql10/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/mysql10/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -480,7 +473,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">5.4k</span>
+                <span title="本文字数">7.7k</span>
               
 
               
@@ -494,7 +487,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">9 分钟</span>
+                <span title="阅读时长">13 分钟</span>
               
             </div>
           
@@ -514,50 +507,574 @@
       
 
       
-        <p>GitLab Runner是一个开源项目，用于运行您的jobs并将结果发送回GitLab。它与GitLab CI一起使用，GitLab CI是GitLab随附的开源持续集成服务，用于协调jobs。</p>
+        <p>MySQL服务器管理</p>
 <a id="more"></a>
-<h2 id="注册Runner"><a href="#注册Runner" class="headerlink" title="注册Runner"></a>注册Runner</h2><h3 id="查看配置信息"><a href="#查看配置信息" class="headerlink" title="查看配置信息"></a>查看配置信息</h3><p>在Kubernetes上设置Gitlab Runner的第一步是获取身份验证令牌。此令牌非常重要，因为它会向Gitlab验证您的跑步者。要注册Runner，我们需要从Gitlab获取配置详细信息并完成Runner的注册过程。</p>
-<p>这里我是直接使用root账户来注册的，查看位于Admin Area &gt; Runners 的“Set up a shared Runner manually”(手动设置共享Runner)，这里包含使用Gitlab注册新Runner所需的配置详细信息，记住URL和token。</p>
-<p><img src="/blog/runner/run01.png" alt="run01"></p>
-<blockquote>
-<p>注意: 使用其他普通账户可以注册Specific Runners(特定的runner)，配置信息位于相关项目的Settings &gt; CI/CD &gt; Runners 下。</p>
-</blockquote>
-<h3 id="注册Runner-1"><a href="#注册Runner-1" class="headerlink" title="注册Runner"></a>注册Runner</h3><p>接下来，我们需要完成注册过程以连接新的Runner。注册Runner的最简单方法是使用Runner 在本地启动Docker容器来进行注册:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker run --rm -it --entrypoint /bin/bash gitlab/gitlab-runner:latest</span></span><br><span class="line">root@ceb637716b3c:/<span class="comment"># gitlab-runner register     ##注册runner</span></span><br><span class="line">Runtime platform                                    arch=amd64 os=linux pid=30 revision=692ae235 version=11.9.0</span><br><span class="line">Running <span class="keyword">in</span> system-mode.                            </span><br><span class="line">                                                   </span><br><span class="line">Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com/):</span><br><span class="line">http://192.168.100.128:32626/          <span class="comment">##配置gitlab-ci的URL，通常为域名</span></span><br><span class="line">Please enter the gitlab-ci token <span class="keyword">for</span> this runner:</span><br><span class="line">5cy-91nwWtcqsuNXWZmF        <span class="comment">##输入gitlab-ci token</span></span><br><span class="line">Please enter the gitlab-ci description <span class="keyword">for</span> this runner:</span><br><span class="line">[ceb637716b3c]: Kubernetes Gitlab-Runner  <span class="comment">##输入gitlab-ci的描述</span></span><br><span class="line">Please enter the gitlab-ci tags <span class="keyword">for</span> this runner (comma separated):</span><br><span class="line">kubernetes,gitlab-runner      <span class="comment">##输入该runner的tag</span></span><br><span class="line">Registering runner... succeeded                     runner=5cy-91nw</span><br><span class="line">Please enter the executor: shell, virtualbox, docker+machine, docker-ssh+machine, kubernetes, parallels, docker-ssh, ssh, docker:</span><br><span class="line">kubernetes           <span class="comment">##输入executor</span></span><br><span class="line">Runner registered successfully. Feel free to start it, but <span class="keyword">if</span> it<span class="string">'s running already the config should be automatically reloaded! </span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">root@ceb637716b3c:/# grep token /etc/gitlab-runner/config.toml ##获取身份验证令牌</span></span><br><span class="line"><span class="string">  token = "-YGyg2YY_E4z9siNhpxj"</span></span><br><span class="line"><span class="string">    bearer_token_overwrite_allowed = false</span></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注意:复制此令牌并确保不会丢失它,这是验证Runner连接Gitlab的唯一身份令牌。保存令牌后，为安全计，请删除Docker实例。</p>
-</blockquote>
-<h2 id="在Kubernetes上部署Runner"><a href="#在Kubernetes上部署Runner" class="headerlink" title="在Kubernetes上部署Runner"></a>在Kubernetes上部署Runner</h2><h3 id="为Runner创建RBAC-角色访问控制"><a href="#为Runner创建RBAC-角色访问控制" class="headerlink" title="为Runner创建RBAC(角色访问控制)"></a>为Runner创建RBAC(角色访问控制)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim gitlab-runner-rbac.yaml </span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">---</span><br><span class="line">kind: Role</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">rules:</span><br><span class="line">  - apiGroups: [<span class="string">""</span>]</span><br><span class="line">    resources: [<span class="string">"*"</span>]</span><br><span class="line">    verbs: [<span class="string">"*"</span>]</span><br><span class="line">---</span><br><span class="line">kind: RoleBinding</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">subjects:</span><br><span class="line">  - kind: ServiceAccount</span><br><span class="line">    name: gitlab-runner</span><br><span class="line">roleRef:</span><br><span class="line">  kind: Role</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br></pre></td></tr></table></figure>
-<h3 id="创建ConfigMap"><a href="#创建ConfigMap" class="headerlink" title="创建ConfigMap"></a>创建ConfigMap</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim config.toml </span></span><br><span class="line">concurrent = 4</span><br><span class="line"></span><br><span class="line">[[runners]]</span><br><span class="line">  name = <span class="string">"Kubernetes Gitlab-Runner"</span></span><br><span class="line">  url = <span class="string">"http://192.168.100.128:32626"</span></span><br><span class="line">  token = <span class="string">"-YGyg2YY_E4z9siNhpxj"</span></span><br><span class="line">  executor = <span class="string">"kubernetes"</span></span><br><span class="line">  [runners.kubernetes]</span><br><span class="line">  namespace = <span class="string">"default"</span></span><br><span class="line">  privileged = <span class="literal">true</span></span><br><span class="line">  poll_timeout = 600</span><br><span class="line">  cpu_request = <span class="string">"1"</span></span><br><span class="line">  service_cpu_request = <span class="string">"200m"</span></span><br><span class="line">  [[runners.kubernetes.volumes.host_path]]</span><br><span class="line">      name = <span class="string">"docker"</span></span><br><span class="line">      mount_path = <span class="string">"/var/run/docker.sock"</span></span><br><span class="line">      host_path = <span class="string">"/var/run/docker.sock"</span></span><br><span class="line"><span class="comment"># kubectl create configmap gitlab-runner-config --from-file=config.toml</span></span><br><span class="line">configmap/gitlab-runner-config created</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>关于Kubernetes executor详询:<a href="https://docs.gitlab.com/runner/executors/kubernetes.html" target="_blank" rel="noopener">https://docs.gitlab.com/runner/executors/kubernetes.html</a></p>
-</blockquote>
-<h3 id="部署Runner"><a href="#部署Runner" class="headerlink" title="部署Runner"></a>部署Runner</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim gitlab-runner.yaml</span></span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: gitlab-runner</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      name: gitlab-runner</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        name: gitlab-runner</span><br><span class="line">    spec:</span><br><span class="line">      serviceAccountName: gitlab-runner</span><br><span class="line">      containers:</span><br><span class="line">        - name: gitlab-runner</span><br><span class="line">          image: 192.168.100.100/gitlab/gitlab-runner:v11.9.0</span><br><span class="line">          imagePullPolicy: Always</span><br><span class="line">          resources:</span><br><span class="line">            requests:</span><br><span class="line">              cpu: <span class="string">"100m"</span></span><br><span class="line">            limits:</span><br><span class="line">              cpu: <span class="string">"100m"</span></span><br><span class="line">          volumeMounts:</span><br><span class="line">            - name: config</span><br><span class="line">              mountPath: /etc/gitlab-runner/config.toml</span><br><span class="line">              readOnly: <span class="literal">true</span></span><br><span class="line">              subPath: config.toml</span><br><span class="line">      volumes:</span><br><span class="line">        - name: config</span><br><span class="line">          configMap:</span><br><span class="line">            name: gitlab-runner-config</span><br><span class="line">      restartPolicy: Always</span><br><span class="line"><span class="comment"># kubectl apply -f .</span></span><br><span class="line">serviceaccount/gitlab-runner created</span><br><span class="line">role.rbac.authorization.k8s.io/gitlab-runner created</span><br><span class="line">rolebinding.rbac.authorization.k8s.io/gitlab-runner created</span><br><span class="line">deployment.extensions/gitlab-runner created</span><br></pre></td></tr></table></figure>
-<h3 id="查看连接情况"><a href="#查看连接情况" class="headerlink" title="查看连接情况"></a>查看连接情况</h3><p><img src="/blog/runner/run02.png" alt="run02"></p>
-<blockquote>
-<p>注意:再次说明，使用root账户创建的runner是共享的，其他项目、其他用户的项目都可以使用。而在某个用户下创建的项目为特定runner，只执行该项目jobs。</p>
-</blockquote>
-<h2 id="使用Runner新建一个项目"><a href="#使用Runner新建一个项目" class="headerlink" title="使用Runner新建一个项目"></a>使用Runner新建一个项目</h2><h3 id="配置环境变量"><a href="#配置环境变量" class="headerlink" title="配置环境变量"></a>配置环境变量</h3><blockquote>
-<p>配置项位于该项目 Settings &gt; CI/CD &gt; Environment variables 下</p>
-</blockquote>
-<p><img src="/blog/runner/run03.png" alt="run03"></p>
-<h3 id="新建一个简单的dockerfile文件"><a href="#新建一个简单的dockerfile文件" class="headerlink" title="新建一个简单的dockerfile文件"></a>新建一个简单的dockerfile文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FROM 192.168.100.100/library/alpine:3.9</span><br><span class="line">WORKDIR /app</span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">"hello"</span> &gt; hh.txt</span><br></pre></td></tr></table></figure>
-<h3 id="新建gitlab-ci-yml配置文件"><a href="#新建gitlab-ci-yml配置文件" class="headerlink" title="新建gitlab-ci.yml配置文件"></a>新建gitlab-ci.yml配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">image:</span><br><span class="line">  name: 192.168.100.100/library/alpine:3.9</span><br><span class="line"></span><br><span class="line">stages:</span><br><span class="line">  - <span class="built_in">test</span></span><br><span class="line">  </span><br><span class="line"><span class="built_in">test</span>:</span><br><span class="line">  stage: <span class="built_in">test</span></span><br><span class="line">  image: 192.168.100.100/docker/docker:18</span><br><span class="line">  script:</span><br><span class="line">    - docker info</span><br><span class="line">    - docker login -u <span class="variable">$harbor_username</span> -p <span class="variable">$harbor_password</span> 192.168.100.100</span><br><span class="line">    - docker build -t 192.168.100.100/docker/<span class="built_in">test</span>:latest .</span><br><span class="line">    - docker push 192.168.100.100/docker/<span class="built_in">test</span>:latest</span><br><span class="line">  tags: </span><br><span class="line">    - kubernetes</span><br></pre></td></tr></table></figure>
-<p><img src="/blog/runner/run04.png" alt="run04"></p>
-<blockquote>
-<p>这里要注意的是，我截的图着重将clone的地址也截了下来，这里的gitlab为service。如果你是用的域名，而且域名可达，可忽略该问题。如果域名不可达，或者使用的是nodeport，又或者像我这样使用的是service，就需要更改gitlab的配置文件，不然gitlab-runner会出现无法Cloning repository的问题。这里我通过configmap挂载gitlab.rb配置文件到/etc/gitlab/目录来实现，gitlab.rb只需配置如下即可:<br>external_url “<a href="http://gitlab&quot;" target="_blank" rel="noopener">http://gitlab&quot;</a></p>
+<h2 id="MySQL服务器管理"><a href="#MySQL服务器管理" class="headerlink" title="MySQL服务器管理"></a>MySQL服务器管理</h2><h3 id="配置服务器"><a href="#配置服务器" class="headerlink" title="配置服务器"></a>配置服务器</h3><blockquote>
+<p>MYSQL默认配置文件位于/etc/my.cnf。</p>
 </blockquote>
 <blockquote>
-<p>之后gitlab-runner会自动进行构建，构建成功会显示“passed”，失败则会显示“failed”。</p>
+<p>查看服务器实际使用的当前系统变量值</p>
 </blockquote>
-<p><img src="/blog/runner/run05.png" alt="run05"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW VARIABLES;</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>点击“Stages”可查看相关构建阶段的详细信息</p>
+<p>查看正在运行的服务器的一些统计信息和状态指示符</p>
 </blockquote>
-<p><img src="/blog/runner/run06.png" alt="run06"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW STATUS;</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>参照文章:<a href="https://adambcomer.com/blog/setup-gitlab-cicd-on-kubernetes.html" target="_blank" rel="noopener">https://adambcomer.com/blog/setup-gitlab-cicd-on-kubernetes.html</a></p>
+<p>系统变量和状态信息也可以使用mysqladmin命令获得</p>
 </blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; mysqladmin variables</span><br><span class="line">shell&gt; mysqladmin extended-status</span><br></pre></td></tr></table></figure>
+<h3 id="服务器配置验证"><a href="#服务器配置验证" class="headerlink" title="服务器配置验证"></a>服务器配置验证</h3><blockquote>
+<p>从MySQL 8开始，MySQL Server支持一个–validate-config的选项，该选项使您无需在正常操作模式下运行服务器即可检查启动配置是否存在问题：<br>mysqld –validate-config</p>
+</blockquote>
+<blockquote>
+<p>如果未找到错误，则服务器以退出代码0终止。如果发现错误，则服务器显示诊断消息，并以退出代码1终止。</p>
+</blockquote>
+<h3 id="服务器命令选项"><a href="#服务器命令选项" class="headerlink" title="服务器命令选项"></a>服务器命令选项</h3><pre><code>命令    |    说明
+</code></pre><p>————|————<br>–help， -? | 显示帮助消息<br>–basedir=dir_name | MySQL安装目录的路径<br>–datadir=dir_name | MySQL服务器数据目录的路径<br>–default-time-zone=name | 设置默认服务器时区。如果未指定此选项，则默认时区与系统时区相同。<br>–flush={OFF或ON} | 在每个SQL语句之后刷新（同步）对磁盘的所有更改。通常，MySQL仅在每个SQL语句之后才将所有更改写入磁盘，并让操作系统处理与磁盘的同步。默认值OFF。<br>–log-error[=file_name] | 设置错误日志文件名<br>–plugin-load=plugin_list | 告诉服务器在启动时加载命名的插件<br>–plugin-load-add=plugin_list | 将一个或多个插件添加到要在启动时加载的一组插件中<br>–port=port_num | 指定MySQL端口号，默认值3306。<br>–skip-grant-tables[={OFF或ON}] | 此选项导致服务器完全不使用特权系统启动，这使有权访问服务器的任何人都可以不受限制地访问所有数据库。默认值OFF。<br>–skip-host-cache | 禁用内部主机缓存的使用，以加快名称到IP的解析速度。在禁用缓存的情况下，每次客户端连接时，服务器都会执行DNS查找。<br>–skip-new | 此选项禁用(过去被认为是)新的可能不安全的行为<br>–skip-show-database | 控制谁被允许使用该SHOW DATABASES语句的系统变量<br>–socket={file_name|pipe_name} | 指定侦听本地连接时使用的Unix套接字文件。默认值为/tmp/mysql.sock。<br>–ssl* | 以选项开头的选项–ssl 指定是否允许客户端使用SSL连接，并指示在何处查找SSL密钥和证书。<br>–transaction-isolation=name | 设置默认的事务隔离级别。该 level值可以是 READ-UNCOMMITTED， READ-COMMITTED， REPEATABLE-READ，或 SERIALIZABLE。<br>–transaction-read-only[={OFF或ON}] | 设置默认的事务访问模式。默认情况下，只读模式为禁用状态，因此该模式为读/写。<br>–upgrade=value | 此选项控制服务器在启动时是否以及如何执行自动升级。默认值ATUO,即自动升级。其他值还有NONE、MINIMAL、FORCE。<br>–user=name | 以具有名称或数字用户ID的用户身份运行mysql服务器<br>–validate-config[={OFF或ON}] | 验证服务器启动配置。</p>
+<h3 id="服务器系统变量"><a href="#服务器系统变量" class="headerlink" title="服务器系统变量"></a>服务器系统变量</h3><blockquote>
+<p>MySQL服务器维护许多配置其操作的系统变量。每个系统变量都有一个默认值。可以在服务器启动时使用命令行或选项文件中的选项设置系统变量。可以使用以下SET语句在运行时动态更改其中的大多数内容，该语句使您无需停止并重新启动服务器即可修改服务器的操作。您也可以在表达式中使用系统变量值。</p>
+</blockquote>
+<blockquote>
+<p>设置全局系统变量运行时值通常需要SYSTEM_VARIABLES_ADMIN或SUPER特权。设置会话系统运行时变量值通常不需要特殊特权，并且任何用户都可以完成，尽管有例外。</p>
+</blockquote>
+<blockquote>
+<p>要查看服务器将基于其编译后的默认值以及它读取的所有选项文件使用的值，使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqld --verbose --<span class="built_in">help</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>仅基于服务器的编译缺省值查看服务器将使用的值，而忽略任何选项文件中的设置，使用以下命令：</p>
+</blockquote>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysqld --no-defaults --verbose --<span class="built_in">help</span></span><br></pre></td></tr></table></figure>
+<h3 id="使用系统变量"><a href="#使用系统变量" class="headerlink" title="使用系统变量"></a>使用系统变量</h3><blockquote>
+<p>显示系统变量名称和值</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW VARIABLES;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要获取特定的变量名，使用LIKE子句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SHOW VARIABLES LIKE <span class="string">'max_join_size'</span>;</span><br><span class="line">SHOW SESSION VARIABLES LIKE <span class="string">'max_join_size'</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>获取名称与模式匹配的变量列表，在LIKE子句中使用%通配符:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SHOW VARIABLES LIKE <span class="string">'%size%'</span>;</span><br><span class="line">SHOW GLOBAL VARIABLES LIKE <span class="string">'%size%'</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="服务器状态变量"><a href="#服务器状态变量" class="headerlink" title="服务器状态变量"></a>服务器状态变量</h3><table>
+<thead>
+<tr>
+<th>服务器状态变量</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Aborted_clients</td>
+<td>由于客户端在未正确关闭连接的情况下死亡而中止的连接数</td>
+</tr>
+<tr>
+<td>Aborted_connects</td>
+<td>连接到MySQL服务器的失败尝试次数</td>
+</tr>
+<tr>
+<td>Binlog_cache_use</td>
+<td>使用二进制日志缓存的事务数</td>
+</tr>
+<tr>
+<td>Bytes_received</td>
+<td>从所有客户端收到的字节数</td>
+</tr>
+<tr>
+<td>Bytes_sent</td>
+<td>发送给所有客户端的字节数</td>
+</tr>
+<tr>
+<td>Connections</td>
+<td>与MySQL服务器的连接尝试次数（成功或失败）</td>
+</tr>
+<tr>
+<td>Created_tmp_disk_tables</td>
+<td>服务器在执行语句时创建的内部磁盘临时表的数量</td>
+</tr>
+<tr>
+<td>Created_tmp_files</td>
+<td>MySQL创建了多少个临时文件</td>
+</tr>
+<tr>
+<td>Created_tmp_tables</td>
+<td>服务器在执行语句时创建的内部临时表的数量</td>
+</tr>
+<tr>
+<td>Handler_delete</td>
+<td>从表中删除行的次数</td>
+</tr>
+<tr>
+<td>Handler_read_first</td>
+<td>索引中第一个条目的读取次数</td>
+</tr>
+<tr>
+<td>Handler_read_key</td>
+<td>基于键读取行的请求数</td>
+</tr>
+<tr>
+<td>Handler_read_last</td>
+<td>读取索引中最后一个键的请求数</td>
+</tr>
+<tr>
+<td>Handler_read_next</td>
+<td>按键顺序读取下一行的请求数</td>
+</tr>
+<tr>
+<td>Handler_read_prev</td>
+<td>按键顺序读取上一行的请求数</td>
+</tr>
+<tr>
+<td>Handler_read_rnd</td>
+<td>基于固定位置读取行的请求数 </td>
+</tr>
+<tr>
+<td>Handler_read_rnd_next</td>
+<td>读取数据文件下一行的请求数</td>
+</tr>
+<tr>
+<td>Handler_rollback</td>
+<td>存储引擎执行回滚操作的请求数</td>
+</tr>
+<tr>
+<td>Handler_savepoint</td>
+<td>存储引擎放置保存点的请求数</td>
+</tr>
+<tr>
+<td>Handler_savepoint_rollback</td>
+<td>存储引擎回滚到保存点的请求数</td>
+</tr>
+<tr>
+<td>Handler_update</td>
+<td>更新表中一行的请求数</td>
+</tr>
+<tr>
+<td>Handler_write</td>
+<td>在表中插入行的请求数</td>
+</tr>
+<tr>
+<td>Locked_connects</td>
+<td>连接到锁定的用户帐户的尝试次数</td>
+</tr>
+<tr>
+<td>Max_used_connections</td>
+<td>自服务器启动以来已同时使用的最大连接数</td>
+</tr>
+<tr>
+<td>Open_tables</td>
+<td>打开的表数</td>
+</tr>
+<tr>
+<td>Opened_table_definitions</td>
+<td>已缓存的表定义数</td>
+</tr>
+<tr>
+<td>Opened_tables</td>
+<td>已打开的表数</td>
+</tr>
+<tr>
+<td>Sort_range</td>
+<td>使用范围完成的排序数量</td>
+</tr>
+<tr>
+<td>Sort_rows</td>
+<td>排序的行数</td>
+</tr>
+<tr>
+<td>Sort_scan</td>
+<td>通过扫描表完成的排序数</td>
+</tr>
+<tr>
+<td>Ssl_accept_renegotiates</td>
+<td>建立连接所需的协商次数</td>
+</tr>
+<tr>
+<td>Ssl_accepts</td>
+<td>接受的SSL连接数</td>
+</tr>
+<tr>
+<td>Ssl_callback_cache_hits</td>
+<td>回调缓存命中数</td>
+</tr>
+<tr>
+<td>Ssl_cipher</td>
+<td>当前的加密密码（对于未加密的连接为空）</td>
+</tr>
+<tr>
+<td>Ssl_cipher_list</td>
+<td>可能的SSL密码列表（非SSL连接为空）</td>
+</tr>
+<tr>
+<td>Ssl_client_connects</td>
+<td>与启用了SSL的主机的SSL连接尝试次数</td>
+</tr>
+<tr>
+<td>Ssl_connect_renegotiates</td>
+<td>建立与启用SSL的主机的连接所需的协商次数</td>
+</tr>
+<tr>
+<td>Ssl_ctx_verify_depth</td>
+<td>SSL上下文验证深度（测试了链中的多少个证书）</td>
+</tr>
+<tr>
+<td>Ssl_ctx_verify_mode</td>
+<td>SSL上下文验证模式</td>
+</tr>
+<tr>
+<td>Ssl_default_timeout</td>
+<td>默认的SSL超时</td>
+</tr>
+<tr>
+<td>Ssl_finished_accepts</td>
+<td>到服务器的成功SSL连接数</td>
+</tr>
+<tr>
+<td>Ssl_finished_connects</td>
+<td>与已启用SSL的主服务器的成功从服务器连接数</td>
+</tr>
+<tr>
+<td>Threads_cached</td>
+<td>线程缓存中的线程数</td>
+</tr>
+<tr>
+<td>Threads_connected</td>
+<td>当前打开的连接数</td>
+</tr>
+<tr>
+<td>Threads_created</td>
+<td>创建用于处理连接的线程数</td>
+</tr>
+<tr>
+<td>Threads_running</td>
+<td>未休眠的线程数</td>
+</tr>
+<tr>
+<td>Uptime</td>
+<td>服务器已启动的秒数</td>
+</tr>
+<tr>
+<td>Uptime_since_flush_status</td>
+<td>自最近一次FLUSH STATUS声明以来的秒数</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>显示服务器状态变量</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW GLOBAL STATUS;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>检查SSL证书到期信息</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW STATUS LIKE <span class="string">'Ssl_server_not%'</span>;</span><br><span class="line">+-----------------------+--------------------------+</span><br><span class="line">| Variable_name         | Value                    |</span><br><span class="line">+-----------------------+--------------------------+</span><br><span class="line">| Ssl_server_not_after  | Apr 28 14:16:39 2029 GMT |</span><br><span class="line">| Ssl_server_not_before | May  1 14:16:39 2019 GMT |</span><br><span class="line">+-----------------------+--------------------------+</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Ssl_server_not_after : SSL证书有效的最后日期</li>
+</ul>
+<ul>
+<li>Ssl_server_not_before : SSL证书有效的第一个日期</li>
+</ul>
+<h3 id="服务器对信号的响应"><a href="#服务器对信号的响应" class="headerlink" title="服务器对信号的响应"></a>服务器对信号的响应</h3><ul>
+<li>SIGTERM 导致服务器关闭。</li>
+</ul>
+<ul>
+<li>SIGHUP使服务器重新加载授权表并刷新表，日志，线程缓存和主机缓存。</li>
+</ul>
+<h3 id="服务器关闭过程"><a href="#服务器关闭过程" class="headerlink" title="服务器关闭过程"></a>服务器关闭过程</h3><blockquote>
+<p>为了向管理过程提供信息，服务器将返回以下列表中描述的退出代码之一:</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>退出码</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  0</td>
+<td>成功终止（未完成重新启动）</td>
+</tr>
+<tr>
+<td>  1</td>
+<td>终止失败（不重新启动）</td>
+</tr>
+<tr>
+<td>  2</td>
+<td>终止失败（重启完成）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mysql系统架构"><a href="#mysql系统架构" class="headerlink" title="mysql系统架构"></a>mysql系统架构</h2><h2 id="MySQL服务器日志"><a href="#MySQL服务器日志" class="headerlink" title="MySQL服务器日志"></a>MySQL服务器日志</h2><blockquote>
+<p>日志类型</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>日志类型</th>
+<th>写入日志的信息</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>错误日志</td>
+<td>启动,运行或停止MySQL遇到的问题</td>
+</tr>
+<tr>
+<td>通用查询日志</td>
+<td>建立的客户端连接和从客户端那里收到的信息   </td>
+</tr>
+<tr>
+<td>二进制日志</td>
+<td>更改数据的语句(也用于复制)</td>
+</tr>
+<tr>
+<td>中继日志</td>
+<td>从复制主服务器收到的数据更改</td>
+</tr>
+<tr>
+<td>慢查询日志</td>
+<td>long_query_time执行耗时超过几秒钟的查询</td>
+</tr>
+<tr>
+<td>DDL日志(元数据日志)</td>
+<td>DDL语句执行的元数据操作</td>
+</tr>
+</tbody>
+</table>
+<h2 id="MySQL服务器组件"><a href="#MySQL服务器组件" class="headerlink" title="MySQL服务器组件"></a>MySQL服务器组件</h2><h3 id="安装和卸载组件"><a href="#安装和卸载组件" class="headerlink" title="安装和卸载组件"></a>安装和卸载组件</h3><blockquote>
+<p>服务器组件必须先装入服务器，然后才能使用。MySQL支持在运行时加载组件。<br>在INSTALL COMPONENT与 UNINSTALL COMPONENTSQL语句使组件装卸。例如:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INSTALL COMPONENT <span class="string">'file://component_validate_password'</span>;</span><br><span class="line">UNINSTALL COMPONENT <span class="string">'file://component_validate_password'</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="获取服务器组件信息"><a href="#获取服务器组件信息" class="headerlink" title="获取服务器组件信息"></a>获取服务器组件信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM mysql.component;</span><br></pre></td></tr></table></figure>
+<h3 id="错误日志组件"><a href="#错误日志组件" class="headerlink" title="错误日志组件"></a>错误日志组件</h3><blockquote>
+<p>日志组件可以是过滤器或接收器：</p>
+<ul>
+<li>筛选器处理日志事件，以添加，删除或修改事件字段，或完全删除事件。结果事件将传递到log_error_services系统变量值中命名的下一个日志组件 。</li>
+</ul>
+<ul>
+<li>接收器是日志事件的目标（写入器）。通常，接收器将日志事件处理为具有特定格式的日志消息，并将这些消息写入其关联的输出，例如文件或系统日志。</li>
+</ul>
+</blockquote>
+<h2 id="MySQL服务器插件"><a href="#MySQL服务器插件" class="headerlink" title="MySQL服务器插件"></a>MySQL服务器插件</h2><h3 id="安装和卸载插件"><a href="#安装和卸载插件" class="headerlink" title="安装和卸载插件"></a>安装和卸载插件</h3><blockquote>
+<p>必须先将服务器插件加载到服务器中，然后才能使用它们。MySQL支持在服务器启动和运行时加载插件。也可以在启动时控制已加载插件的激活状态，并在运行时卸载它们。</p>
+</blockquote>
+<ul>
+<li>内置插件: –plugin_name[=activation_state]</li>
+</ul>
+<ul>
+<li>在mysql.plugin系统表中注册的插件 ： –plugin_name[=activation_state]</li>
+</ul>
+<ul>
+<li>用命令行选项命名的插件：–plugin_name[=activation_state]</li>
+</ul>
+<ul>
+<li>INSTALL PLUGIN 声明安装的插件 ：可以使用INSTALL PLUGIN 语句在运行时加载位于插件库文件中的插件</li>
+</ul>
+<h3 id="获取服务器插件信息"><a href="#获取服务器插件信息" class="headerlink" title="获取服务器插件信息"></a>获取服务器插件信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT * FROM INFORMATION_SCHEMA.PLUGINS\G</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW PLUGINS\G</span><br></pre></td></tr></table></figure>
+<h2 id="MySQL的一些语句语法"><a href="#MySQL的一些语句语法" class="headerlink" title="MySQL的一些语句语法"></a>MySQL的一些语句语法</h2><table>
+<thead>
+<tr>
+<th>语法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ALTER TABLE</td>
+<td>用来更新已存在表的模式</td>
+</tr>
+<tr>
+<td>COMMIT</td>
+<td>用来将事务处理写到数据库</td>
+</tr>
+<tr>
+<td>CREATE INDEX</td>
+<td>用于在一个或多个列上创建索引</td>
+</tr>
+<tr>
+<td>CREATE PROCEDURE</td>
+<td>用于创建存储过程</td>
+</tr>
+<tr>
+<td>CREATE TABLE</td>
+<td>用于创建新数据库表</td>
+</tr>
+<tr>
+<td>CREATE USER</td>
+<td>用于向系统中添加新的用户账户</td>
+</tr>
+<tr>
+<td>CREATE VIEW</td>
+<td>用来创建一个或多个表上的新视图</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>从表中删除一行或多行</td>
+</tr>
+<tr>
+<td>DROP</td>
+<td>永久地删除数据库对象(表、视图、索引等)</td>
+</tr>
+<tr>
+<td>INSERT</td>
+<td>给表增加一行</td>
+</tr>
+<tr>
+<td>INSERT SELECT</td>
+<td>插入SELECT的结果到一个表</td>
+</tr>
+<tr>
+<td>ROLLBACK</td>
+<td>用于撤销一个事务处理块</td>
+</tr>
+<tr>
+<td>SAVEPOINT</td>
+<td>为使用ROLLBACK语句设立保留点</td>
+</tr>
+<tr>
+<td>SELECT</td>
+<td>用于从一个或多个表（视图）中检索数据</td>
+</tr>
+<tr>
+<td>START TRANSACTION</td>
+<td>表示一个新的事务处理块的开始</td>
+</tr>
+<tr>
+<td>UPDATE</td>
+<td>更新表中一行或多行</td>
+</tr>
+</tbody>
+</table>
+<h2 id="MySQL数据类型"><a href="#MySQL数据类型" class="headerlink" title="MySQL数据类型"></a>MySQL数据类型</h2><h3 id="串数据类型"><a href="#串数据类型" class="headerlink" title="串数据类型"></a>串数据类型</h3><blockquote>
+<p>分别为定长串和变长串</p>
+</blockquote>
+<blockquote>
+<p>定长串接受长度固定的字符串，其长度是在创建表时指定的。定长列不允许多于指定的字符数目。它们分配的存储空间与指定的一样多。 </p>
+</blockquote>
+<blockquote>
+<p>变长串存储可变长度的文本。</p>
+</blockquote>
+<blockquote>
+<p>MySQL处理定长列远比处理变长列快得多。此外，MySQL不允许对变长列(或一个列的可变部分)进行索引。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>字符串</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CHAR</td>
+<td>1～255个字符的定长串。长度必须在创建时指定，否则MySQL假定为CHAR(1)</td>
+</tr>
+<tr>
+<td>ENUM</td>
+<td>接受最多64 K个串组成的一个预定义集合的某个串</td>
+</tr>
+<tr>
+<td>LONGTEXT</td>
+<td>与TEXT相同，但最大长度为4 GB</td>
+</tr>
+<tr>
+<td>MEDIUMTEXT</td>
+<td>与TEXT相同，但最大长度为16 K</td>
+</tr>
+<tr>
+<td>SET</td>
+<td>接受最多64个串组成的一个预定义集合的零个或多个串</td>
+</tr>
+<tr>
+<td>TEXT</td>
+<td>最大长度为64 K的变长文本</td>
+</tr>
+<tr>
+<td>TINYTEXT</td>
+<td>与TEXT相同，但最大长度为255字节</td>
+</tr>
+<tr>
+<td>VARCHAR</td>
+<td>长度可变，最多不超过255字节。如果在创建时指定为VARCHAR(n)，则可存储0到n个字符的变长串（其中n≤255）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>不管使用何种形式的串数据类型，串值都必须括在引号内(通常单引号更好)</p>
+</blockquote>
+<blockquote>
+<p>如果数值是计算(求和、平均等)中使用的数值，则应该存储在数值数据类型列中。如果作为字符串(可能只包含数字)使用，则应该保存在串数据类型列中。</p>
+</blockquote>
+<h3 id="数值数据类型"><a href="#数值数据类型" class="headerlink" title="数值数据类型"></a>数值数据类型</h3><blockquote>
+<p>所有数值数据类型(除BIT和BOOLEAN外)都可以有符号或无符号。有符号数值列可以存储正或负的数值，无符号数值列只能存储正数。默认情况为有符号。</p>
+</blockquote>
+<pre><code>数值类型   |    说明
+</code></pre><p>—————|————<br>BIT            |位字段， 1～64位<br>BIGINT         |整数值，支持9223372036854775808～9223372036854775807(如果是UNSIGNED，为0～18446744073709551615)的数<br>BOOLEAN(或BOOL)|布尔标志，或者为0或者为1，主要用于开/关(on/off)标志<br>DECIMAL(或DEC) |精度可变的浮点值<br>DOUBLE         |双精度浮点值<br>FLOAT          |单精度浮点值<br>INT(或INTEGER) |整数值，支持2147483648～2147483647(如果是UNSIGNED，为0～4294967295)的数<br>MEDIUMINT      |整数值，支持8388608～8388607(如果是UNSIGNED，为0～16777215)的数REAL 4字节的浮点值<br>SMALLINT       |整数值，支持32768～32767(如果是UNSIGNED，为0～65535)的数<br>TINYINT        |整数值，支持128～127(如果为UNSIGNED，为0～255)的数</p>
+<blockquote>
+<p>数值不应该括在引号内</p>
+</blockquote>
+<h3 id="日期和时间数据类型"><a href="#日期和时间数据类型" class="headerlink" title="日期和时间数据类型"></a>日期和时间数据类型</h3><table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DATE</td>
+<td>表示1000-01-01～9999-12-31的日期，格式为YYYY-MM-DD</td>
+</tr>
+<tr>
+<td>DATETIME</td>
+<td>DATE和TIME的组合</td>
+</tr>
+<tr>
+<td>TIMESTAMP</td>
+<td>功能和DATETIME相同(但范围较小)</td>
+</tr>
+<tr>
+<td>TIME</td>
+<td>格式为HH:MM:SS</td>
+</tr>
+<tr>
+<td>YEAR</td>
+<td>用2位数字表示，范围是70(1970年)～69(2069年)，用4位数字表示，范围是1901年～2155年。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="二进制数据类型"><a href="#二进制数据类型" class="headerlink" title="二进制数据类型"></a>二进制数据类型</h3><blockquote>
+<p>二进制数据类型可存储任何数据(甚至包括二进制信息)，如图像、多媒体、字处理文档等。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>二进制类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BLOB</td>
+<td>Blob最大长度为64KB</td>
+</tr>
+<tr>
+<td>MEDIUMBLOB</td>
+<td>Blob最大长度为16MB</td>
+</tr>
+<tr>
+<td>LONGBLOB</td>
+<td>Blob最大长度为4GB</td>
+</tr>
+<tr>
+<td>TINYBLOB</td>
+<td>Blob最大长度为255字节</td>
+</tr>
+</tbody>
+</table>
+<p>附MySQL文档页: <a href="https://dev.mysql.com/doc/" target="_blank" rel="noopener">https://dev.mysql.com/doc/</a></p>
 
       
     </div>
@@ -600,15 +1117,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/kubernetes/" rel="tag"><i class="fa fa-tag"></i> kubernetes</a>
-          
-            <a href="/tags/gitlab/" rel="tag"><i class="fa fa-tag"></i> gitlab</a>
-          
-            <a href="/tags/runnner/" rel="tag"><i class="fa fa-tag"></i> runnner</a>
-          
-            <a href="/tags/CI/" rel="tag"><i class="fa fa-tag"></i> CI</a>
-          
-            <a href="/tags/CD/" rel="tag"><i class="fa fa-tag"></i> CD</a>
+            <a href="/tags/mysql/" rel="tag"><i class="fa fa-tag"></i> mysql</a>
           
         </div>
       
@@ -621,8 +1130,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/ops/" rel="next" title="Kubernetes+GitLab+Jenkins使用Pipeline构建镜像">
-                <i class="fa fa-chevron-left"></i> Kubernetes+GitLab+Jenkins使用Pipeline构建镜像
+              <a href="/blog/mysql9/" rel="next" title="MySQL之数据库维护和优化篇">
+                <i class="fa fa-chevron-left"></i> MySQL之数据库维护和优化篇
               </a>
             
           </div>
@@ -630,10 +1139,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/drone/" rel="prev" title="Drone + Gogs 执行自动构建">
-                Drone + Gogs 执行自动构建 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -879,7 +1384,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#注册Runner"><span class="nav-number">1.</span> <span class="nav-text">注册Runner</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看配置信息"><span class="nav-number">1.1.</span> <span class="nav-text">查看配置信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册Runner-1"><span class="nav-number">1.2.</span> <span class="nav-text">注册Runner</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在Kubernetes上部署Runner"><span class="nav-number">2.</span> <span class="nav-text">在Kubernetes上部署Runner</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为Runner创建RBAC-角色访问控制"><span class="nav-number">2.1.</span> <span class="nav-text">为Runner创建RBAC(角色访问控制)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建ConfigMap"><span class="nav-number">2.2.</span> <span class="nav-text">创建ConfigMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部署Runner"><span class="nav-number">2.3.</span> <span class="nav-text">部署Runner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看连接情况"><span class="nav-number">2.4.</span> <span class="nav-text">查看连接情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用Runner新建一个项目"><span class="nav-number">3.</span> <span class="nav-text">使用Runner新建一个项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置环境变量"><span class="nav-number">3.1.</span> <span class="nav-text">配置环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新建一个简单的dockerfile文件"><span class="nav-number">3.2.</span> <span class="nav-text">新建一个简单的dockerfile文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新建gitlab-ci-yml配置文件"><span class="nav-number">3.3.</span> <span class="nav-text">新建gitlab-ci.yml配置文件</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL服务器管理"><span class="nav-number">1.</span> <span class="nav-text">MySQL服务器管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置服务器"><span class="nav-number">1.1.</span> <span class="nav-text">配置服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器配置验证"><span class="nav-number">1.2.</span> <span class="nav-text">服务器配置验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器命令选项"><span class="nav-number">1.3.</span> <span class="nav-text">服务器命令选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器系统变量"><span class="nav-number">1.4.</span> <span class="nav-text">服务器系统变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用系统变量"><span class="nav-number">1.5.</span> <span class="nav-text">使用系统变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器状态变量"><span class="nav-number">1.6.</span> <span class="nav-text">服务器状态变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器对信号的响应"><span class="nav-number">1.7.</span> <span class="nav-text">服务器对信号的响应</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器关闭过程"><span class="nav-number">1.8.</span> <span class="nav-text">服务器关闭过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql系统架构"><span class="nav-number">2.</span> <span class="nav-text">mysql系统架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL服务器日志"><span class="nav-number">3.</span> <span class="nav-text">MySQL服务器日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL服务器组件"><span class="nav-number">4.</span> <span class="nav-text">MySQL服务器组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装和卸载组件"><span class="nav-number">4.1.</span> <span class="nav-text">安装和卸载组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取服务器组件信息"><span class="nav-number">4.2.</span> <span class="nav-text">获取服务器组件信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#错误日志组件"><span class="nav-number">4.3.</span> <span class="nav-text">错误日志组件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL服务器插件"><span class="nav-number">5.</span> <span class="nav-text">MySQL服务器插件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装和卸载插件"><span class="nav-number">5.1.</span> <span class="nav-text">安装和卸载插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取服务器插件信息"><span class="nav-number">5.2.</span> <span class="nav-text">获取服务器插件信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL的一些语句语法"><span class="nav-number">6.</span> <span class="nav-text">MySQL的一些语句语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL数据类型"><span class="nav-number">7.</span> <span class="nav-text">MySQL数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#串数据类型"><span class="nav-number">7.1.</span> <span class="nav-text">串数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数值数据类型"><span class="nav-number">7.2.</span> <span class="nav-text">数值数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日期和时间数据类型"><span class="nav-number">7.3.</span> <span class="nav-text">日期和时间数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二进制数据类型"><span class="nav-number">7.4.</span> <span class="nav-text">二进制数据类型</span></a></li></ol></li></ol></div>
             
 
           </div>
