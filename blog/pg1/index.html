@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="postgresql安装以及简单使用">
+<meta name="keywords" content="pg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL初探">
+<meta property="og:url" content="https://www.flywzj.com/blog/pg1/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="postgresql安装以及简单使用">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-11-20T15:27:57.631Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL初探">
+<meta name="twitter:description" content="postgresql安装以及简单使用">
+
+
+
+
+
+
+  <link rel="canonical" href="https://www.flywzj.com/blog/pg1/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PostgreSQL初探 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/pg1/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PostgreSQL初探
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-20 23:21:47 / 修改时间：23:27:57" itemprop="dateCreated datePublished" datetime="2019-11-20T23:21:47+08:00">2019-11-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/pg1/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg1/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">18k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">31 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>postgresql安装以及简单使用</p>
+<a id="more"></a>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm</span></span><br><span class="line"><span class="comment"># yum -y install postgresql12</span></span><br><span class="line"><span class="comment"># yum -y install postgresql12-server</span></span><br></pre></td></tr></table></figure>
+<h2 id="初始化数据库并启用"><a href="#初始化数据库并启用" class="headerlink" title="初始化数据库并启用"></a>初始化数据库并启用</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /usr/pgsql-12/bin/postgresql-12-setup initdb</span></span><br><span class="line">Initializing database ... OK</span><br><span class="line"><span class="comment"># systemctl start postgresql-12</span></span><br></pre></td></tr></table></figure>
+<h2 id="使用postgres用户登录"><a href="#使用postgres用户登录" class="headerlink" title="使用postgres用户登录"></a>使用postgres用户登录</h2><blockquote>
+<p>PostgresSQL安装后会自动创建postgres用户，无密码</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># su - postgres</span></span><br><span class="line">-bash-4.2$</span><br></pre></td></tr></table></figure>
+<h2 id="登录postgresql数据库"><a href="#登录postgresql数据库" class="headerlink" title="登录postgresql数据库"></a>登录postgresql数据库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-bash-4.2$ psql </span><br><span class="line">psql (12.1)</span><br><span class="line">输入 <span class="string">"help"</span> 来获取帮助信息.</span><br></pre></td></tr></table></figure>
+<h2 id="查看角色"><a href="#查看角色" class="headerlink" title="查看角色"></a>查看角色</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># select * from pg_roles;</span></span><br><span class="line">          rolname          | rolsuper | rolinherit | rolcreaterole | rolcreatedb | rolcanlogin | rolreplication | rolconnlimit | rolpassword | rolvaliduntil | rolbypassrls | rolconfig |  oid </span><br><span class="line"> </span><br><span class="line">---------------------------+----------+------------+---------------+-------------+-------------+----------------+--------------+-------------+---------------+--------------+-----------+------</span><br><span class="line">-</span><br><span class="line"> pg_signal_backend         | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f            |           |  4200</span><br><span class="line"> pg_read_server_files      | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f            |           |  4569</span><br><span class="line"> root                      | f        | t          | f             | f           | t           | f              |           -1 | ********    |               | f            |           | 16386</span><br><span class="line"> postgres                  | t        | t          | t             | t           | t           | t              |           -1 | ********    |               | t            |           |    10</span><br><span class="line"> pg_write_server_files     | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f            |           |  4570</span><br><span class="line"> pg_execute_server_program | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f            |           |  4571</span><br><span class="line"> pg_read_all_stats         | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f            |           |  3375</span><br><span class="line"> pg_monitor                | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f            |           |  3373</span><br><span class="line"> pg_read_all_settings      | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f            |           |  3374</span><br><span class="line"> pg_stat_scan_tables       | f        | t          | f             | f           | f           | f              |           -1 | ********    |               | f            |           |  3377</span><br><span class="line">(10 rows)</span><br></pre></td></tr></table></figure>
+<pre><code>角色    |  允许的访问
+</code></pre><p>————–|—————<br>pg_read_all_settings|读取所有配置变量，甚至通常只对超级用户可见的那些变量。<br>pg_read_all_stats    | 阅读所有pg_stat_ *视图，并使用各种与统计信息相关的扩展，甚至那些通常仅对超级用户可见的扩展。<br>pg_stat_scan_tables    | 执行可能ACCESS SHARE长时间锁定表的监视功能。<br>pg_monitor |    读取/执行各种监视视图和功能。这个角色的成员pg_read_all_settings，pg_read_all_stats和pg_stat_scan_tables。<br>pg_signal_backend    | 发信号通知另一个后端取消查询或终止其会话。<br>pg_read_server_files|    允许从数据库可以使用COPY和其他文件访问功能在服务器上访问的任何位置读取文件。<br>pg_write_server_files|    允许在数据库可以使用COPY和其他文件访问功能在服务器上访问的任何位置写入文件。<br>pg_execute_server_program | 允许用户以与数据库运行相同的用户身份在数据库服务器上执行程序，就像使用COPY和其他允许执行服务器端程序的功能一样。</p>
+<h2 id="查看数据库"><a href="#查看数据库" class="headerlink" title="查看数据库"></a>查看数据库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># select * from pg_database;</span></span><br><span class="line">  oid  |  datname  | datdba | encoding | datcollate  |  datctype   | datistemplate | datallowconn | datconnlimit | datlastsysoid | datfrozenxid | datminmxid | dattablespace |               datacl</span><br><span class="line">-------+-----------+--------+----------+-------------+-------------+---------------+--------------+--------------+---------------+--------------+------------+---------------+-------------------------------------</span><br><span class="line"> 14187 | postgres  |     10 |        6 | zh_CN.UTF-8 | zh_CN.UTF-8 | f             | t            |           -1 |         14186 |          479 |          1 |          1663 |</span><br><span class="line">     1 | template1 |     10 |        6 | zh_CN.UTF-8 | zh_CN.UTF-8 | t             | t            |           -1 |         14186 |          479 |          1 |          1663 | &#123;=c/postgres,postgres=CTc/postgres&#125;</span><br><span class="line"> 14186 | template0 |     10 |        6 | zh_CN.UTF-8 | zh_CN.UTF-8 | t             | f            |           -1 |         14186 |          479 |          1 |          1663 | &#123;=c/postgres,postgres=CTc/postgres&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="查看所有表信息"><a href="#查看所有表信息" class="headerlink" title="查看所有表信息"></a>查看所有表信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># select * from pg_tables;</span></span><br></pre></td></tr></table></figure>
+<h2 id="修改默认用户postgres的密码"><a href="#修改默认用户postgres的密码" class="headerlink" title="修改默认用户postgres的密码"></a>修改默认用户postgres的密码</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># ALTER USER postgres WITH PASSWORD 'postgres';</span></span><br><span class="line">ALTER ROLE</span><br></pre></td></tr></table></figure>
+<h2 id="修改访问控制协议"><a href="#修改访问控制协议" class="headerlink" title="修改访问控制协议"></a>修改访问控制协议</h2><h3 id="监听所有"><a href="#监听所有" class="headerlink" title="监听所有"></a>监听所有</h3><blockquote>
+<p>默认监听localhost</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /var/lib/pgsql/12/data/postgresql.conf </span></span><br><span class="line">listen_addresses = <span class="string">'*'</span></span><br></pre></td></tr></table></figure>
+<h3 id="更改访问控制和认证协议"><a href="#更改访问控制和认证协议" class="headerlink" title="更改访问控制和认证协议"></a>更改访问控制和认证协议</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /var/lib/pgsql/12/data/pg_hba.conf</span></span><br><span class="line"><span class="comment"># IPv4 local connections:</span></span><br><span class="line"><span class="comment">#host    all             all             127.0.0.1/32            ident</span></span><br><span class="line">host    all             all             0.0.0.0/0               md5</span><br><span class="line"><span class="comment"># systemctl restart postgresql-12</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Identification Protocol(标识协议)，标识协议的本意不是作为一种认证或访问控制协议。</p>
+</blockquote>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># psql -h 192.168.100.133 -U postgres </span></span><br><span class="line">用户 postgres 的口令：</span><br><span class="line">psql (12.1)</span><br><span class="line">输入 <span class="string">"help"</span> 来获取帮助信息.</span><br><span class="line"></span><br><span class="line">postgres=<span class="comment"># \q</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># psql -h 127.0.0.1 -U postgres </span></span><br><span class="line">用户 postgres 的口令：</span><br><span class="line">psql (12.1)</span><br><span class="line">输入 <span class="string">"help"</span> 来获取帮助信息.</span><br><span class="line"></span><br><span class="line">postgres=<span class="comment"># \q</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>不带-h参数时，属于本地登陆，以unix或者linux系统的socket方式连接，用的是peer认证方式。</p>
+</blockquote>
+<blockquote>
+<p>使用-h ip的格式，属于远程登陆，以TCP/IP的方式连接，使用的是ident的认证方式。</p>
+</blockquote>
+<h3 id="更改本地认证"><a href="#更改本地认证" class="headerlink" title="更改本地认证"></a>更改本地认证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /var/lib/pgsql/12/data/pg_hba.conf</span></span><br><span class="line"><span class="comment"># "local" is for Unix domain socket connections only</span></span><br><span class="line"><span class="comment">#local   all             all                                     ident</span></span><br><span class="line"><span class="built_in">local</span>   all             all                                     md5</span><br><span class="line"><span class="comment"># systemctl restart postgresql-12</span></span><br><span class="line"><span class="comment"># psql -U postgres</span></span><br><span class="line">用户 postgres 的口令：</span><br><span class="line">psql (12.1)</span><br><span class="line">输入 <span class="string">"help"</span> 来获取帮助信息.</span><br><span class="line"></span><br><span class="line">postgres=<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h2 id="创建数据库并赋予权限"><a href="#创建数据库并赋予权限" class="headerlink" title="创建数据库并赋予权限"></a>创建数据库并赋予权限</h2><h3 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE USER test WITH PASSWORD 'wangzhijian';</span></span><br><span class="line">CREATE ROLE</span><br></pre></td></tr></table></figure>
+<h3 id="创建数据库并给定拥有者"><a href="#创建数据库并给定拥有者" class="headerlink" title="创建数据库并给定拥有者"></a>创建数据库并给定拥有者</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE DATABASE test OWNER test;</span></span><br><span class="line">CREATE DATABASE</span><br></pre></td></tr></table></figure>
+<h3 id="授权该用户对数据库的所有权限"><a href="#授权该用户对数据库的所有权限" class="headerlink" title="授权该用户对数据库的所有权限"></a>授权该用户对数据库的所有权限</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># GRANT ALL ON DATABASE test to test;</span></span><br><span class="line">GRANT</span><br></pre></td></tr></table></figure>
+<h2 id="查看数据库-1"><a href="#查看数据库-1" class="headerlink" title="查看数据库"></a>查看数据库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT datname FROM pg_database;</span></span><br><span class="line">  datname</span><br><span class="line">-----------</span><br><span class="line"> postgres</span><br><span class="line"> template1</span><br><span class="line"> template0</span><br><span class="line"> <span class="built_in">test</span></span><br><span class="line">(4 rows)</span><br><span class="line">postgres=<span class="comment"># select * from pg_database where datname='test';</span></span><br><span class="line">  oid  | datname | datdba | encoding | datcollate  |  datctype   | datistemplate | datallowconn | datconnlimit | datlastsysoid | datfrozenxid | datminmxid | dattablespace |          datacl</span><br><span class="line">-------+---------+--------+----------+-------------+-------------+---------------+--------------+--------------+---------------+--------------+------------+---------------+--------------------------</span><br><span class="line"> 17043 | <span class="built_in">test</span>    |  16384 |        6 | zh_CN.UTF-8 | zh_CN.UTF-8 | f             | t            |           -1 |         14186 |          479 |          1 |          1663 | &#123;=Tc/<span class="built_in">test</span>,<span class="built_in">test</span>=CTc/<span class="built_in">test</span>&#125;</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h2 id="查看表信息"><a href="#查看表信息" class="headerlink" title="查看表信息"></a>查看表信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT * FROM pg_tables;</span></span><br></pre></td></tr></table></figure>
+<h2 id="查看所有视图信息"><a href="#查看所有视图信息" class="headerlink" title="查看所有视图信息"></a>查看所有视图信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT * FROM pg_views;</span></span><br></pre></td></tr></table></figure>
+<h2 id="查看数据库会话情况"><a href="#查看数据库会话情况" class="headerlink" title="查看数据库会话情况"></a>查看数据库会话情况</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># select * from pg_stat_activity where datname = 'test';</span></span><br><span class="line"> datid | datname |  pid  | usesysid | usename | application_name |   client_addr   | client_hostname | client_port |         backend_start         | xact_start |          query_start          |         state_change          | wait_event_type | wait_event | state | backend_xid | backend_xmin |                         query                          |  backend_type</span><br><span class="line">-------+---------+-------+----------+---------+------------------+-----------------+-----------------+-------------+-------------------------------+------------+-------------------------------+-------------------------------+-----------------+------------+-------+-------------+--------------+--------------------------------------------------------+----------------</span><br><span class="line"> 17043 | <span class="built_in">test</span>    | 79780 |    16384 | <span class="built_in">test</span>    | psql             | 192.168.100.133 |                 |       41632 | 2019-11-20 10:40:24.756097+08 |            | 2019-11-20 10:53:52.628493+08 | 2019-11-20 10:53:52.632927+08 | Client          | ClientRead | idle  |             |              | select * from pg_stat_activity <span class="built_in">where</span> datname = <span class="string">'test'</span>; | client backend</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h2 id="删除PID"><a href="#删除PID" class="headerlink" title="删除PID"></a>删除PID</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT pg_terminate_backend(79780);</span></span><br><span class="line"> pg_terminate_backend</span><br><span class="line">----------------------</span><br><span class="line"> t</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h2 id="删除数据库"><a href="#删除数据库" class="headerlink" title="删除数据库"></a>删除数据库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># drop database test;</span></span><br><span class="line">DROP DATABASE</span><br></pre></td></tr></table></figure>
+<h2 id="常见PostgreSQL命令"><a href="#常见PostgreSQL命令" class="headerlink" title="常见PostgreSQL命令"></a>常见PostgreSQL命令</h2><h3 id="查询数据库版本"><a href="#查询数据库版本" class="headerlink" title="查询数据库版本"></a>查询数据库版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT VERSION();</span></span><br><span class="line">                                                 version</span><br><span class="line">---------------------------------------------------------------------------------------------------------</span><br><span class="line"> PostgreSQL 12.1 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39), 64-bit</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h3 id="查询当前时间"><a href="#查询当前时间" class="headerlink" title="查询当前时间"></a>查询当前时间</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT CURRENT_TIMESTAMP(0);</span></span><br><span class="line">   current_timestamp</span><br><span class="line">------------------------</span><br><span class="line"> 2019-11-20 12:09:42+08</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h3 id="查询所有用户自定义表的名字"><a href="#查询所有用户自定义表的名字" class="headerlink" title="查询所有用户自定义表的名字"></a>查询所有用户自定义表的名字</h3><blockquote>
+<p>用户自定义的表，如未经特殊处理，默认都是放在名为public的schema下</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">test=# select tablename from pg_tables where schemaname=&apos;public&apos;;</span><br><span class="line">   tablename</span><br><span class="line">---------------</span><br><span class="line"> film_actor</span><br><span class="line"> address</span><br><span class="line"> city</span><br><span class="line"> customer</span><br><span class="line"> actor</span><br><span class="line"> film_category</span><br><span class="line"> inventory</span><br><span class="line"> category</span><br><span class="line"> country</span><br><span class="line"> language</span><br><span class="line"> rental</span><br><span class="line"> staff</span><br><span class="line"> store</span><br><span class="line"> payment</span><br><span class="line"> film</span><br><span class="line">(15 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="查询角色属性"><a href="#查询角色属性" class="headerlink" title="查询角色属性"></a>查询角色属性</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">postgres-<span class="comment"># \du</span></span><br><span class="line">                              角色列表</span><br><span class="line"> 角色名称 |                    属性                    |  成员属于  </span><br><span class="line">----------+--------------------------------------------+------------</span><br><span class="line"> postgres | 超级用户, 建立角色, 建立 DB, 复制, 绕过RLS | &#123;&#125;</span><br><span class="line"> root     |                                            | &#123;&#125;</span><br><span class="line"> <span class="built_in">test</span>     |                                            | &#123;postgres&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="列出所有数据库"><a href="#列出所有数据库" class="headerlink" title="列出所有数据库"></a>列出所有数据库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">postgres-<span class="comment"># \l</span></span><br><span class="line">                                     数据库列表</span><br><span class="line">   名称    |  拥有者  | 字元编码 |  校对规则   |    Ctype    |       存取权限        </span><br><span class="line">-----------+----------+----------+-------------+-------------+-----------------------</span><br><span class="line"> postgres  | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | </span><br><span class="line"> template0 | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =c/postgres          +</span><br><span class="line">           |          |          |             |             | postgres=CTc/postgres</span><br><span class="line"> template1 | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =c/postgres          +</span><br><span class="line">           |          |          |             |             | postgres=CTc/postgres</span><br><span class="line"> <span class="built_in">test</span>      | <span class="built_in">test</span>     | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =Tc/<span class="built_in">test</span>             +</span><br><span class="line">           |          |          |             |             | <span class="built_in">test</span>=CTc/<span class="built_in">test</span></span><br><span class="line">(4 行记录)</span><br></pre></td></tr></table></figure>
+<h3 id="切换数据库"><a href="#切换数据库" class="headerlink" title="切换数据库"></a>切换数据库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=&gt; \c <span class="built_in">test</span></span><br><span class="line">您现在已经连接到数据库 <span class="string">"test"</span>,用户 <span class="string">"test"</span>.</span><br></pre></td></tr></table></figure>
+<h3 id="查看表"><a href="#查看表" class="headerlink" title="查看表"></a>查看表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \dt</span><br><span class="line">                   关联列表</span><br><span class="line"> 架构模式 |     名称      |  类型  |  拥有者  </span><br><span class="line">----------+---------------+--------+----------</span><br><span class="line"> public   | actor         | 数据表 | postgres</span><br><span class="line"> public   | address       | 数据表 | postgres</span><br><span class="line"> public   | category      | 数据表 | postgres</span><br><span class="line"> public   | city          | 数据表 | postgres</span><br><span class="line"> public   | country       | 数据表 | postgres</span><br><span class="line"> public   | customer      | 数据表 | postgres</span><br><span class="line"> public   | film          | 数据表 | postgres</span><br><span class="line"> public   | film_actor    | 数据表 | postgres</span><br><span class="line"> public   | film_category | 数据表 | postgres</span><br><span class="line"> public   | inventory     | 数据表 | postgres</span><br><span class="line"> public   | language      | 数据表 | postgres</span><br><span class="line"> public   | payment       | 数据表 | postgres</span><br><span class="line"> public   | rental        | 数据表 | postgres</span><br><span class="line"> public   | staff         | 数据表 | postgres</span><br><span class="line"> public   | store         | 数据表 | postgres</span><br><span class="line">(15 行记录)</span><br></pre></td></tr></table></figure>
+<h3 id="查看表结构"><a href="#查看表结构" class="headerlink" title="查看表结构"></a>查看表结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \d</span><br><span class="line">                         关联列表</span><br><span class="line"> 架构模式 |            名称            |  类型  |  拥有者  </span><br><span class="line">----------+----------------------------+--------+----------</span><br><span class="line"> public   | actor                      | 数据表 | postgres</span><br><span class="line"> public   | actor_actor_id_seq         | 序列数 | postgres</span><br><span class="line"> public   | actor_info                 | 视图   | postgres</span><br><span class="line"> public   | address                    | 数据表 | postgres</span><br><span class="line"> public   | address_address_id_seq     | 序列数 | postgres</span><br><span class="line"> public   | category                   | 数据表 | postgres</span><br><span class="line"> public   | category_category_id_seq   | 序列数 | postgres</span><br><span class="line"> public   | city                       | 数据表 | postgres</span><br><span class="line"> public   | city_city_id_seq           | 序列数 | postgres</span><br><span class="line"> public   | country                    | 数据表 | postgres</span><br><span class="line"> public   | country_country_id_seq     | 序列数 | postgres</span><br><span class="line"> public   | customer                   | 数据表 | postgres</span><br><span class="line"> public   | customer_customer_id_seq   | 序列数 | postgres</span><br><span class="line"> public   | customer_list              | 视图   | postgres</span><br><span class="line"> public   | film                       | 数据表 | postgres</span><br><span class="line"> public   | film_actor                 | 数据表 | postgres</span><br><span class="line"> public   | film_category              | 数据表 | postgres</span><br><span class="line"> public   | film_film_id_seq           | 序列数 | postgres</span><br><span class="line"> public   | film_list                  | 视图   | postgres</span><br><span class="line"> public   | inventory                  | 数据表 | postgres</span><br><span class="line"> public   | inventory_inventory_id_seq | 序列数 | postgres</span><br><span class="line"> public   | language                   | 数据表 | postgres</span><br><span class="line"> public   | language_language_id_seq   | 序列数 | postgres</span><br><span class="line"> public   | nicer_but_slower_film_list | 视图   | postgres</span><br><span class="line"> public   | payment                    | 数据表 | postgres</span><br><span class="line"> public   | payment_payment_id_seq     | 序列数 | postgres</span><br><span class="line"> public   | rental                     | 数据表 | postgres</span><br><span class="line"> public   | rental_rental_id_seq       | 序列数 | postgres</span><br><span class="line"> public   | sales_by_film_category     | 视图   | postgres</span><br><span class="line"> public   | sales_by_store             | 视图   | postgres</span><br><span class="line"> public   | staff                      | 数据表 | postgres</span><br><span class="line"> public   | staff_list                 | 视图   | postgres</span><br><span class="line"> public   | staff_staff_id_seq         | 序列数 | postgres</span><br><span class="line"> public   | store                      | 数据表 | postgres</span><br><span class="line"> public   | store_store_id_seq         | 序列数 | postgres</span><br><span class="line">(35 行记录)</span><br></pre></td></tr></table></figure>
+<h3 id="查看索引"><a href="#查看索引" class="headerlink" title="查看索引"></a>查看索引</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \di</span><br><span class="line">                                             关联列表</span><br><span class="line"> 架构模式 |                        名称                         | 类型 |  拥有者  |    数据表     </span><br><span class="line">----------+-----------------------------------------------------+------+----------+---------------</span><br><span class="line"> public   | actor_pkey                                          | 索引 | postgres | actor</span><br><span class="line"> public   | address_pkey                                        | 索引 | postgres | address</span><br><span class="line"> public   | category_pkey                                       | 索引 | postgres | category</span><br><span class="line"> public   | city_pkey                                           | 索引 | postgres | city</span><br><span class="line"> public   | country_pkey                                        | 索引 | postgres | country</span><br><span class="line"> public   | customer_pkey                                       | 索引 | postgres | customer</span><br><span class="line"> public   | film_actor_pkey                                     | 索引 | postgres | film_actor</span><br><span class="line"> public   | film_category_pkey                                  | 索引 | postgres | film_category</span><br><span class="line"> public   | film_fulltext_idx                                   | 索引 | postgres | film</span><br><span class="line"> public   | film_pkey                                           | 索引 | postgres | film</span><br><span class="line"> public   | idx_actor_last_name                                 | 索引 | postgres | actor</span><br><span class="line"> public   | idx_fk_address_id                                   | 索引 | postgres | customer</span><br><span class="line"> public   | idx_fk_city_id                                      | 索引 | postgres | address</span><br><span class="line"> public   | idx_fk_country_id                                   | 索引 | postgres | city</span><br><span class="line"> public   | idx_fk_customer_id                                  | 索引 | postgres | payment</span><br><span class="line"> public   | idx_fk_film_id                                      | 索引 | postgres | film_actor</span><br><span class="line"> public   | idx_fk_inventory_id                                 | 索引 | postgres | rental</span><br><span class="line"> public   | idx_fk_language_id                                  | 索引 | postgres | film</span><br><span class="line"> public   | idx_fk_rental_id                                    | 索引 | postgres | payment</span><br><span class="line"> public   | idx_fk_staff_id                                     | 索引 | postgres | payment</span><br><span class="line"> public   | idx_fk_store_id                                     | 索引 | postgres | customer</span><br><span class="line"> public   | idx_last_name                                       | 索引 | postgres | customer</span><br><span class="line"> public   | idx_store_id_film_id                                | 索引 | postgres | inventory</span><br><span class="line"> public   | idx_title                                           | 索引 | postgres | film</span><br><span class="line"> public   | idx_unq_manager_staff_id                            | 索引 | postgres | store</span><br><span class="line"> public   | idx_unq_rental_rental_date_inventory_id_customer_id | 索引 | postgres | rental</span><br><span class="line"> public   | inventory_pkey                                      | 索引 | postgres | inventory</span><br><span class="line"> public   | language_pkey                                       | 索引 | postgres | language</span><br><span class="line"> public   | payment_pkey                                        | 索引 | postgres | payment</span><br><span class="line"> public   | rental_pkey                                         | 索引 | postgres | rental</span><br><span class="line"> public   | staff_pkey                                          | 索引 | postgres | staff</span><br><span class="line"> public   | store_pkey                                          | 索引 | postgres | store</span><br><span class="line">(32 行记录)</span><br></pre></td></tr></table></figure>
+<h3 id="列出指定表的所有字段"><a href="#列出指定表的所有字段" class="headerlink" title="列出指定表的所有字段"></a>列出指定表的所有字段</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \d city</span><br><span class="line">                                          数据表 <span class="string">"public.city"</span></span><br><span class="line">    栏位     |            类型             | 校对规则 |  可空的  |                 预设                  </span><br><span class="line">-------------+-----------------------------+----------+----------+---------------------------------------</span><br><span class="line"> city_id     | <span class="built_in">integer</span>                     |          | not null | nextval(<span class="string">'city_city_id_seq'</span>::regclass)</span><br><span class="line"> city        | character varying(50)       |          | not null | </span><br><span class="line"> country_id  | smallint                    |          | not null | </span><br><span class="line"> last_update | timestamp without time zone |          | not null | now()</span><br><span class="line">索引：</span><br><span class="line">    <span class="string">"city_pkey"</span> PRIMARY KEY, btree (city_id)</span><br><span class="line">    <span class="string">"idx_fk_country_id"</span> btree (country_id)</span><br><span class="line">外部键(FK)限制：</span><br><span class="line">    <span class="string">"fk_city"</span> FOREIGN KEY (country_id) REFERENCES country(country_id)</span><br><span class="line">由引用：</span><br><span class="line">    TABLE <span class="string">"address"</span> CONSTRAINT <span class="string">"fk_address_city"</span> FOREIGN KEY (city_id) REFERENCES city(city_id)</span><br><span class="line">触发器：</span><br><span class="line">    last_updated BEFORE UPDATE ON city FOR EACH ROW EXECUTE FUNCTION last_updated()</span><br></pre></td></tr></table></figure>
+<h3 id="详细查看指定表的基本情况"><a href="#详细查看指定表的基本情况" class="headerlink" title="详细查看指定表的基本情况"></a>详细查看指定表的基本情况</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \d+ city</span><br><span class="line">                                                         数据表 <span class="string">"public.city"</span></span><br><span class="line">    栏位     |            类型             | 校对规则 |  可空的  |                 预设                  |   存储   | 统计目标 | 描述 </span><br><span class="line">-------------+-----------------------------+----------+----------+---------------------------------------+----------+----------+------</span><br><span class="line"> city_id     | <span class="built_in">integer</span>                     |          | not null | nextval(<span class="string">'city_city_id_seq'</span>::regclass) | plain    |          | </span><br><span class="line"> city        | character varying(50)       |          | not null |                                       | extended |          | </span><br><span class="line"> country_id  | smallint                    |          | not null |                                       | plain    |          | </span><br><span class="line"> last_update | timestamp without time zone |          | not null | now()                                 | plain    |          | </span><br><span class="line">索引：</span><br><span class="line">    <span class="string">"city_pkey"</span> PRIMARY KEY, btree (city_id)</span><br><span class="line">    <span class="string">"idx_fk_country_id"</span> btree (country_id)</span><br><span class="line">外部键(FK)限制：</span><br><span class="line">    <span class="string">"fk_city"</span> FOREIGN KEY (country_id) REFERENCES country(country_id)</span><br><span class="line">由引用：</span><br><span class="line">    TABLE <span class="string">"address"</span> CONSTRAINT <span class="string">"fk_address_city"</span> FOREIGN KEY (city_id) REFERENCES city(city_id)</span><br><span class="line">触发器：</span><br><span class="line">    last_updated BEFORE UPDATE ON city FOR EACH ROW EXECUTE FUNCTION last_updated()</span><br><span class="line">访问方法 heap</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/zabbix1/" rel="next" title="Zabbix批量监控网络设备">
+                <i class="fa fa-chevron-left"></i> Zabbix批量监控网络设备
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">27</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化数据库并启用"><span class="nav-number">2.</span> <span class="nav-text">初始化数据库并启用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用postgres用户登录"><span class="nav-number">3.</span> <span class="nav-text">使用postgres用户登录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#登录postgresql数据库"><span class="nav-number">4.</span> <span class="nav-text">登录postgresql数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看角色"><span class="nav-number">5.</span> <span class="nav-text">查看角色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看数据库"><span class="nav-number">6.</span> <span class="nav-text">查看数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看所有表信息"><span class="nav-number">7.</span> <span class="nav-text">查看所有表信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改默认用户postgres的密码"><span class="nav-number">8.</span> <span class="nav-text">修改默认用户postgres的密码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改访问控制协议"><span class="nav-number">9.</span> <span class="nav-text">修改访问控制协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#监听所有"><span class="nav-number">9.1.</span> <span class="nav-text">监听所有</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更改访问控制和认证协议"><span class="nav-number">9.2.</span> <span class="nav-text">更改访问控制和认证协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">9.3.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更改本地认证"><span class="nav-number">9.4.</span> <span class="nav-text">更改本地认证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建数据库并赋予权限"><span class="nav-number">10.</span> <span class="nav-text">创建数据库并赋予权限</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建用户"><span class="nav-number">10.1.</span> <span class="nav-text">创建用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建数据库并给定拥有者"><span class="nav-number">10.2.</span> <span class="nav-text">创建数据库并给定拥有者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#授权该用户对数据库的所有权限"><span class="nav-number">10.3.</span> <span class="nav-text">授权该用户对数据库的所有权限</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看数据库-1"><span class="nav-number">11.</span> <span class="nav-text">查看数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看表信息"><span class="nav-number">12.</span> <span class="nav-text">查看表信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看所有视图信息"><span class="nav-number">13.</span> <span class="nav-text">查看所有视图信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看数据库会话情况"><span class="nav-number">14.</span> <span class="nav-text">查看数据库会话情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除PID"><span class="nav-number">15.</span> <span class="nav-text">删除PID</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除数据库"><span class="nav-number">16.</span> <span class="nav-text">删除数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见PostgreSQL命令"><span class="nav-number">17.</span> <span class="nav-text">常见PostgreSQL命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查询数据库版本"><span class="nav-number">17.1.</span> <span class="nav-text">查询数据库版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询当前时间"><span class="nav-number">17.2.</span> <span class="nav-text">查询当前时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询所有用户自定义表的名字"><span class="nav-number">17.3.</span> <span class="nav-text">查询所有用户自定义表的名字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询角色属性"><span class="nav-number">17.4.</span> <span class="nav-text">查询角色属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#列出所有数据库"><span class="nav-number">17.5.</span> <span class="nav-text">列出所有数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#切换数据库"><span class="nav-number">17.6.</span> <span class="nav-text">切换数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看表"><span class="nav-number">17.7.</span> <span class="nav-text">查看表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看表结构"><span class="nav-number">17.8.</span> <span class="nav-text">查看表结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看索引"><span class="nav-number">17.9.</span> <span class="nav-text">查看索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#列出指定表的所有字段"><span class="nav-number">17.10.</span> <span class="nav-text">列出指定表的所有字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#详细查看指定表的基本情况"><span class="nav-number">17.11.</span> <span class="nav-text">详细查看指定表的基本情况</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">328k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">9:06</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
