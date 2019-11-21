@@ -108,25 +108,25 @@
 
 
 
-  <meta name="description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为例。">
-<meta name="keywords" content="zabbix">
+  <meta name="description" content="SELECT语句、ORDER BY子句以及DISTINCT子句的使用。 加载数据 使用pg_restore工具将数据加载到test数据库中  1# pg_restore -U test -d test dvdrental.tar  在-U test指定test用户登录到PostgreSQL数据库服务器。在-d test指定的目标数据库加载。  SELECT语句 SELECT语句具有以下子句：  使">
+<meta name="keywords" content="pg">
 <meta property="og:type" content="article">
-<meta property="og:title" content="切换 zabbix 认证模式">
-<meta property="og:url" content="https://www.flywzj.com/blog/b5448413/index.html">
+<meta property="og:title" content="PostgreSQL之查询数据篇">
+<meta property="og:url" content="https://www.flywzj.com/blog/pg2/index.html">
 <meta property="og:site_name" content="ZhiJian">
-<meta property="og:description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为例。">
+<meta property="og:description" content="SELECT语句、ORDER BY子句以及DISTINCT子句的使用。 加载数据 使用pg_restore工具将数据加载到test数据库中  1# pg_restore -U test -d test dvdrental.tar  在-U test指定test用户登录到PostgreSQL数据库服务器。在-d test指定的目标数据库加载。  SELECT语句 SELECT语句具有以下子句：  使">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-12-31T15:38:23.457Z">
+<meta property="og:updated_time" content="2019-11-21T13:38:49.042Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="切换 zabbix 认证模式">
-<meta name="twitter:description" content="以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为例。">
+<meta name="twitter:title" content="PostgreSQL之查询数据篇">
+<meta name="twitter:description" content="SELECT语句、ORDER BY子句以及DISTINCT子句的使用。 加载数据 使用pg_restore工具将数据加载到test数据库中  1# pg_restore -U test -d test dvdrental.tar  在-U test指定test用户登录到PostgreSQL数据库服务器。在-d test指定的目标数据库加载。  SELECT语句 SELECT语句具有以下子句：  使">
 
 
 
 
 
 
-  <link rel="canonical" href="https://www.flywzj.com/blog/b5448413/">
+  <link rel="canonical" href="https://www.flywzj.com/blog/pg2/">
 
 
 
@@ -136,7 +136,7 @@
   };
 </script>
 
-  <title>切换 zabbix 认证模式 | ZhiJian</title>
+  <title>PostgreSQL之查询数据篇 | ZhiJian</title>
   
 
 
@@ -364,7 +364,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/b5448413/">
+    <link itemprop="mainEntityOfPage" href="https://www.flywzj.com/blog/pg2/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ZhiJian">
@@ -381,7 +381,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">切换 zabbix 认证模式
+          <h1 class="post-title" itemprop="name headline">PostgreSQL之查询数据篇
               
             
           </h1>
@@ -406,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2018-12-31 15:43:46 / 修改时间：23:38:23" itemprop="dateCreated datePublished" datetime="2018-12-31T15:43:46+08:00">2018-12-31</time>
+              <time title="创建时间：2019-11-21 21:32:44 / 修改时间：21:38:49" itemprop="dateCreated datePublished" datetime="2019-11-21T21:32:44+08:00">2019-11-21</time>
             
 
             
@@ -428,7 +428,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/openldap/" itemprop="url" rel="index"><span itemprop="name">openldap</span></a></span>
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
 
                 
                 
@@ -443,8 +443,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/b5448413/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/b5448413/" itemprop="commentCount"></span>
+                <a href="/blog/pg2/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg2/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -473,7 +473,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">1.1k</span>
+                <span title="本文字数">5.2k</span>
               
 
               
@@ -487,7 +487,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">2 分钟</span>
+                <span title="阅读时长">9 分钟</span>
               
             </div>
           
@@ -507,16 +507,106 @@
       
 
       
-        <blockquote>
-<p>以 zabbix 配置了 openLDAP 认证，现在想切换为默认的认证方式为例。</p>
+        <p>SELECT语句、ORDER BY子句以及DISTINCT子句的使用。</p>
+<h2 id="加载数据"><a href="#加载数据" class="headerlink" title="加载数据"></a>加载数据</h2><blockquote>
+<p>使用pg_restore工具将数据加载到test数据库中</p>
 </blockquote>
-<a id="more"></a>
-<h2 id="登陆数据库查看当前认证方式"><a href="#登陆数据库查看当前认证方式" class="headerlink" title="登陆数据库查看当前认证方式"></a>登陆数据库查看当前认证方式</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mysql -u root -p</span></span><br><span class="line">MariaDB [(none)]&gt; use zabbix;</span><br><span class="line">Database changed</span><br><span class="line">MariaDB [zabbix]&gt; show tables like <span class="string">'config'</span>;</span><br><span class="line">+---------------------------+</span><br><span class="line">| Tables_in_zabbix (config) |</span><br><span class="line">+---------------------------+</span><br><span class="line">| config                    |</span><br><span class="line">+---------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line">MariaDB [zabbix]&gt; select authentication_type from config ;</span><br><span class="line">+---------------------+</span><br><span class="line">| authentication_type |</span><br><span class="line">+---------------------+</span><br><span class="line">|                   1 |</span><br><span class="line">+---------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pg_restore -U test -d test dvdrental.tar</span></span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>0 代表Internal,1 代表LDAP，2 代表HTTP。</p>
+<p>在-U test指定test用户登录到PostgreSQL数据库服务器。<br>在-d test指定的目标数据库加载。</p>
 </blockquote>
-<h2 id="更改认证方式为默认认证方式"><a href="#更改认证方式为默认认证方式" class="headerlink" title="更改认证方式为默认认证方式"></a>更改认证方式为默认认证方式</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [zabbix]&gt; update config <span class="built_in">set</span> authentication_type=0;</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 0</span><br><span class="line"></span><br><span class="line">MariaDB [zabbix]&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
-<h2 id="更新-Admin-密码-如需要"><a href="#更新-Admin-密码-如需要" class="headerlink" title="更新 Admin 密码(如需要)"></a>更新 Admin 密码(如需要)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询Admin用户的ID</span></span><br><span class="line">MariaDB [zabbix]&gt; select * from users;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新Admin密码</span></span><br><span class="line">MariaDB [zabbix]&gt; update  users <span class="built_in">set</span> passwd=md5(<span class="string">"zabbix"</span>) <span class="built_in">where</span> userid=<span class="string">'1'</span>;</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 0</span><br><span class="line"></span><br><span class="line">MariaDB [zabbix]&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="SELECT语句"><a href="#SELECT语句" class="headerlink" title="SELECT语句"></a>SELECT语句</h2><blockquote>
+<p>SELECT语句具有以下子句：</p>
+<ul>
+<li>使用DISTINCT运算符选择不同的行。</li>
+</ul>
+<ul>
+<li>使用ORDER BY子句对行进行排序。</li>
+</ul>
+<ul>
+<li>使用WHERE子句过滤行。</li>
+</ul>
+<ul>
+<li>使用LIMITor FETCH子句从表中选择行的子集。</li>
+</ul>
+<ul>
+<li>使用GROUP BY子句将行分组。</li>
+</ul>
+<ul>
+<li>使用HAVING子句过滤组。</li>
+</ul>
+<ul>
+<li>使用诸如INNER JOIN，LEFT JOIN，FULL OUTER JOIN，CROSS JOIN子句之类的联接与其他表联接。</li>
+</ul>
+<ul>
+<li>执行使用集合运算UNION，INTERSECT和EXCEPT。</li>
+</ul>
+</blockquote>
+<h3 id="查询单列"><a href="#查询单列" class="headerlink" title="查询单列"></a>查询单列</h3><blockquote>
+<p>查找所有客户的名字</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; SELECT first_name FROM customer;</span><br></pre></td></tr></table></figure>
+<h3 id="查询多列"><a href="#查询多列" class="headerlink" title="查询多列"></a>查询多列</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; SELECT first_name,last_name,email FROM customer;</span><br></pre></td></tr></table></figure>
+<h3 id="查询所有列"><a href="#查询所有列" class="headerlink" title="查询所有列"></a>查询所有列</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; SELECT * FROM customer;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>语句中使用星号（*）不是一个好习惯:</p>
+<ul>
+<li>假设有一个包含许多列的大表，SELECT带星号（*）的简写语句将从表的所有列中检索数据，这可能不是必需的。</li>
+</ul>
+<ul>
+<li>从数据库检索不必要的数据会增加数据库和应用程序层之间的流量。</li>
+</ul>
+</blockquote>
+<h3 id="将SELECT语句与表达式结合使用"><a href="#将SELECT语句与表达式结合使用" class="headerlink" title="将SELECT语句与表达式结合使用"></a>将SELECT语句与表达式结合使用</h3><blockquote>
+<p>使用该SELECT语句返回所有客户的全名和电子邮件:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; SELECT first_name || <span class="string">' '</span> || last_name AS full_name,email FROM customer;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用串联运算符 || 串联每个客户的名字，空格和姓氏。另外，使用列别名 AS full_name为表达式分配列标题。</p>
+</blockquote>
+<h2 id="ORDER-BY子句"><a href="#ORDER-BY子句" class="headerlink" title="ORDER BY子句"></a>ORDER BY子句</h2><blockquote>
+<p>当从表中查询数据时，PostgreSQL将按插入表中的顺序返回行。为了对结果集进行排序，可以在SELECT语句中使用ORDER BY子句。该ORDER BY子句允许根据指定的条件以升序或降序对从SELECT语句返回的行进行排序。</p>
+</blockquote>
+<h3 id="ORDER-BY-子句的语法"><a href="#ORDER-BY-子句的语法" class="headerlink" title="ORDER BY 子句的语法"></a>ORDER BY 子句的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   column_1,</span><br><span class="line">   column_2</span><br><span class="line">FROM</span><br><span class="line">   tbl_name</span><br><span class="line">ORDER BY</span><br><span class="line">   column_1 ASC,</span><br><span class="line">   column_2 DESC;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>首先，在ORDER BY子句中指定要排序的列。如果基于多列对结果集进行排序，请使用逗号在两列之间进行分隔。</p>
+</blockquote>
+<blockquote>
+<p>第二，ASC按升序对结果集进行排序，DESC按降序对结果集进行排序。如果保留为空，则该ORDER BY子句默认使用ASC。</p>
+</blockquote>
+<h3 id="按名字升序对客户进行排序"><a href="#按名字升序对客户进行排序" class="headerlink" title="按名字升序对客户进行排序"></a>按名字升序对客户进行排序</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; SELECT first_name,last_name FROM customer ORDER BY first_name ;</span><br><span class="line"> first_name  |  last_name   </span><br><span class="line">-------------+--------------</span><br><span class="line"> Aaron       | Selby</span><br><span class="line"> Adam        | Gooch</span><br><span class="line"> Adrian      | Clary</span><br><span class="line"> Agnes       | Bishop</span><br><span class="line"> Alan        | Kahn</span><br><span class="line"> Albert      | Crouse</span><br><span class="line"> Alberto     | Henning</span><br><span class="line"> Alex        | Gresham</span><br><span class="line"> Alexander   | Fennell</span><br><span class="line"> Alfred      | Casillas</span><br><span class="line"> Alfredo     | Mcadams</span><br><span class="line"> Alice       | Stewart</span><br><span class="line"> Alicia      | Mills</span><br><span class="line"> Allan       | Cornish</span><br><span class="line"> Allen       | Butterfield</span><br><span class="line"> Allison     | Stanley</span><br><span class="line"> Alma        | Austin</span><br><span class="line"> Alvin       | Deloach</span><br><span class="line"> Amanda      | Carter</span><br><span class="line"> --More--</span><br></pre></td></tr></table></figure>
+<h3 id="按姓氏降序对客户进行排序"><a href="#按姓氏降序对客户进行排序" class="headerlink" title="按姓氏降序对客户进行排序"></a>按姓氏降序对客户进行排序</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; SELECT first_name,last_name FROM customer ORDER BY last_name DESC;</span><br><span class="line"> first_name  |  last_name   </span><br><span class="line">-------------+--------------</span><br><span class="line"> Cynthia     | Young</span><br><span class="line"> Marvin      | Yee</span><br><span class="line"> Luis        | Yanez</span><br><span class="line"> Brian       | Wyman</span><br><span class="line"> Brenda      | Wright</span><br><span class="line"> Tyler       | Wren</span><br><span class="line"> Florence    | Woods</span><br><span class="line"> Lori        | Wood</span><br><span class="line"> Virgil      | Wofford</span><br><span class="line"> Darren      | Windham</span><br><span class="line"> Susan       | Wilson</span><br><span class="line"> Bernice     | Willis</span><br><span class="line"> Gina        | Williamson</span><br><span class="line"> Linda       | Williams</span><br><span class="line"> Jon         | Wiles</span><br><span class="line"> Roy         | Whiting</span><br><span class="line"> Betty       | White</span><br><span class="line"> Lucy        | Wheeler</span><br><span class="line"> Fred        | Wheat</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<h3 id="对多列进行排序"><a href="#对多列进行排序" class="headerlink" title="对多列进行排序"></a>对多列进行排序</h3><blockquote>
+<p>先按名字升序对客户排序，然后按姓氏降序对排序结果集进行排序</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; SELECT first_name,last_name FROM customer ORDER BY first_name ASC,last_name DESC;</span><br><span class="line"> first_name  |  last_name   </span><br><span class="line">-------------+--------------</span><br><span class="line"> Aaron       | Selby</span><br><span class="line"> Adam        | Gooch</span><br><span class="line"> Adrian      | Clary</span><br><span class="line"> Agnes       | Bishop</span><br><span class="line"> Alan        | Kahn</span><br><span class="line"> Albert      | Crouse</span><br><span class="line"> Alberto     | Henning</span><br><span class="line"> Alex        | Gresham</span><br><span class="line"> Alexander   | Fennell</span><br><span class="line"> Alfred      | Casillas</span><br><span class="line"> Alfredo     | Mcadams</span><br><span class="line"> Alice       | Stewart</span><br><span class="line"> Alicia      | Mills</span><br><span class="line"> Allan       | Cornish</span><br><span class="line"> Allen       | Butterfield</span><br><span class="line"> Allison     | Stanley</span><br><span class="line"> Alma        | Austin</span><br><span class="line"> Alvin       | Deloach</span><br><span class="line"> Amanda      | Carter</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<h2 id="SELECT-DISTINCT子句"><a href="#SELECT-DISTINCT子句" class="headerlink" title="SELECT DISTINCT子句"></a>SELECT DISTINCT子句</h2><h3 id="DISTINCT子句的语法"><a href="#DISTINCT子句的语法" class="headerlink" title="DISTINCT子句的语法"></a>DISTINCT子句的语法</h3><blockquote>
+<p>该DISTINCT子句在SELECT语句中用于从结果集中删除重复的行。该DISTINCT子句为每组重复项保留一行。该DISTINCT子句可用于表的一个或多个列。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   DISTINCT column_1</span><br><span class="line">FROM</span><br><span class="line">   table_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果指定多个列，则该DISTINCT子句将根据这些列的值组合来评估重复项。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   DISTINCT column_1, column_2</span><br><span class="line">FROM</span><br><span class="line">   table_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>PostgreSQL还提供了DISTINCT ON(expression)使用以下语法来保留每组重复项的“第一”行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   DISTINCT ON (column_1) column_alias,</span><br><span class="line">   column_2</span><br><span class="line">FROM</span><br><span class="line">   table_name</span><br><span class="line">ORDER BY</span><br><span class="line">   column_1,</span><br><span class="line">   column_2;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>从SELECT语句返回的行的顺序是不可预测的，因此重复项的每一组的“第一”行也是不可预测的。优良作法是始终将ORDER BY子句与DISTINCT ON(expression)一起使用以使结果集显而易见。同时，DISTINCT ON表达式必须与ORDER BY子句中最左边的表达式匹配。</p>
+</blockquote>
+<h3 id="创建名为t1的表"><a href="#创建名为t1的表" class="headerlink" title="创建名为t1的表"></a>创建名为t1的表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE t1 (</span></span><br><span class="line">   id serial NOT NULL PRIMARY KEY,</span><br><span class="line">   bcolor VARCHAR,</span><br><span class="line">   fcolor VARCHAR</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<h3 id="插入数据"><a href="#插入数据" class="headerlink" title="插入数据"></a>插入数据</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO t1 (bcolor, fcolor)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'red'</span>, <span class="string">'red'</span>),</span><br><span class="line">   (<span class="string">'red'</span>, <span class="string">'red'</span>),</span><br><span class="line">   (<span class="string">'red'</span>, NULL),</span><br><span class="line">   (NULL, <span class="string">'red'</span>),</span><br><span class="line">   (<span class="string">'red'</span>, <span class="string">'green'</span>),</span><br><span class="line">   (<span class="string">'red'</span>, <span class="string">'blue'</span>),</span><br><span class="line">   (<span class="string">'green'</span>, <span class="string">'red'</span>),</span><br><span class="line">   (<span class="string">'green'</span>, <span class="string">'blue'</span>),</span><br><span class="line">   (<span class="string">'green'</span>, <span class="string">'green'</span>),</span><br><span class="line">   (<span class="string">'blue'</span>, <span class="string">'red'</span>),</span><br><span class="line">   (<span class="string">'blue'</span>, <span class="string">'green'</span>),</span><br><span class="line">   (<span class="string">'blue'</span>, <span class="string">'blue'</span>);</span><br><span class="line">INSERT 0 12</span><br></pre></td></tr></table></figure>
+<h3 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   id,</span><br><span class="line">   bcolor,</span><br><span class="line">   fcolor</span><br><span class="line">FROM</span><br><span class="line">   t1;</span><br><span class="line"> id | bcolor | fcolor</span><br><span class="line">----+--------+--------</span><br><span class="line">  1 | red    | red</span><br><span class="line">  2 | red    | red</span><br><span class="line">  3 | red    |</span><br><span class="line">  4 |        | red</span><br><span class="line">  5 | red    | green</span><br><span class="line">  6 | red    | blue</span><br><span class="line">  7 | green  | red</span><br><span class="line">  8 | green  | blue</span><br><span class="line">  9 | green  | green</span><br><span class="line"> 10 | blue   | red</span><br><span class="line"> 11 | blue   | green</span><br><span class="line"> 12 | blue   | blue</span><br><span class="line">(12 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="从单一列选择唯一值并按字母顺序排序"><a href="#从单一列选择唯一值并按字母顺序排序" class="headerlink" title="从单一列选择唯一值并按字母顺序排序"></a>从单一列选择唯一值并按字母顺序排序</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   DISTINCT bcolor</span><br><span class="line">FROM</span><br><span class="line">   t1</span><br><span class="line">ORDER BY</span><br><span class="line">   bcolor;</span><br><span class="line"> bcolor</span><br><span class="line">--------</span><br><span class="line"> blue</span><br><span class="line"> green</span><br><span class="line"> red</span><br><span class="line"></span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="在多个列上使用DISTINCT子句"><a href="#在多个列上使用DISTINCT子句" class="headerlink" title="在多个列上使用DISTINCT子句"></a>在多个列上使用DISTINCT子句</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   DISTINCT bcolor,</span><br><span class="line">   fcolor</span><br><span class="line">FROM</span><br><span class="line">   t1</span><br><span class="line">ORDER BY</span><br><span class="line">   bcolor,</span><br><span class="line">   fcolor;</span><br><span class="line"> bcolor | fcolor</span><br><span class="line">--------+--------</span><br><span class="line"> blue   | blue</span><br><span class="line"> blue   | green</span><br><span class="line"> blue   | red</span><br><span class="line"> green  | blue</span><br><span class="line"> green  | green</span><br><span class="line"> green  | red</span><br><span class="line"> red    | blue</span><br><span class="line"> red    | green</span><br><span class="line"> red    | red</span><br><span class="line"> red    |</span><br><span class="line">        | red</span><br><span class="line">(11 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里删除了一行:red | red，因为他们重复了。</p>
+</blockquote>
+<h3 id="使用DISTINCT-ON"><a href="#使用DISTINCT-ON" class="headerlink" title="使用DISTINCT ON"></a>使用DISTINCT ON</h3><blockquote>
+<p>对列进行排序，去重后，返回第一行。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   DISTINCT ON</span><br><span class="line">   (bcolor) bcolor,</span><br><span class="line">   fcolor</span><br><span class="line">FROM</span><br><span class="line">   t1</span><br><span class="line">ORDER BY</span><br><span class="line">   bcolor,</span><br><span class="line">   fcolor;</span><br><span class="line"> bcolor | fcolor</span><br><span class="line">--------+--------</span><br><span class="line"> blue   | blue</span><br><span class="line"> green  | blue</span><br><span class="line"> red    | blue</span><br><span class="line">        | red</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -559,7 +649,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/zabbix/" rel="tag"><i class="fa fa-tag"></i> zabbix</a>
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
           
         </div>
       
@@ -572,8 +662,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/360wayne/" rel="next" title="部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne">
-                <i class="fa fa-chevron-left"></i> 部署基于 Web 的 Kubernetes 多集群管理平台 -- 360 Wayne
+              <a href="/blog/pg1/" rel="next" title="PostgreSQL初探">
+                <i class="fa fa-chevron-left"></i> PostgreSQL初探
               </a>
             
           </div>
@@ -581,10 +671,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/openldap/" rel="prev" title="部署openLDAP">
-                部署openLDAP <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -836,7 +922,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#登陆数据库查看当前认证方式"><span class="nav-number">1.</span> <span class="nav-text">登陆数据库查看当前认证方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更改认证方式为默认认证方式"><span class="nav-number">2.</span> <span class="nav-text">更改认证方式为默认认证方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新-Admin-密码-如需要"><span class="nav-number">3.</span> <span class="nav-text">更新 Admin 密码(如需要)</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#加载数据"><span class="nav-number">1.</span> <span class="nav-text">加载数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SELECT语句"><span class="nav-number">2.</span> <span class="nav-text">SELECT语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查询单列"><span class="nav-number">2.1.</span> <span class="nav-text">查询单列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询多列"><span class="nav-number">2.2.</span> <span class="nav-text">查询多列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询所有列"><span class="nav-number">2.3.</span> <span class="nav-text">查询所有列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将SELECT语句与表达式结合使用"><span class="nav-number">2.4.</span> <span class="nav-text">将SELECT语句与表达式结合使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ORDER-BY子句"><span class="nav-number">3.</span> <span class="nav-text">ORDER BY子句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ORDER-BY-子句的语法"><span class="nav-number">3.1.</span> <span class="nav-text">ORDER BY 子句的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#按名字升序对客户进行排序"><span class="nav-number">3.2.</span> <span class="nav-text">按名字升序对客户进行排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#按姓氏降序对客户进行排序"><span class="nav-number">3.3.</span> <span class="nav-text">按姓氏降序对客户进行排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对多列进行排序"><span class="nav-number">3.4.</span> <span class="nav-text">对多列进行排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SELECT-DISTINCT子句"><span class="nav-number">4.</span> <span class="nav-text">SELECT DISTINCT子句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DISTINCT子句的语法"><span class="nav-number">4.1.</span> <span class="nav-text">DISTINCT子句的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建名为t1的表"><span class="nav-number">4.2.</span> <span class="nav-text">创建名为t1的表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插入数据"><span class="nav-number">4.3.</span> <span class="nav-text">插入数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询数据"><span class="nav-number">4.4.</span> <span class="nav-text">查询数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从单一列选择唯一值并按字母顺序排序"><span class="nav-number">4.5.</span> <span class="nav-text">从单一列选择唯一值并按字母顺序排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在多个列上使用DISTINCT子句"><span class="nav-number">4.6.</span> <span class="nav-text">在多个列上使用DISTINCT子句</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用DISTINCT-ON"><span class="nav-number">4.7.</span> <span class="nav-text">使用DISTINCT ON</span></a></li></ol></li></ol></div>
             
 
           </div>
