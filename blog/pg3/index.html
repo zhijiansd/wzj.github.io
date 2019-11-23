@@ -108,18 +108,18 @@
 
 
 
-  <meta name="description" content="WHERE子句、LIMIT子句、FETCH子句、IN运算符以及BETWEEN运算符的使用。">
+  <meta name="description" content="WHERE子句、LIMIT子句以及FETCH子句，IN运算符以及BETWEEN运算符的使用。">
 <meta name="keywords" content="pg">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PostgreSQL之过滤数据上篇">
 <meta property="og:url" content="https://www.flywzj.com/blog/pg3/index.html">
 <meta property="og:site_name" content="ZhiJian">
-<meta property="og:description" content="WHERE子句、LIMIT子句、FETCH子句、IN运算符以及BETWEEN运算符的使用。">
+<meta property="og:description" content="WHERE子句、LIMIT子句以及FETCH子句，IN运算符以及BETWEEN运算符的使用。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-11-23T14:39:43.304Z">
+<meta property="og:updated_time" content="2019-11-23T14:50:17.015Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PostgreSQL之过滤数据上篇">
-<meta name="twitter:description" content="WHERE子句、LIMIT子句、FETCH子句、IN运算符以及BETWEEN运算符的使用。">
+<meta name="twitter:description" content="WHERE子句、LIMIT子句以及FETCH子句，IN运算符以及BETWEEN运算符的使用。">
 
 
 
@@ -406,7 +406,7 @@
                 
               
 
-              <time title="创建时间：2019-11-23 22:33:06 / 修改时间：22:39:43" itemprop="dateCreated datePublished" datetime="2019-11-23T22:33:06+08:00">2019-11-23</time>
+              <time title="创建时间：2019-11-23 22:33:06 / 修改时间：22:50:17" itemprop="dateCreated datePublished" datetime="2019-11-23T22:33:06+08:00">2019-11-23</time>
             
 
             
@@ -507,7 +507,7 @@
       
 
       
-        <p>WHERE子句、LIMIT子句、FETCH子句、IN运算符以及BETWEEN运算符的使用。</p>
+        <p>WHERE子句、LIMIT子句以及FETCH子句，IN运算符以及BETWEEN运算符的使用。</p>
 <a id="more"></a>
 <h2 id="WHERE子句"><a href="#WHERE子句" class="headerlink" title="WHERE子句"></a>WHERE子句</h2><h3 id="WHERE子句的语法"><a href="#WHERE子句的语法" class="headerlink" title="WHERE子句的语法"></a>WHERE子句的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT select_list</span><br><span class="line">FROM table_name</span><br><span class="line">WHERE condition;</span><br></pre></td></tr></table></figure>
 <ul>
@@ -520,14 +520,50 @@
 <li>查询返回满足WHERE中条件的行</li>
 </ul>
 <ul>
-<li><p>除了SELECT语句，还可以在UPDATE和DELETE中使用WHERE子句</p>
-<p>操作 |     描述<br>——|——<br>=      |   等于</p>
-<blockquote>
-<pre><code>|   大于
-</code></pre><p>&lt;      |   小于<br>=      | 大于或等于<br>&lt;=      | 小于或等于<br>&lt;&gt;或!=|      不相等<br>AND  |    逻辑运算符AND<br>OR      |    逻辑运算符OR</p>
-</blockquote>
-</li>
+<li>除了SELECT语句，还可以在UPDATE和DELETE中使用WHERE子句</li>
 </ul>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>=</td>
+<td>等于</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>大于</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>小于</td>
+</tr>
+<tr>
+<td>&gt;=</td>
+<td>大于或等于</td>
+</tr>
+<tr>
+<td>&lt;=</td>
+<td>小于或等于</td>
+</tr>
+<tr>
+<td>&lt;&gt;或!=</td>
+<td>不相等</td>
+</tr>
+<tr>
+<td>AND</td>
+<td>逻辑运算符AND</td>
+</tr>
+<tr>
+<td>OR</td>
+<td>逻辑运算符OR</td>
+</tr>
+</tbody>
+</table>
 <h3 id="使用-运算符"><a href="#使用-运算符" class="headerlink" title="使用=运算符"></a>使用=运算符</h3><blockquote>
 <p>获取所有名字为Jamie的客户</p>
 </blockquote>
