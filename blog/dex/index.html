@@ -112,26 +112,26 @@
 <meta name="keywords" content="kubernetes,dex,openldap">
 <meta property="og:type" content="article">
 <meta property="og:title" content="通过Dex和openLDAP进行Kubernetes身份验证">
-<meta property="og:url" content="http://yoursite.com/blog/dex/index.html">
+<meta property="og:url" content="zzhijiansd.github.io/blog/dex/index.html">
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="Dex是一种身份服务，它使用OpenID Connect(简称OIDC)来驱动其他应用程序的身份验证。 Dex通过“connectors.”充当其他身份提供商的门户。这使得dex可以将身份验证延迟(找不到很好的词来形容，只能硬翻了)到LDAP服务器、SAML提供程序或已建立的身份提供程序（如GitHub，Google和Active Directory）。客户端编写一次身份验证逻辑与dex通信，然后">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/blog/dex/dex01.png">
-<meta property="og:image" content="http://yoursite.com/blog/dex/dex02.png">
-<meta property="og:image" content="http://yoursite.com/blog/dex/dex03.png">
-<meta property="og:image" content="http://yoursite.com/blog/dex/dex04.png">
+<meta property="og:image" content="/dex/dex01.png">
+<meta property="og:image" content="/dex/dex02.png">
+<meta property="og:image" content="/dex/dex03.png">
+<meta property="og:image" content="/dex/dex04.png">
 <meta property="og:updated_time" content="2019-02-06T07:44:18.886Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="通过Dex和openLDAP进行Kubernetes身份验证">
 <meta name="twitter:description" content="Dex是一种身份服务，它使用OpenID Connect(简称OIDC)来驱动其他应用程序的身份验证。 Dex通过“connectors.”充当其他身份提供商的门户。这使得dex可以将身份验证延迟(找不到很好的词来形容，只能硬翻了)到LDAP服务器、SAML提供程序或已建立的身份提供程序（如GitHub，Google和Active Directory）。客户端编写一次身份验证逻辑与dex通信，然后">
-<meta name="twitter:image" content="http://yoursite.com/blog/dex/dex01.png">
+<meta name="twitter:image" content="/dex/dex01.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/blog/dex/">
+  <link rel="canonical" href="zzhijiansd.github.io/blog/dex/">
 
 
 
@@ -369,7 +369,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/dex/">
+    <link itemprop="mainEntityOfPage" href="zzhijiansd.github.io/blog/dex/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ZhiJian">
@@ -697,22 +697,22 @@
 <li>浏览器输入 <a href="https://192.168.100.185:32002/" target="_blank" rel="noopener">https://192.168.100.185:32002/</a> (loginapp的nodeport)进行登录</li>
 </ul>
 <ul>
-<li>Authentication for clients : login(login 对应之前 dex 和 Login App Configmap 的配置)<br><img src="/blog/dex/dex01.png" alt="dex01"></li>
+<li>Authentication for clients : login(login 对应之前 dex 和 Login App Configmap 的配置)<br><img src="/dex/dex01.png" alt="dex01"></li>
 </ul>
 <ul>
 <li>点击 “Request Token” 进行登录</li>
 </ul>
 <ul>
-<li>之后，会跳转至 Dex 的网址 <a href="https://192.168.100.185:32000" target="_blank" rel="noopener">https://192.168.100.185:32000</a><br><img src="/blog/dex/dex02.png" alt="dex02"></li>
+<li>之后，会跳转至 Dex 的网址 <a href="https://192.168.100.185:32000" target="_blank" rel="noopener">https://192.168.100.185:32000</a><br><img src="/dex/dex02.png" alt="dex02"></li>
 </ul>
 <ul>
 <li>点击 “Log in with LDAP”</li>
 </ul>
 <ul>
-<li>输入 Username 和 Password ，点击 “Login” 登录生成 id-token<br><img src="/blog/dex/dex03.png" alt="dex03"></li>
+<li>输入 Username 和 Password ，点击 “Login” 登录生成 id-token<br><img src="/dex/dex03.png" alt="dex03"></li>
 </ul>
 <ul>
-<li>根据提示将文件复制至~/.kube/config<br><img src="/blog/dex/dex04.png" alt="dex04"></li>
+<li>根据提示将文件复制至~/.kube/config<br><img src="/dex/dex04.png" alt="dex04"></li>
 </ul>
 <h2 id="ID-Tokens-简单解释"><a href="#ID-Tokens-简单解释" class="headerlink" title="ID Tokens 简单解释"></a>ID Tokens 简单解释</h2><blockquote>
 <p>id-token 实际上有三个部分，每个部分都是Base64编码的JSON，以”.”来分割。第一部分提供令牌的元数据。第二部分提供身份信息，这称为有效负载。第三部分是签名，用于验证令牌是否由可信方发出。</p>

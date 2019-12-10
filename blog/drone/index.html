@@ -112,30 +112,30 @@
 <meta name="keywords" content="docker,gogs,drone">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Drone + Gogs 执行自动构建">
-<meta property="og:url" content="http://yoursite.com/blog/drone/index.html">
+<meta property="og:url" content="zzhijiansd.github.io/blog/drone/index.html">
 <meta property="og:site_name" content="ZhiJian">
 <meta property="og:description" content="Drone 是一种基于容器技术的持续交付系统。Drone 使用YAML配置文件来定义和执行Docker容器中的Pipelines。 Gogs 是一个用Go编写的轻量级git服务器，它设计简单，易于设置和操作。Gogs提供存储库文件查看和编辑，项目问题跟踪以及项目文档的内置wiki。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/blog/drone/gogs01.png">
-<meta property="og:image" content="http://yoursite.com/blog/drone/drone01.png">
-<meta property="og:image" content="http://yoursite.com/blog/drone/drone02.png">
-<meta property="og:image" content="http://yoursite.com/blog/drone/drone03.png">
-<meta property="og:image" content="http://yoursite.com/blog/drone/drone04.png">
-<meta property="og:image" content="http://yoursite.com/blog/drone/drone05.png">
-<meta property="og:image" content="http://yoursite.com/blog/drone/drone06.png">
-<meta property="og:image" content="http://yoursite.com/blog/drone/drone07.png">
+<meta property="og:image" content="/gogs01.png">
+<meta property="og:image" content="/drone01.png">
+<meta property="og:image" content="/drone02.png">
+<meta property="og:image" content="/drone03.png">
+<meta property="og:image" content="/drone04.png">
+<meta property="og:image" content="/drone05.png">
+<meta property="og:image" content="/drone06.png">
+<meta property="og:image" content="/drone07.png">
 <meta property="og:updated_time" content="2019-04-28T09:14:27.612Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Drone + Gogs 执行自动构建">
 <meta name="twitter:description" content="Drone 是一种基于容器技术的持续交付系统。Drone 使用YAML配置文件来定义和执行Docker容器中的Pipelines。 Gogs 是一个用Go编写的轻量级git服务器，它设计简单，易于设置和操作。Gogs提供存储库文件查看和编辑，项目问题跟踪以及项目文档的内置wiki。">
-<meta name="twitter:image" content="http://yoursite.com/blog/drone/gogs01.png">
+<meta name="twitter:image" content="/gogs01.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/blog/drone/">
+  <link rel="canonical" href="zzhijiansd.github.io/blog/drone/">
 
 
 
@@ -373,7 +373,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/drone/">
+    <link itemprop="mainEntityOfPage" href="zzhijiansd.github.io/blog/drone/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ZhiJian">
@@ -529,7 +529,7 @@
 <h2 id="部署-Gogs"><a href="#部署-Gogs" class="headerlink" title="部署 Gogs"></a>部署 Gogs</h2><blockquote>
 <p>这里通过traefik配置的gogs.flywzj.com:3000即可登录配置界面，安装后创建一个新的仓库</p>
 </blockquote>
-<p><img src="/blog/drone/gogs01.png" alt="gogs01"></p>
+<p><img src="/gogs01.png" alt="gogs01"></p>
 <p>注: 数据库主机 —-&gt; mysql:3306 (这里的mysql是container_name)</p>
 <h2 id="启用-Drone"><a href="#启用-Drone" class="headerlink" title="启用 Drone"></a>启用 Drone</h2><blockquote>
 <p>这里通过traefik配置的drone.flywzj.com即可登录，之后输入在gogs上创建的账号和密码即可登录，登录后drone会自动进行同步</p>
@@ -537,15 +537,15 @@
 <blockquote>
 <p>点击”ACTIVATE”激活该代码库</p>
 </blockquote>
-<p><img src="/blog/drone/drone01.png" alt="drone01"></p>
+<p><img src="/drone01.png" alt="drone01"></p>
 <blockquote>
 <p>进入该代码库，点击”SETTINGS”之后，点击”ACTIVATE REPOSITORY”激活储存库</p>
 </blockquote>
-<p><img src="/blog/drone/drone02.png" alt="drone02"></p>
+<p><img src="/drone02.png" alt="drone02"></p>
 <blockquote>
 <p>激活后配置项如下图所示</p>
 </blockquote>
-<p><img src="/blog/drone/drone03.png" alt="drone03"></p>
+<p><img src="/drone03.png" alt="drone03"></p>
 <h2 id="推送代码到-Gogs"><a href="#推送代码到-Gogs" class="headerlink" title="推送代码到 Gogs"></a>推送代码到 Gogs</h2><blockquote>
 <p>注:新建的代码库是无法直接在gogs的web端进行编辑的，需要从远端推送一次后才能在gogs的web端进行编辑</p>
 </blockquote>
@@ -554,16 +554,16 @@
 <h2 id="查看-Drone"><a href="#查看-Drone" class="headerlink" title="查看 Drone"></a>查看 Drone</h2><blockquote>
 <p>构建中的状态显示如下:</p>
 </blockquote>
-<p><img src="/blog/drone/drone04.png" alt="drone04"></p>
+<p><img src="/drone04.png" alt="drone04"></p>
 <blockquote>
 <p>构建完成显示如下:</p>
 </blockquote>
-<p><img src="/blog/drone/drone05.png" alt="drone05"></p>
+<p><img src="/drone05.png" alt="drone05"></p>
 <blockquote>
 <p>点击即可进入查看构建的详细信息:</p>
 </blockquote>
-<p><img src="/blog/drone/drone06.png" alt="drone06"></p>
-<p><img src="/blog/drone/drone07.png" alt="drone07"></p>
+<p><img src="/drone06.png" alt="drone06"></p>
+<p><img src="/drone07.png" alt="drone07"></p>
 <p>附:</p>
 <ul>
 <li>docker-compose文档:<a href="https://docs.docker.com/compose/compose-file/" target="_blank" rel="noopener">https://docs.docker.com/compose/compose-file/</a>    </li>
