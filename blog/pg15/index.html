@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="PostgreSQL视图管理视图 视图是存储查询的数据库对象。可以在PostgreSQL中将视图作为虚拟表进行访问。换句话说，PostgreSQL视图是一个逻辑表，它通过SELECT语句表示一个或多个基础表的数据。请注意，除实例化视图外，视图并不物理存储数据。   视图在某些情况下可能非常有用，例如：  视图可以简化查询的复杂性，因为您可以使用简单的SELECT语句查询基于复杂查询的视图。   像">
+<meta name="keywords" content="pg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL之视图">
+<meta property="og:url" content="zhijiansd.github.io/blog/pg15/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="PostgreSQL视图管理视图 视图是存储查询的数据库对象。可以在PostgreSQL中将视图作为虚拟表进行访问。换句话说，PostgreSQL视图是一个逻辑表，它通过SELECT语句表示一个或多个基础表的数据。请注意，除实例化视图外，视图并不物理存储数据。   视图在某些情况下可能非常有用，例如：  视图可以简化查询的复杂性，因为您可以使用简单的SELECT语句查询基于复杂查询的视图。   像">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-20T05:25:05.587Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL之视图">
+<meta name="twitter:description" content="PostgreSQL视图管理视图 视图是存储查询的数据库对象。可以在PostgreSQL中将视图作为虚拟表进行访问。换句话说，PostgreSQL视图是一个逻辑表，它通过SELECT语句表示一个或多个基础表的数据。请注意，除实例化视图外，视图并不物理存储数据。   视图在某些情况下可能非常有用，例如：  视图可以简化查询的复杂性，因为您可以使用简单的SELECT语句查询基于复杂查询的视图。   像">
+
+
+
+
+
+
+  <link rel="canonical" href="zhijiansd.github.io/blog/pg15/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PostgreSQL之视图 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="zhijiansd.github.io/blog/pg15/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PostgreSQL之视图
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-20 13:23:12 / 修改时间：13:25:05" itemprop="dateCreated datePublished" datetime="2020-05-20T13:23:12+08:00">2020-05-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/pg15/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg15/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">21k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">35 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="PostgreSQL视图"><a href="#PostgreSQL视图" class="headerlink" title="PostgreSQL视图"></a>PostgreSQL视图</h2><h3 id="管理视图"><a href="#管理视图" class="headerlink" title="管理视图"></a>管理视图</h3><blockquote>
+<p>视图是存储查询的数据库对象。可以在PostgreSQL中将视图作为虚拟表进行访问。换句话说，PostgreSQL视图是一个逻辑表，它通过SELECT语句表示一个或多个基础表的数据。请注意，除实例化视图外，视图并不物理存储数据。</p>
+</blockquote>
+<blockquote>
+<p>视图在某些情况下可能非常有用，例如：</p>
+<ul>
+<li>视图可以简化查询的复杂性，因为您可以使用简单的SELECT语句查询基于复杂查询的视图。</li>
+</ul>
+<ul>
+<li>像表一样，您可以通过包含用户被授权查看的特定数据的视图向用户授予权限。</li>
+</ul>
+<ul>
+<li>一个视图提供了一个一致的层，即使基础表的列发生了变化。</li>
+</ul>
+</blockquote>
+<h4 id="创建PostgreSQL视图"><a href="#创建PostgreSQL视图" class="headerlink" title="创建PostgreSQL视图"></a>创建PostgreSQL视图</h4><h5 id="CREATE-VIEW语法"><a href="#CREATE-VIEW语法" class="headerlink" title="CREATE VIEW语法"></a>CREATE VIEW语法</h5><blockquote>
+<p>要创建视图，我们使用CREATE VIEW语句。 CREATE VIEW语句的最简单语法如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE VIEW view_name AS query;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>首先，在CREATE VIEW子句之后指定视图的名称，然后在AS关键字之后放置一个查询。查询可以是简单的SELECT语句，也可以是带有连接的复杂的SELECT语句。</p>
+</blockquote>
+<h5 id="CREATE-VIEW示例"><a href="#CREATE-VIEW示例" class="headerlink" title="CREATE VIEW示例"></a>CREATE VIEW示例</h5><blockquote>
+<p>例如，在示例数据库中，我们有四个表:</p>
+<ul>
+<li>customer – 存储所有客户数据</li>
+</ul>
+<ul>
+<li>address  – 客户的商店地址</li>
+</ul>
+<ul>
+<li>city     – 存储城市数据</li>
+</ul>
+<ul>
+<li>country  – 存储国家数据</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>如果要获取完整的客户数据，通常可以按以下方式构造联接语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT cu.customer_id AS id,</span></span><br><span class="line">    cu.first_name || <span class="string">' '</span> || cu.last_name AS name,</span><br><span class="line">    a.address,</span><br><span class="line">    a.postal_code AS <span class="string">"zip code"</span>,</span><br><span class="line">    a.phone,</span><br><span class="line">    city.city,</span><br><span class="line">    country.country,</span><br><span class="line">        CASE</span><br><span class="line">            WHEN cu.activebool THEN <span class="string">'active'</span></span><br><span class="line">            ELSE <span class="string">''</span></span><br><span class="line">        END AS notes,</span><br><span class="line">    cu.store_id AS sid</span><br><span class="line">   FROM customer cu</span><br><span class="line">     INNER JOIN address a USING (address_id)</span><br><span class="line">     INNER JOIN city USING (city_id)</span><br><span class="line">     INNER JOIN country USING (country_id);</span><br><span class="line"> id  |         name          |                address                 | zip code |    phone     |            city            |                country                | notes  | sid </span><br><span class="line">-----+-----------------------+----------------------------------------+----------+--------------+----------------------------+---------------------------------------+--------+-----</span><br><span class="line"> 524 | Jared Ely             | 1003 Qinhuangdao Street                | 25972    | 35533115997  | Purwakarta                 | Indonesia                             | active |   1</span><br><span class="line">   1 | Mary Smith            | 1913 Hanoi Way                         | 35200    | 28303384290  | Sasebo                     | Japan                                 | active |   1</span><br><span class="line">   2 | Patricia Johnson      | 1121 Loja Avenue                       | 17886    | 838635286649 | San Bernardino             | United States                         | active |   1</span><br><span class="line">   3 | Linda Williams        | 692 Joliet Street                      | 83579    | 448477190408 | Athenai                    | Greece                                | active |   1</span><br><span class="line">   4 | Barbara Jones         | 1566 Inegl Manor                       | 53561    | 705814003527 | Myingyan                   | Myanmar                               | active |   2</span><br><span class="line">   5 | Elizabeth Brown       | 53 Idfu Parkway                        | 42399    | 10655648674  | Nantou                     | Taiwan                                | active |   1</span><br><span class="line">   6 | Jennifer Davis        | 1795 Santiago de Compostela Way        | 18743    | 860452626434 | Laredo                     | United States                         | active |   2</span><br><span class="line">   7 | Maria Miller          | 900 Santiago de Compostela Parkway     | 93896    | 716571220373 | Kragujevac                 | Yugoslavia                            | active |   1</span><br><span class="line">   8 | Susan Wilson          | 478 Joliet Way                         | 77948    | 657282285970 | Hamilton                   | New Zealand                           | active |   2</span><br><span class="line">   9 | Margaret Moore        | 613 Korolev Drive                      | 45844    | 380657522649 | Masqat                     | Oman                                  | active |   2</span><br><span class="line">  10 | Dorothy Taylor        | 1531 Sal Drive                         | 53628    | 648856936185 | Esfahan                    | Iran                                  | active |   1</span><br><span class="line">  11 | Lisa Anderson         | 1542 Tarlac Parkway                    | 1027     | 635297277345 | Sagamihara                 | Japan                                 | active |   2</span><br><span class="line">  12 | Nancy Thomas          | 808 Bhopal Manor                       | 10672    | 465887807014 | Yamuna Nagar               | India                                 | active |   1</span><br><span class="line">  13 | Karen Jackson         | 270 Amroha Parkway                     | 29610    | 695479687538 | Osmaniye                   | Turkey                                | active |   2</span><br><span class="line">  14 | Betty White           | 770 Bydgoszcz Avenue                   | 16266    | 517338314235 | Citrus Heights             | United States                         | active |   2</span><br><span class="line">  15 | Helen Harris          | 419 Iligan Lane                        | 72878    | 990911107354 | Bhopal                     | India                                 | active |   1</span><br><span class="line">  16 | Sandra Martin         | 360 Toulouse Parkway                   | 54308    | 949312333307 | Southend-on-Sea            | United Kingdom                        | active |   2</span><br><span class="line">  17 | Donna Thompson        | 270 Toulon Boulevard                   | 81766    | 407752414682 | Elista                     | Russian Federation                    | active |   1</span><br><span class="line">  18 | Carol Garcia          | 320 Brest Avenue                       | 43331    | 747791594069 | Kaduna                     | Nigeria                               | active |   2</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这个查询非常复杂。但是，可以创建一个名为customer_master的视图，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE VIEW customer_master AS</span></span><br><span class="line">  SELECT cu.customer_id AS id,</span><br><span class="line">    cu.first_name || <span class="string">' '</span> || cu.last_name AS name,</span><br><span class="line">    a.address,</span><br><span class="line">    city.city,</span><br><span class="line">    country.country,</span><br><span class="line">        CASE</span><br><span class="line">            WHEN cu.activebool THEN <span class="string">'active'</span></span><br><span class="line">            ELSE <span class="string">''</span></span><br><span class="line">        END AS notes</span><br><span class="line">   FROM customer cu</span><br><span class="line">     INNER JOIN address a USING (address_id)</span><br><span class="line">     INNER JOIN city USING (city_id)</span><br><span class="line">     INNER JOIN country USING (country_id);</span><br><span class="line">CREATE VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>从现在开始，每当需要获取完整的客户数据时，只需执行以下简单的SELECT语句即可从视图中查询数据：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> id  |         name          |                address                 |            city            |                country                | notes  </span><br><span class="line">-----+-----------------------+----------------------------------------+----------------------------+---------------------------------------+--------</span><br><span class="line"> 524 | Jared Ely             | 1003 Qinhuangdao Street                | Purwakarta                 | Indonesia                             | active</span><br><span class="line">   1 | Mary Smith            | 1913 Hanoi Way                         | Sasebo                     | Japan                                 | active</span><br><span class="line">   2 | Patricia Johnson      | 1121 Loja Avenue                       | San Bernardino             | United States                         | active</span><br><span class="line">   3 | Linda Williams        | 692 Joliet Street                      | Athenai                    | Greece                                | active</span><br><span class="line">   4 | Barbara Jones         | 1566 Inegl Manor                       | Myingyan                   | Myanmar                               | active</span><br><span class="line">   5 | Elizabeth Brown       | 53 Idfu Parkway                        | Nantou                     | Taiwan                                | active</span><br><span class="line">   6 | Jennifer Davis        | 1795 Santiago de Compostela Way        | Laredo                     | United States                         | active</span><br><span class="line">   7 | Maria Miller          | 900 Santiago de Compostela Parkway     | Kragujevac                 | Yugoslavia                            | active</span><br><span class="line">   8 | Susan Wilson          | 478 Joliet Way                         | Hamilton                   | New Zealand                           | active</span><br><span class="line">   9 | Margaret Moore        | 613 Korolev Drive                      | Masqat                     | Oman                                  | active</span><br><span class="line">  10 | Dorothy Taylor        | 1531 Sal Drive                         | Esfahan                    | Iran                                  | active</span><br><span class="line">  11 | Lisa Anderson         | 1542 Tarlac Parkway                    | Sagamihara                 | Japan                                 | active</span><br><span class="line">  12 | Nancy Thomas          | 808 Bhopal Manor                       | Yamuna Nagar               | India                                 | active</span><br><span class="line">  13 | Karen Jackson         | 270 Amroha Parkway                     | Osmaniye                   | Turkey                                | active</span><br><span class="line">  14 | Betty White           | 770 Bydgoszcz Avenue                   | Citrus Heights             | United States                         | active</span><br><span class="line">  15 | Helen Harris          | 419 Iligan Lane                        | Bhopal                     | India                                 | active</span><br><span class="line">  16 | Sandra Martin         | 360 Toulouse Parkway                   | Southend-on-Sea            | United Kingdom                        | active</span><br><span class="line">  17 | Donna Thompson        | 270 Toulon Boulevard                   | Elista                     | Russian Federation                    | active</span><br><span class="line">  18 | Carol Garcia          | 320 Brest Avenue                       | Kaduna                     | Nigeria                               | active</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<h4 id="更改PostgreSQL视图"><a href="#更改PostgreSQL视图" class="headerlink" title="更改PostgreSQL视图"></a>更改PostgreSQL视图</h4><h5 id="更改视图语法"><a href="#更改视图语法" class="headerlink" title="更改视图语法"></a>更改视图语法</h5><blockquote>
+<p>要更改视图的定义查询，请使用CREATE VIEW带有OR REPLACE以下内容的语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE OR REPLACE VIEW view_name</span><br><span class="line">AS</span><br><span class="line">query</span><br></pre></td></tr></table></figure>
+<h5 id="更改视图示例"><a href="#更改视图示例" class="headerlink" title="更改视图示例"></a>更改视图示例</h5><blockquote>
+<p>将电话号码添加到customer_master视图，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE VIEW customer_master AS</span></span><br><span class="line">  SELECT cu.customer_id AS id,</span><br><span class="line">    cu.first_name || <span class="string">' '</span> || cu.last_name AS name,</span><br><span class="line">    a.address,</span><br><span class="line">    city.city,</span><br><span class="line">    country.country,</span><br><span class="line">        CASE</span><br><span class="line">            WHEN cu.activebool THEN <span class="string">'active'</span></span><br><span class="line">            ELSE <span class="string">''</span></span><br><span class="line">        END AS notes,</span><br><span class="line">    a.phone</span><br><span class="line">   FROM customer cu</span><br><span class="line">     INNER JOIN address a USING (address_id)</span><br><span class="line">     INNER JOIN city USING (city_id)</span><br><span class="line">     INNER JOIN country USING (country_id);</span><br><span class="line">CREATE VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>现在，从customer_master视图中选择数据，您将在列表末尾看到phone列。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   customer_master;</span><br><span class="line">id  |         name          |                address                 |            city            |                country                | notes  |    phone     </span><br><span class="line">-----+-----------------------+----------------------------------------+----------------------------+---------------------------------------+--------+--------------</span><br><span class="line"> 524 | Jared Ely             | 1003 Qinhuangdao Street                | Purwakarta                 | Indonesia                             | active | 35533115997</span><br><span class="line">   1 | Mary Smith            | 1913 Hanoi Way                         | Sasebo                     | Japan                                 | active | 28303384290</span><br><span class="line">   2 | Patricia Johnson      | 1121 Loja Avenue                       | San Bernardino             | United States                         | active | 838635286649</span><br><span class="line">   3 | Linda Williams        | 692 Joliet Street                      | Athenai                    | Greece                                | active | 448477190408</span><br><span class="line">   4 | Barbara Jones         | 1566 Inegl Manor                       | Myingyan                   | Myanmar                               | active | 705814003527</span><br><span class="line">   5 | Elizabeth Brown       | 53 Idfu Parkway                        | Nantou                     | Taiwan                                | active | 10655648674</span><br><span class="line">   6 | Jennifer Davis        | 1795 Santiago de Compostela Way        | Laredo                     | United States                         | active | 860452626434</span><br><span class="line">   7 | Maria Miller          | 900 Santiago de Compostela Parkway     | Kragujevac                 | Yugoslavia                            | active | 716571220373</span><br><span class="line">   8 | Susan Wilson          | 478 Joliet Way                         | Hamilton                   | New Zealand                           | active | 657282285970</span><br><span class="line">   9 | Margaret Moore        | 613 Korolev Drive                      | Masqat                     | Oman                                  | active | 380657522649</span><br><span class="line">  10 | Dorothy Taylor        | 1531 Sal Drive                         | Esfahan                    | Iran                                  | active | 648856936185</span><br><span class="line">  11 | Lisa Anderson         | 1542 Tarlac Parkway                    | Sagamihara                 | Japan                                 | active | 635297277345</span><br><span class="line">  12 | Nancy Thomas          | 808 Bhopal Manor                       | Yamuna Nagar               | India                                 | active | 465887807014</span><br><span class="line">  13 | Karen Jackson         | 270 Amroha Parkway                     | Osmaniye                   | Turkey                                | active | 695479687538</span><br><span class="line">  14 | Betty White           | 770 Bydgoszcz Avenue                   | Citrus Heights             | United States                         | active | 517338314235</span><br><span class="line">  15 | Helen Harris          | 419 Iligan Lane                        | Bhopal                     | India                                 | active | 990911107354</span><br><span class="line">  16 | Sandra Martin         | 360 Toulouse Parkway                   | Southend-on-Sea            | United Kingdom                        | active | 949312333307</span><br><span class="line">  17 | Donna Thompson        | 270 Toulon Boulevard                   | Elista                     | Russian Federation                    | active | 407752414682</span><br><span class="line">  18 | Carol Garcia          | 320 Brest Avenue                       | Kaduna                     | Nigeria                               | active | 747791594069</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要更改视图的定义，请使用ALTER VIEW语句。例如，将视图的名称从customer_master更改为customer_info：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># ALTER VIEW customer_master RENAME TO customer_info;</span></span><br><span class="line">ALTER VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>PostgreSQL允许您设置列名的默认值，更改视图的架构，设置或重置视图的选项。</p>
+</blockquote>
+<h4 id="删除PostgreSQL视图"><a href="#删除PostgreSQL视图" class="headerlink" title="删除PostgreSQL视图"></a>删除PostgreSQL视图</h4><blockquote>
+<p>要删除PostgreSQL中的现有视图，请使用DROP VIEW语句，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP VIEW [ IF EXISTS ] view_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>可以在DROP VIEW子句之后指定要删除的视图的名称。删除数据库中不存在的视图将导致错误。为了避免这种情况，通常在语句中添加IF EXISTS选项，以指示PostgreSQL删除该视图（如果存在），否则，什么也不做。</p>
+</blockquote>
+<blockquote>
+<p>例如，要删除已创建的customer_info视图，请执行以下查询：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DROP VIEW IF EXISTS customer_info;</span></span><br><span class="line">DROP VIEW</span><br></pre></td></tr></table></figure>
+<h3 id="创建可更新视图"><a href="#创建可更新视图" class="headerlink" title="创建可更新视图"></a>创建可更新视图</h3><blockquote>
+<p>满足以下条件的PostgreSQL视图是可更新的：</p>
+<ul>
+<li>视图的定义查询必须在FROM子句中恰好具有一个条目，该条目可以是表或另一个可更新的视图。</li>
+</ul>
+<ul>
+<li>定义查询不得在顶层包含以下子句之一：GROUP BY，HAVING，LIMIT，OFFSET，DISTINCT，WITH，UNION，INTERSECT和EXCEPT。</li>
+</ul>
+<ul>
+<li>选择列表不得包含任何窗口函数，任何返回集合的函数或任何聚合函数，例如SUM，COUNT，AVG，MIN和MAX。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>可更新视图可以同时包含可更新列和不可更新列。如果尝试插入或更新不可更新的列，PostgreSQL将引发错误。</p>
+</blockquote>
+<blockquote>
+<p>当执行诸如INSERT，UPDATE或DELETE之类的更新操作时，PosgreSQL会将此语句转换为基础表的相应语句。</p>
+</blockquote>
+<blockquote>
+<p>如果在视图的定义查询中有WHERE条件，仍然可以更新或删除在视图中不可见的行。但是，如果要避免这种情况，可以在定义视图时使用CHECK OPTION。</p>
+</blockquote>
+<blockquote>
+<p>执行更新操作时，必须在视图上具有相应的特权，但不必在基础表上具有特权。但是，视图所有者必须具有基础表的相关特权。</p>
+</blockquote>
+<blockquote>
+<p>使用CREATE VIEW语句创建一个新的可更新视图count:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE VIEW count AS SELECT</span></span><br><span class="line">   city,</span><br><span class="line">   country_id</span><br><span class="line">FROM</span><br><span class="line">   city</span><br><span class="line">WHERE</span><br><span class="line">   country_id = 103;</span><br><span class="line">CREATE VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>接下来，通过执行以下SELECT语句检查count视图中的数据：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   count;</span><br><span class="line">          city           | country_id </span><br><span class="line">-------------------------+------------</span><br><span class="line"> Akron                   |        103</span><br><span class="line"> Arlington               |        103</span><br><span class="line"> Augusta-Richmond County |        103</span><br><span class="line"> Aurora                  |        103</span><br><span class="line"> Bellevue                |        103</span><br><span class="line"> Brockton                |        103</span><br><span class="line"> Cape Coral              |        103</span><br><span class="line"> Citrus Heights          |        103</span><br><span class="line"> Clarksville             |        103</span><br><span class="line"> Compton                 |        103</span><br><span class="line"> Dallas                  |        103</span><br><span class="line"> Dayton                  |        103</span><br><span class="line"> El Monte                |        103</span><br><span class="line"> Fontana                 |        103</span><br><span class="line"> Garden Grove            |        103</span><br><span class="line"> Garland                 |        103</span><br><span class="line"> Grand Prairie           |        103</span><br><span class="line"> Greensboro              |        103</span><br><span class="line"> Joliet                  |        103</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>然后，使用INSERT语句通过count视图将新城市插入到city表中：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO count (city, country_id)</span></span><br><span class="line">VALUES(<span class="string">'San Jose'</span>, 103);</span><br><span class="line">INSERT 0 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>之后，检查city表的内容：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   city,</span><br><span class="line">   country_id</span><br><span class="line">FROM</span><br><span class="line">   city</span><br><span class="line">WHERE</span><br><span class="line">   country_id = 103</span><br><span class="line">ORDER BY</span><br><span class="line">   last_update DESC;</span><br><span class="line">          city           | country_id </span><br><span class="line">-------------------------+------------</span><br><span class="line"> San Jose                |        103</span><br><span class="line"> Arlington               |        103</span><br><span class="line"> Augusta-Richmond County |        103</span><br><span class="line"> Aurora                  |        103</span><br><span class="line"> Bellevue                |        103</span><br><span class="line"> Brockton                |        103</span><br><span class="line"> Cape Coral              |        103</span><br><span class="line"> Citrus Heights          |        103</span><br><span class="line"> Clarksville             |        103</span><br><span class="line"> Compton                 |        103</span><br><span class="line"> Dallas                  |        103</span><br><span class="line"> Dayton                  |        103</span><br><span class="line"> El Monte                |        103</span><br><span class="line"> Fontana                 |        103</span><br><span class="line"> Garden Grove            |        103</span><br><span class="line"> Garland                 |        103</span><br><span class="line"> Grand Prairie           |        103</span><br><span class="line"> Greensboro              |        103</span><br><span class="line"> Akron                   |        103</span><br><span class="line">--More--</span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line">&gt; 最后，删除已通过count视图添加的条目。</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE</span></span><br><span class="line">FROM</span><br><span class="line">   count</span><br><span class="line">WHERE</span><br><span class="line">   city = <span class="string">'San Jose'</span>;</span><br><span class="line">DELETE 1</span><br></pre></td></tr></table></figure>
+<h3 id="实例化视图"><a href="#实例化视图" class="headerlink" title="实例化视图"></a>实例化视图</h3><blockquote>
+<p>PosgreSQL将视图概念扩展到了一个新级别，该视图允许视图物理存储数据，我们称这些视图为实例化视图。实例化视图缓存复杂的昂贵查询的结果，并允许定期刷新此结果。</p>
+</blockquote>
+<blockquote>
+<p>实例化视图在许多需要快速访问数据的情况下很有用，因此它们通常用于数据仓库或商业智能应用程序中。</p>
+</blockquote>
+<h4 id="创建实例化视图"><a href="#创建实例化视图" class="headerlink" title="创建实例化视图"></a>创建实例化视图</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE MATERIALIZED VIEW view_name</span><br><span class="line">AS</span><br><span class="line">query</span><br><span class="line">WITH [NO] DATA;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在CREATE MATERIALIZED VIEW子句之后指定view_name。</li>
+</ul>
+<ul>
+<li>其次，在AS关键字之后添加从基础表获取数据的查询。</li>
+</ul>
+<ul>
+<li>第三，如果要在创建时将数据加载到实例化视图中，请放置WITH DATA选项，否则放置WITH WITH DATA。如果使用WITH NO DATA，则该视图被标记为不可读。这意味着您无法从视图中查询数据，除非将数据加载到视图中。</li>
+</ul>
+<h4 id="刷新实例化视图的数据"><a href="#刷新实例化视图的数据" class="headerlink" title="刷新实例化视图的数据"></a>刷新实例化视图的数据</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">REFRESH MATERIALIZED VIEW view_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当刷新实例化视图的数据时，PosgreSQL会锁定整个表，因此无法针对该表查询数据。为避免这种情况，可以使用CONCURRENTLY选项:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">REFRESH MATERIALIZED VIEW CONCURRENTLY view_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>刷新实例化视图，而不会锁定实例化视图上的并发选择。没有此选项，影响很多行的刷新将倾向于使用较少的资源并更快地完成，但是可能会阻止其他尝试从实例化视图读取的连接。在少数行受到影响的情况下，此选项可能会更快。</p>
+</blockquote>
+<blockquote>
+<p>使用CONCURRENTLY选项，PostgreSQL创建实例化视图的临时更新版本，比较两个版本，并仅执行差异中的INSERT和UPDATE。可以在实例化视图更新时对其进行查询。使用CONCURRENTLY选项的一项要求是，实例化视图必须具有UNIQUE索引。</p>
+</blockquote>
+<h4 id="删除实例化视图"><a href="#删除实例化视图" class="headerlink" title="删除实例化视图"></a>删除实例化视图</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP MATERIALIZED VIEW view_name;</span><br></pre></td></tr></table></figure>
+<h4 id="实例化视图示例"><a href="#实例化视图示例" class="headerlink" title="实例化视图示例"></a>实例化视图示例</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE MATERIALIZED VIEW rental_by_category</span></span><br><span class="line">AS</span><br><span class="line">SELECT c.name AS category,</span><br><span class="line">    sum(p.amount) AS total_sales</span><br><span class="line">   FROM (((((payment p</span><br><span class="line">     JOIN rental r ON ((p.rental_id = r.rental_id)))</span><br><span class="line">     JOIN inventory i ON ((r.inventory_id = i.inventory_id)))</span><br><span class="line">     JOIN film f ON ((i.film_id = f.film_id)))</span><br><span class="line">     JOIN film_category <span class="built_in">fc</span> ON ((f.film_id = fc.film_id)))</span><br><span class="line">     JOIN category c ON ((fc.category_id = c.category_id)))</span><br><span class="line">  GROUP BY c.name</span><br><span class="line">  ORDER BY sum(p.amount) DESC</span><br><span class="line">WITH NO DATA;</span><br><span class="line">CREATE MATERIALIZED VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>因为使用了WITH NO DATA选项，所以无法从视图中查询数据。如果我们尝试这样做，则会收到如下错误消息：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   rental_by_category;</span><br><span class="line">错误:  物化视图 <span class="string">"rental_by_category"</span>未被初始化</span><br><span class="line">HINT:  使用命令 REFRESH MATERIALIZED VIEW.</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>初始化视图</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># REFRESH MATERIALIZED VIEW rental_by_category;</span></span><br><span class="line">REFRESH MATERIALIZED VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>再次查询数据</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   rental_by_category;</span><br><span class="line">  category   | total_sales</span><br><span class="line">-------------+-------------</span><br><span class="line"> Sports      |     4892.19</span><br><span class="line"> Sci-Fi      |     4336.01</span><br><span class="line"> Animation   |     4245.31</span><br><span class="line"> Drama       |     4118.46</span><br><span class="line"> Comedy      |     4002.48</span><br><span class="line"> New         |     3966.38</span><br><span class="line"> Action      |     3951.84</span><br><span class="line"> Foreign     |     3934.47</span><br><span class="line"> Games       |     3922.18</span><br><span class="line"> Family      |     3830.15</span><br><span class="line"> Documentary |     3749.65</span><br><span class="line"> Horror      |     3401.27</span><br><span class="line"> Classics    |     3353.38</span><br><span class="line"> Children    |     3309.39</span><br><span class="line"> Travel      |     3227.36</span><br><span class="line"> Music       |     3071.52</span><br><span class="line">(16 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用REFRESH MATERIALIZED VIEW语句刷新rental_by_category视图中的数据。但是，要使用CONCURRENTLY选项刷新它，我们需要首先为视图创建一个UNIQUE索引。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE UNIQUE INDEX rental_category ON rental_by_category (category);</span></span><br><span class="line">CREATE INDEX</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>同时为Rental_by_category视图刷新数据</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># REFRESH MATERIALIZED VIEW CONCURRENTLY rental_by_category;</span></span><br><span class="line">REFRESH MATERIALIZED VIEW</span><br></pre></td></tr></table></figure>
+<h3 id="使用WITH-CHECK-OPTION子句创建可更新视图"><a href="#使用WITH-CHECK-OPTION子句创建可更新视图" class="headerlink" title="使用WITH CHECK OPTION子句创建可更新视图"></a>使用WITH CHECK OPTION子句创建可更新视图</h3><h4 id="示例1"><a href="#示例1" class="headerlink" title="示例1"></a>示例1</h4><blockquote>
+<p>创建一个名为usa_city的可更新视图</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE VIEW usa_city AS SELECT</span></span><br><span class="line">   city_id,</span><br><span class="line">   city,</span><br><span class="line">   country_id</span><br><span class="line">FROM</span><br><span class="line">   city</span><br><span class="line">WHERE</span><br><span class="line">   country_id = 103</span><br><span class="line">ORDER BY</span><br><span class="line">   city;</span><br><span class="line">CREATE VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>通过usa_city将新行插入到city表中</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO usa_city (city, country_id)</span></span><br><span class="line">VALUES (<span class="string">'Birmingham'</span>, 102);</span><br><span class="line"> </span><br><span class="line">INSERT INTO usa_city (city, country_id)</span><br><span class="line">VALUES (<span class="string">'Cambridge'</span>, 102);</span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>为了防止用户插入或更新在视图中不可见的行，请在创建视图时使用WITH CHECK OPTION子句。</p>
+</blockquote>
+<blockquote>
+<p>更改usa_city视图，使其包含WITH CHECK OPTION子句</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE</span></span><br><span class="line">OR REPLACE VIEW usa_city AS SELECT</span><br><span class="line">   city_id,</span><br><span class="line">   city,</span><br><span class="line">   country_id</span><br><span class="line">FROM</span><br><span class="line">   city</span><br><span class="line">WHERE</span><br><span class="line">   country_id = 103</span><br><span class="line">ORDER BY</span><br><span class="line">   city WITH CHECK OPTION;</span><br><span class="line">CREATE VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>更改城市ID将发生错误</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE usa_city</span></span><br><span class="line">SET country_id = 102</span><br><span class="line">WHERE</span><br><span class="line">   city_id = 135;</span><br><span class="line">错误:  新行违反了视图<span class="string">"usa_city"</span>的检查选项</span><br><span class="line">DETAIL:  失败, 行包含(135, Dallas, 102, 2019-12-04 22:21:33.039525).</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这是因为UPDATE语句导致通过usa_city视图看不到正在更新的行。</li>
+</ul>
+<h4 id="用LOCAL和CASCADED检查的范围"><a href="#用LOCAL和CASCADED检查的范围" class="headerlink" title="用LOCAL和CASCADED检查的范围"></a>用LOCAL和CASCADED检查的范围</h4><blockquote>
+<p>首先，创建一个视图，返回名称以字母A开头的所有城市。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE VIEW city_a AS SELECT</span></span><br><span class="line">   city_id,</span><br><span class="line">   city,</span><br><span class="line">   country_id</span><br><span class="line">FROM</span><br><span class="line">   city</span><br><span class="line">WHERE</span><br><span class="line">   city LIKE <span class="string">'A%'</span>;</span><br><span class="line">CREATE VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其次，创建另一个视图，以返回名称以字母A开头并位于美国的城市。该city_a_usa视图基于city_a视图。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE</span></span><br><span class="line">OR REPLACE VIEW city_a_usa AS SELECT</span><br><span class="line">   city_id,</span><br><span class="line">   city,</span><br><span class="line">   country_id</span><br><span class="line">FROM</span><br><span class="line">   city_a</span><br><span class="line">WHERE</span><br><span class="line">   country_id = 103</span><br><span class="line">WITH CASCADED CHECK OPTION;</span><br><span class="line">CREATE VIEW</span><br></pre></td></tr></table></figure>
+<ul>
+<li>city_a_usa视图具有WITH CASCADED CHECK OPTION子句。注意CASCADED选项。</li>
+</ul>
+<blockquote>
+<p>通过city_a_usa表将一行插入到city表中。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO city_a_usa (city, country_id)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'Houston'</span>, 103);</span><br><span class="line">错误:  新行违反了视图<span class="string">"city_a"</span>的检查选项</span><br><span class="line">DETAIL:  失败, 行包含(606, Houston, 103, 2019-12-04 22:29:35.695079).</span><br></pre></td></tr></table></figure>
+<ul>
+<li>该错误消息表明，即使city_a视图没有WITH CHECK OPTION子句，也违反了city_a视图的视图定义条件。</li>
+</ul>
+<ul>
+<li>这是因为当我们对city_a_usa视图使用WITH CASCADED CHECK OPTION时，PostgreSQL检查了city_a_usa视图以及所有基础视图的视图定义条件，在这种情况下，它是city_a视图。</li>
+</ul>
+<blockquote>
+<p>要检查插入或更新的视图的视图定义条件，请按以下方式使用WITH LOCAL CHECK OPTION：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE VIEW city_a_usa AS SELECT</span></span><br><span class="line">   city_id,</span><br><span class="line">   city,</span><br><span class="line">   country_id</span><br><span class="line">FROM</span><br><span class="line">   city_a</span><br><span class="line">WHERE</span><br><span class="line">   country_id = 103</span><br><span class="line">WITH LOCAL CHECK OPTION;</span><br><span class="line">CREATE VIEW</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>再次通过city_a_usa视图在城市表中插入新行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO city_a_usa (city, country_id)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'Houston'</span>, 103);</span><br><span class="line">INSERT 0 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这次成功了，因为新行满足了city_a_usa视图的视图定义条件。PostgreSQL没有检查基本视图的视图定义条件。</p>
+</blockquote>
+<h3 id="创建递归视图"><a href="#创建递归视图" class="headerlink" title="创建递归视图"></a>创建递归视图</h3><h4 id="CREATE-RECURSIVE-VIEW语法"><a href="#CREATE-RECURSIVE-VIEW语法" class="headerlink" title="CREATE RECURSIVE VIEW语法"></a>CREATE RECURSIVE VIEW语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE RECURSIVE VIEW view_name(columns) AS</span><br><span class="line">SELECT columns;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在CREATE RECURSIVE VIEW子句中指定要创建的视图的名称。可以在视图名称中添加一个可选的限定模式。</li>
+</ul>
+<ul>
+<li>其次，添加SELECT语句以从基表中查询数据。SELECT语句引用view_name以使视图递归。</li>
+</ul>
+<blockquote>
+<p>上面的该语句等效于以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE VIEW view_name</span><br><span class="line">AS</span><br><span class="line">  WITH RECURSIVE cte_name (columns) AS (</span><br><span class="line">    SELECT ...)</span><br><span class="line">  SELECT columns FROM cte_name;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/pg13/" rel="next" title="PostgreSQL之触发器">
+                <i class="fa fa-chevron-left"></i> PostgreSQL之触发器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/pg15/" rel="prev" title="PostgreSQL之索引">
+                PostgreSQL之索引 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PostgreSQL视图"><span class="nav-number">1.</span> <span class="nav-text">PostgreSQL视图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#管理视图"><span class="nav-number">1.1.</span> <span class="nav-text">管理视图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建PostgreSQL视图"><span class="nav-number">1.1.1.</span> <span class="nav-text">创建PostgreSQL视图</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#CREATE-VIEW语法"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">CREATE VIEW语法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CREATE-VIEW示例"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">CREATE VIEW示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更改PostgreSQL视图"><span class="nav-number">1.1.2.</span> <span class="nav-text">更改PostgreSQL视图</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#更改视图语法"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">更改视图语法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#更改视图示例"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">更改视图示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除PostgreSQL视图"><span class="nav-number">1.1.3.</span> <span class="nav-text">删除PostgreSQL视图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建可更新视图"><span class="nav-number">1.2.</span> <span class="nav-text">创建可更新视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实例化视图"><span class="nav-number">1.3.</span> <span class="nav-text">实例化视图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建实例化视图"><span class="nav-number">1.3.1.</span> <span class="nav-text">创建实例化视图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#刷新实例化视图的数据"><span class="nav-number">1.3.2.</span> <span class="nav-text">刷新实例化视图的数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除实例化视图"><span class="nav-number">1.3.3.</span> <span class="nav-text">删除实例化视图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实例化视图示例"><span class="nav-number">1.3.4.</span> <span class="nav-text">实例化视图示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用WITH-CHECK-OPTION子句创建可更新视图"><span class="nav-number">1.4.</span> <span class="nav-text">使用WITH CHECK OPTION子句创建可更新视图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#示例1"><span class="nav-number">1.4.1.</span> <span class="nav-text">示例1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用LOCAL和CASCADED检查的范围"><span class="nav-number">1.4.2.</span> <span class="nav-text">用LOCAL和CASCADED检查的范围</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建递归视图"><span class="nav-number">1.5.</span> <span class="nav-text">创建递归视图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CREATE-RECURSIVE-VIEW语法"><span class="nav-number">1.5.1.</span> <span class="nav-text">CREATE RECURSIVE VIEW语法</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">732k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">20:20</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

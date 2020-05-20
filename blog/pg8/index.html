@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="修改数据INSERT语句 创建新表时，它没有任何数据。您经常要做的第一件事是在表中插入新行。PostgreSQL提供了INSERT语句，使您可以一次将一个或多个行插入到一个表中。  INSERT语法123INSERT INTO table(column1, column2, …)VALUES   (value1, value2, …);  首先，指定要在INSERT INTO子句之后插入新行的表的">
+<meta name="keywords" content="pg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL之数据处理">
+<meta property="og:url" content="zhijiansd.github.io/blog/pg8/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="修改数据INSERT语句 创建新表时，它没有任何数据。您经常要做的第一件事是在表中插入新行。PostgreSQL提供了INSERT语句，使您可以一次将一个或多个行插入到一个表中。  INSERT语法123INSERT INTO table(column1, column2, …)VALUES   (value1, value2, …);  首先，指定要在INSERT INTO子句之后插入新行的表的">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-20T04:15:09.165Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL之数据处理">
+<meta name="twitter:description" content="修改数据INSERT语句 创建新表时，它没有任何数据。您经常要做的第一件事是在表中插入新行。PostgreSQL提供了INSERT语句，使您可以一次将一个或多个行插入到一个表中。  INSERT语法123INSERT INTO table(column1, column2, …)VALUES   (value1, value2, …);  首先，指定要在INSERT INTO子句之后插入新行的表的">
+
+
+
+
+
+
+  <link rel="canonical" href="zhijiansd.github.io/blog/pg8/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PostgreSQL之数据处理 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="zhijiansd.github.io/blog/pg8/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PostgreSQL之数据处理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-20 11:40:25 / 修改时间：12:15:09" itemprop="dateCreated datePublished" datetime="2020-05-20T11:40:25+08:00">2020-05-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/pg8/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg8/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">27k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">44 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h2><h3 id="INSERT语句"><a href="#INSERT语句" class="headerlink" title="INSERT语句"></a>INSERT语句</h3><blockquote>
+<p>创建新表时，它没有任何数据。您经常要做的第一件事是在表中插入新行。PostgreSQL提供了INSERT语句，使您可以一次将一个或多个行插入到一个表中。</p>
+</blockquote>
+<h4 id="INSERT语法"><a href="#INSERT语法" class="headerlink" title="INSERT语法"></a>INSERT语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO table(column1, column2, …)</span><br><span class="line">VALUES</span><br><span class="line">   (value1, value2, …);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，指定要在INSERT INTO子句之后插入新行的表的名称，后跟一个逗号分隔的列列表。</li>
+</ul>
+<ul>
+<li>其次，在VALUES子句后列出一个逗号分隔的值列表。值列表必须与表名称后指定的列列表的顺序相同。</li>
+</ul>
+<blockquote>
+<p>要一次将多个行添加到一个表中，请使用以下语法:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO table (column1, column2, …)</span><br><span class="line">VALUES</span><br><span class="line">   (value1, value2, …),</span><br><span class="line">   (value1, value2, …) ,...;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>只需要在第一个列表后添加其他逗号分隔值列表，列表中的每个值都用逗号（，）分隔。</p>
+</blockquote>
+<blockquote>
+<p>要插入来自另一个表的数据，请使用INSERT INTO SELECT语句，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO table(column1,column2,...)</span><br><span class="line">SELECT column1,column2,...</span><br><span class="line">FROM another_table</span><br><span class="line">WHERE condition;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>WHERE子句用于过滤允许将another_table中的部分数据插入表中的行。</p>
+</blockquote>
+<h4 id="创建样表"><a href="#创建样表" class="headerlink" title="创建样表"></a>创建样表</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE link (</span></span><br><span class="line">   ID serial PRIMARY KEY,</span><br><span class="line">   url VARCHAR (255) NOT NULL,</span><br><span class="line">   name VARCHAR (255) NOT NULL,</span><br><span class="line">   description VARCHAR (255),</span><br><span class="line">   rel VARCHAR (50)</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<h4 id="INSERT插入单行"><a href="#INSERT插入单行" class="headerlink" title="INSERT插入单行"></a>INSERT插入单行</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO link (url, name)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'http://www.postgresql.com'</span>,<span class="string">'PostgreSQL'</span>);</span><br><span class="line">INSERT 0 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要插入字符数据，必须将其括在单引号（’）中，例如’PostgreSQL’。对于数字数据类型，只需使用纯数字（例如1、2、3）即可。</p>
+</blockquote>
+<blockquote>
+<p>如果在INSERT语句中省略任何接受NULL值的列，则该列将采用其默认值。如果未为该列设置默认值，则该列将采用NULL值。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL会自动为serial列提供一个值，因此不能也不应该在串行列中插入一个值。</p>
+</blockquote>
+<blockquote>
+<p>使用SELECT语句来验证插入的行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link;</span><br><span class="line"> id |            url            |    name    | description | rel</span><br><span class="line">----+---------------------------+------------+-------------+------</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL |             |</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要插入包含单引号字符的字符串（例如O’Reilly Media），则必须使用单引号（’）转义字符，如以下查询所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO link (url, name)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'http://www.oreilly.com'</span>,<span class="string">'O'</span><span class="string">'Reilly Media'</span>);</span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link;</span><br><span class="line"> id |            url            |      name      | description | rel</span><br><span class="line">----+---------------------------+----------------+-------------+------</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     |             |</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media |             |</span></span><br><span class="line"><span class="string">(2 rows)</span></span><br></pre></td></tr></table></figure>
+<h4 id="INSERT插入多行"><a href="#INSERT插入多行" class="headerlink" title="INSERT插入多行"></a>INSERT插入多行</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO link (url, name)</span></span><br><span class="line">VALUES</span><br><span class="line"> (<span class="string">'http://www.google.com'</span>,<span class="string">'Google'</span>),</span><br><span class="line"> (<span class="string">'http://www.yahoo.com'</span>,<span class="string">'Yahoo'</span>),</span><br><span class="line"> (<span class="string">'http://www.bing.com'</span>,<span class="string">'Bing'</span>);</span><br><span class="line">INSERT 0 3</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link;</span><br><span class="line"> id |            url            |      name      | description | rel</span><br><span class="line">----+---------------------------+----------------+-------------+------</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     |             |</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media |             |</span></span><br><span class="line"><span class="string">  3 | http://www.google.com     | Google         |             |</span></span><br><span class="line"><span class="string">  4 | http://www.yahoo.com      | Yahoo          |             |</span></span><br><span class="line"><span class="string">  5 | http://www.bing.com       | Bing           |             |</span></span><br><span class="line"><span class="string">(5 rows)</span></span><br></pre></td></tr></table></figure>
+<h4 id="INSERT插入日期"><a href="#INSERT插入日期" class="headerlink" title="INSERT插入日期"></a>INSERT插入日期</h4><blockquote>
+<p>在链接表中添加一个名为last_update的新列，并将其默认值设置为CURRENT_DATE。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># ALTER TABLE link ADD COLUMN last_update DATE;</span></span><br><span class="line"> </span><br><span class="line">ALTER TABLE link ALTER COLUMN last_update</span><br><span class="line">SET DEFAULT CURRENT_DATE;</span><br><span class="line">ALTER TABLE</span><br><span class="line"></span><br><span class="line">ALTER TABLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在link表中插入具有指定日期的新行，日期格式为YYYY-MM-DD。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO link (url, name, last_update)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'http://www.facebook.com'</span>,<span class="string">'Facebook'</span>,<span class="string">'2013-06-01'</span>);</span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link;</span><br><span class="line"> id |            url            |      name      | description | rel  | last_update</span><br><span class="line">----+---------------------------+----------------+-------------+------+-------------</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     |             |      |</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media |             |      |</span></span><br><span class="line"><span class="string">  3 | http://www.google.com     | Google         |             |      |</span></span><br><span class="line"><span class="string">  4 | http://www.yahoo.com      | Yahoo          |             |      |</span></span><br><span class="line"><span class="string">  5 | http://www.bing.com       | Bing           |             |      |</span></span><br><span class="line"><span class="string">  6 | http://www.facebook.com   | Facebook       |             |      | 2013-06-01</span></span><br><span class="line"><span class="string">(6 rows)</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>还可以使用DEFAULT关键字为date列或具有默认值的任何列设置默认值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO link (url, name, last_update)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'https://www.tumblr.com/'</span>,<span class="string">'Tumblr'</span>,DEFAULT);</span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link;</span><br><span class="line"> id |            url            |      name      | description | rel  | last_update</span><br><span class="line">----+---------------------------+----------------+-------------+------+-------------</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     |             |      |</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media |             |      |</span></span><br><span class="line"><span class="string">  3 | http://www.google.com     | Google         |             |      |</span></span><br><span class="line"><span class="string">  4 | http://www.yahoo.com      | Yahoo          |             |      |</span></span><br><span class="line"><span class="string">  5 | http://www.bing.com       | Bing           |             |      |</span></span><br><span class="line"><span class="string">  6 | http://www.facebook.com   | Facebook       |             |      | 2013-06-01</span></span><br><span class="line"><span class="string">  7 | https://www.tumblr.com/   | Tumblr         |             |      | 2019-11-25</span></span><br><span class="line"><span class="string">(7 rows)</span></span><br></pre></td></tr></table></figure>
+<h4 id="INSERT插入来自另一个表的数据"><a href="#INSERT插入来自另一个表的数据" class="headerlink" title="INSERT插入来自另一个表的数据"></a>INSERT插入来自另一个表的数据</h4><blockquote>
+<p>首先，创建另一个表link_tmp，该link表具有与表相同的结构:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE link_tmp (LIKE link);</span></span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其次，从链接表中插入日期列的值不为NULL的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO link_tmp </span></span><br><span class="line">SELECT</span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link</span><br><span class="line">WHERE</span><br><span class="line">   last_update IS NOT NULL;</span><br><span class="line">INSERT 0 2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第三，通过查询link_tmp表中的数据来验证插入操作:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link_tmp;</span><br><span class="line"> id |           url           |   name   | description | rel  | last_update</span><br><span class="line">----+-------------------------+----------+-------------+------+-------------</span><br><span class="line">  6 | http://www.facebook.com | Facebook |             |      | 2013-06-01</span><br><span class="line">  7 | https://www.tumblr.com/ | Tumblr   |             |      | 2019-11-25</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h4 id="获取最后的插入ID"><a href="#获取最后的插入ID" class="headerlink" title="获取最后的插入ID"></a>获取最后的插入ID</h4><blockquote>
+<p>要在插入新行后从表中获取最后一个插入ID，请在INSERT语句中使用RETURNING子句。这是PostgreSQL的SQL扩展。</p>
+</blockquote>
+<blockquote>
+<p>以下语句在link表中插入新行，并返回最后一个插入ID:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO link (url, NAME, last_update)</span></span><br><span class="line">VALUES(<span class="string">'http://www.postgresql.org'</span>,<span class="string">'PostgreSQL'</span>,DEFAULT) </span><br><span class="line">RETURNING id;</span><br><span class="line"> id</span><br><span class="line">----</span><br><span class="line">  8</span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link;</span><br><span class="line"> id |            url            |      name      | description | rel  | last_update</span><br><span class="line">----+---------------------------+----------------+-------------+------+-------------</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     |             |      |</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media |             |      |</span></span><br><span class="line"><span class="string">  3 | http://www.google.com     | Google         |             |      |</span></span><br><span class="line"><span class="string">  4 | http://www.yahoo.com      | Yahoo          |             |      |</span></span><br><span class="line"><span class="string">  5 | http://www.bing.com       | Bing           |             |      |</span></span><br><span class="line"><span class="string">  6 | http://www.facebook.com   | Facebook       |             |      | 2013-06-01</span></span><br><span class="line"><span class="string">  7 | https://www.tumblr.com/   | Tumblr         |             |      | 2019-11-25</span></span><br><span class="line"><span class="string">  8 | http://www.postgresql.org | PostgreSQL     |             |      | 2019-11-25</span></span><br><span class="line"><span class="string">(8 rows)</span></span><br></pre></td></tr></table></figure>
+<h3 id="UPDATE语句"><a href="#UPDATE语句" class="headerlink" title="UPDATE语句"></a>UPDATE语句</h3><h4 id="UPDATE语法"><a href="#UPDATE语法" class="headerlink" title="UPDATE语法"></a>UPDATE语法</h4><blockquote>
+<p>使用UPDATE语句来更新表中的现有数据。UPDATE语句的语法如下:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">UPDATE table</span><br><span class="line">SET column1 = value1,</span><br><span class="line">    column2 = value2 ,...</span><br><span class="line">WHERE</span><br><span class="line">   condition;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在UPDATE子句后指定要在其中更新数据的表名。</li>
+</ul>
+<ul>
+<li>其次，在SET子句中列出要更改其值的列。如果要更新多列中的值，请使用逗号（，）分隔每对列和值。 不在列表中的列保留其原始值。</li>
+</ul>
+<ul>
+<li>第三，确定要在WHERE子句条件下更新的行。如果省略WHERE子句，则表中的所有行都会更新。</li>
+</ul>
+<h4 id="UPDATE更新单列"><a href="#UPDATE更新单列" class="headerlink" title="UPDATE更新单列"></a>UPDATE更新单列</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE link</span></span><br><span class="line">SET last_update = DEFAULT</span><br><span class="line">WHERE</span><br><span class="line">   id = 6;</span><br><span class="line">UPDATE 1</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link</span><br><span class="line">WHERE</span><br><span class="line">   ID = 6;</span><br><span class="line"> id |           url           |   name   | description | rel  | last_update</span><br><span class="line">----+-------------------------+----------+-------------+------+-------------</span><br><span class="line">  6 | http://www.facebook.com | Facebook |             |      | 2019-11-26</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h4 id="UPDATE部分更新表"><a href="#UPDATE部分更新表" class="headerlink" title="UPDATE部分更新表"></a>UPDATE部分更新表</h4><blockquote>
+<p>将last_update列的NULL值更改为当前日期</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE link</span></span><br><span class="line">SET last_update = DEFAULT</span><br><span class="line">WHERE</span><br><span class="line">   last_update IS NULL;</span><br><span class="line">UPDATE 5</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link;</span><br><span class="line"> id |            url            |      name      | description | rel  | last_update</span><br><span class="line">----+---------------------------+----------------+-------------+------+-------------</span><br><span class="line">  7 | https://www.tumblr.com/   | Tumblr         |             |      | 2019-11-25</span><br><span class="line">  8 | http://www.postgresql.org | PostgreSQL     |             |      | 2019-11-25</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     |             |      | 2019-11-26</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media |             |      | 2019-11-26</span></span><br><span class="line"><span class="string">  3 | http://www.google.com     | Google         |             |      | 2019-11-26</span></span><br><span class="line"><span class="string">  4 | http://www.yahoo.com      | Yahoo          |             |      | 2019-11-26</span></span><br><span class="line"><span class="string">  5 | http://www.bing.com       | Bing           |             |      | 2019-11-26</span></span><br><span class="line"><span class="string">  6 | http://www.facebook.com   | Facebook       |             |      | 2019-11-26</span></span><br><span class="line"><span class="string">(8 rows)</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>WHERE子句仅更新last_update列中值为NULL的行。使用DEFAULT关键字是因为last_update列接受当前日期作为默认值。</p>
+</blockquote>
+<h4 id="UPDATE更新表中的所有行"><a href="#UPDATE更新表中的所有行" class="headerlink" title="UPDATE更新表中的所有行"></a>UPDATE更新表中的所有行</h4><blockquote>
+<p>要将链接表中所有行的relcolumn值更新为nofollow，请在UPDATE语句中省略WHERE子句，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE link</span></span><br><span class="line">SET rel = <span class="string">'nofollow'</span>;</span><br><span class="line">UPDATE 8</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line"> * </span><br><span class="line">FROM</span><br><span class="line"> link;</span><br><span class="line"> id |            url            |      name      | description |   rel    | last_update</span><br><span class="line">----+---------------------------+----------------+-------------+----------+-------------</span><br><span class="line">  7 | https://www.tumblr.com/   | Tumblr         |             | nofollow | 2019-11-25</span><br><span class="line">  8 | http://www.postgresql.org | PostgreSQL     |             | nofollow | 2019-11-25</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     |             | nofollow | 2019-11-26</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media |             | nofollow | 2019-11-26</span></span><br><span class="line"><span class="string">  3 | http://www.google.com     | Google         |             | nofollow | 2019-11-26</span></span><br><span class="line"><span class="string">  4 | http://www.yahoo.com      | Yahoo          |             | nofollow | 2019-11-26</span></span><br><span class="line"><span class="string">  5 | http://www.bing.com       | Bing           |             | nofollow | 2019-11-26</span></span><br><span class="line"><span class="string">  6 | http://www.facebook.com   | Facebook       |             | nofollow | 2019-11-26</span></span><br><span class="line"><span class="string">(8 rows)</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>还可以更新同一表中另一列的列数据。以下语句将名称列的值复制到链接表的描述列中：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE link</span></span><br><span class="line">SET description = name;</span><br><span class="line">UPDATE 8</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line"> * </span><br><span class="line">FROM</span><br><span class="line"> link;</span><br><span class="line"> id |            url            |      name      |  description   |   rel    | last_update</span><br><span class="line">----+---------------------------+----------------+----------------+----------+-------------</span><br><span class="line">  7 | https://www.tumblr.com/   | Tumblr         | Tumblr         | nofollow | 2019-11-25</span><br><span class="line">  8 | http://www.postgresql.org | PostgreSQL     | PostgreSQL     | nofollow | 2019-11-25</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     | PostgreSQL     | nofollow | 2019-11-26</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media | O'</span>Reilly Media | nofollow | 2019-11-26</span><br><span class="line">  3 | http://www.google.com     | Google         | Google         | nofollow | 2019-11-26</span><br><span class="line">  4 | http://www.yahoo.com      | Yahoo          | Yahoo          | nofollow | 2019-11-26</span><br><span class="line">  5 | http://www.bing.com       | Bing           | Bing           | nofollow | 2019-11-26</span><br><span class="line">  6 | http://www.facebook.com   | Facebook       | Facebook       | nofollow | 2019-11-26</span><br><span class="line">(8 rows)</span><br></pre></td></tr></table></figure>
+<h4 id="UPDATE更新联接表"><a href="#UPDATE更新联接表" class="headerlink" title="UPDATE更新联接表"></a>UPDATE更新联接表</h4><blockquote>
+<p>查看link_tmp表，它的结构与link表相同</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line"> * </span><br><span class="line">FROM</span><br><span class="line"> link_tmp;</span><br><span class="line"> id |           url           |   name   | description | rel  | last_update</span><br><span class="line">----+-------------------------+----------+-------------+------+-------------</span><br><span class="line">  6 | http://www.facebook.com | Facebook |             |      | 2013-06-01</span><br><span class="line">  7 | https://www.tumblr.com/ | Tumblr   |             |      | 2019-11-25</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>以下语句为link_tmp表中的列更新来自link表的值:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE link_tmp</span></span><br><span class="line">SET rel = link.rel,</span><br><span class="line"> description = link.description,</span><br><span class="line"> last_update = link.last_update</span><br><span class="line">FROM</span><br><span class="line">   link</span><br><span class="line">WHERE</span><br><span class="line">   link_tmp.id = link.id;</span><br><span class="line">UPDATE 2</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line"> * </span><br><span class="line">FROM</span><br><span class="line"> link_tmp;</span><br><span class="line"> id |           url           |   name   | description |   rel    | last_update</span><br><span class="line">----+-------------------------+----------+-------------+----------+-------------</span><br><span class="line">  6 | http://www.facebook.com | Facebook | Facebook    | nofollow | 2019-11-26</span><br><span class="line">  7 | https://www.tumblr.com/ | Tumblr   | Tumblr      | nofollow | 2019-11-25</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，这里在UPDATE语句中使用了FROM子句来指定涉及更新的第二个表（link）。</p>
+</blockquote>
+<blockquote>
+<p>这种UPDATE语句有时称为UPDATE JOIN或UPDATE INNER JOIN，因为UPDATE语句中涉及两个或多个表。连接条件在WHERE子句中指定。</p>
+</blockquote>
+<h4 id="PostgreSQL-UPDATE与RETURNING子句"><a href="#PostgreSQL-UPDATE与RETURNING子句" class="headerlink" title="PostgreSQL UPDATE与RETURNING子句"></a>PostgreSQL UPDATE与RETURNING子句</h4><blockquote>
+<p>UPDATE语句默认返回受影响的行数。PostgreSQL UPDATE语句还使用RETURNING子句返回更新的条目。这是PostgreSQL对SQL标准的扩展。</p>
+</blockquote>
+<blockquote>
+<p>以下语句更新链接表中ID为1的行并返回更新的条目:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE link</span></span><br><span class="line">SET description = <span class="string">'Learn PostgreSQL'</span>,</span><br><span class="line"> rel = <span class="string">'follow'</span></span><br><span class="line">WHERE</span><br><span class="line">   ID = 1 </span><br><span class="line">RETURNING id,</span><br><span class="line">   description,</span><br><span class="line">   rel;</span><br><span class="line"> id |   description    |  rel</span><br><span class="line">----+------------------+--------</span><br><span class="line">  1 | Learn PostgreSQL | follow</span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line">UPDATE 1</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link</span><br><span class="line">WHERE</span><br><span class="line">   ID = 1;</span><br><span class="line"> id |            url            |    name    |   description    |  rel   | last_update</span><br><span class="line">----+---------------------------+------------+------------------+--------+-------------</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL | Learn PostgreSQL | follow | 2019-11-26</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h3 id="UPDATE-JOIN"><a href="#UPDATE-JOIN" class="headerlink" title="UPDATE JOIN"></a>UPDATE JOIN</h3><blockquote>
+<p>有时，您需要根据另一个表中的值更新表的数据。在这种情况下，您可以使用PostgreSQL UPDATE连接语法，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">UPDATE A</span><br><span class="line">SET A.c1 = expresion</span><br><span class="line">FROM B</span><br><span class="line">WHERE A.c2 = B.c2;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>如果表A和B中的每一行在列c2中具有匹配的值，则这种形式的UPDATE语句将更新表A中的列值c1。</li>
+</ul>
+<blockquote>
+<p>要联接到UPDATE语句中的另一个表，请在FROM子句中指定联接的表，并在WHERE子句中提供联接条件。FROM子句必须紧接在SET子句之后出现。 </p>
+</blockquote>
+<h4 id="创建示例表"><a href="#创建示例表" class="headerlink" title="创建示例表"></a>创建示例表</h4><blockquote>
+<p>首先，创建一个名为product_segment的新表，该表存储诸如豪华，奢侈品和大众等产品细分。product_segment表具有折扣列，该列存储基于特定细分的折扣百分比。例如，豪华商品的折扣为5％，而奢侈品和大众商品的折扣分别为6％和10％。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE product_segment (</span></span><br><span class="line">    ID SERIAL PRIMARY KEY,</span><br><span class="line">    segment VARCHAR NOT NULL,</span><br><span class="line">    discount NUMERIC (4, 2)</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">INSERT INTO product_segment (segment, discount)</span><br><span class="line">VALUES</span><br><span class="line">    (<span class="string">'Grand Luxury'</span>, 0.05),</span><br><span class="line">    (<span class="string">'Luxury'</span>, 0.06),</span><br><span class="line">    (<span class="string">'Mass'</span>, 0.1);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">INSERT 0 3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其次，创建另一个名为product的表，用于存储产品数据。产品表的外键列segment_id链接到segment表的ID。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE product(</span></span><br><span class="line">    id serial primary key,</span><br><span class="line">    name varchar not null,</span><br><span class="line">    price numeric(10,2),</span><br><span class="line">    net_price numeric(10,2),</span><br><span class="line">    segment_id int not null,</span><br><span class="line">    foreign key(segment_id) references product_segment(id)</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">INSERT INTO product (name, price, segment_id) </span><br><span class="line">VALUES (<span class="string">'diam'</span>, 804.89, 1),</span><br><span class="line">    (<span class="string">'vestibulum aliquet'</span>, 228.55, 3),</span><br><span class="line">    (<span class="string">'lacinia erat'</span>, 366.45, 2),</span><br><span class="line">    (<span class="string">'scelerisque quam turpis'</span>, 145.33, 3),</span><br><span class="line">    (<span class="string">'justo lacinia'</span>, 551.77, 2),</span><br><span class="line">    (<span class="string">'ultrices mattis odio'</span>, 261.58, 3),</span><br><span class="line">    (<span class="string">'hendrerit'</span>, 519.62, 2),</span><br><span class="line">    (<span class="string">'in hac habitasse'</span>, 843.31, 1),</span><br><span class="line">    (<span class="string">'orci eget orci'</span>, 254.18, 3),</span><br><span class="line">    (<span class="string">'pellentesque'</span>, 427.78, 2),</span><br><span class="line">    (<span class="string">'sit amet nunc'</span>, 936.29, 1),</span><br><span class="line">    (<span class="string">'sed vestibulum'</span>, 910.34, 1),</span><br><span class="line">    (<span class="string">'turpis eget'</span>, 208.33, 3),</span><br><span class="line">    (<span class="string">'cursus vestibulum'</span>, 985.45, 1),</span><br><span class="line">    (<span class="string">'orci nullam'</span>, 841.26, 1),</span><br><span class="line">    (<span class="string">'est quam pharetra'</span>, 896.38, 1),</span><br><span class="line">    (<span class="string">'posuere'</span>, 575.74, 2),</span><br><span class="line">    (<span class="string">'ligula'</span>, 530.64, 2),</span><br><span class="line">    (<span class="string">'convallis'</span>, 892.43, 1),</span><br><span class="line">    (<span class="string">'nulla elit ac'</span>, 161.71, 3);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">INSERT 0 20</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第三，假设需要根据产品细分的折扣计算每个产品的净价。为此，可以按以下方式应用UPDATE连接语句:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE product</span></span><br><span class="line">SET net_price = price - price * discount</span><br><span class="line">FROM</span><br><span class="line">product_segment</span><br><span class="line">WHERE</span><br><span class="line">product.segment_id = product_segment.id;</span><br><span class="line">UPDATE 20</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该语句将product表连接到product_segment表。如果两个表中都有匹配项，它将从product_segment表中获得折扣，根据以下公式计算净价，并更新net_price列:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net_price = price - price * discount;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用以下SELECT语句检查product表的数据:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    *</span><br><span class="line">FROM</span><br><span class="line">    product;</span><br><span class="line"> id |          name           | price  | net_price | segment_id</span><br><span class="line">----+-------------------------+--------+-----------+------------</span><br><span class="line">  1 | diam                    | 804.89 |    764.65 |          1</span><br><span class="line">  2 | vestibulum aliquet      | 228.55 |    205.70 |          3</span><br><span class="line">  3 | lacinia erat            | 366.45 |    344.46 |          2</span><br><span class="line">  4 | scelerisque quam turpis | 145.33 |    130.80 |          3</span><br><span class="line">  5 | justo lacinia           | 551.77 |    518.66 |          2</span><br><span class="line">  6 | ultrices mattis odio    | 261.58 |    235.42 |          3</span><br><span class="line">  7 | hendrerit               | 519.62 |    488.44 |          2</span><br><span class="line">  8 | <span class="keyword">in</span> hac habitasse        | 843.31 |    801.14 |          1</span><br><span class="line">  9 | orci eget orci          | 254.18 |    228.76 |          3</span><br><span class="line"> 10 | pellentesque            | 427.78 |    402.11 |          2</span><br><span class="line"> 11 | sit amet nunc           | 936.29 |    889.48 |          1</span><br><span class="line"> 12 | sed vestibulum          | 910.34 |    864.82 |          1</span><br><span class="line"> 13 | turpis eget             | 208.33 |    187.50 |          3</span><br><span class="line"> 14 | cursus vestibulum       | 985.45 |    936.18 |          1</span><br><span class="line"> 15 | orci nullam             | 841.26 |    799.20 |          1</span><br><span class="line"> 16 | est quam pharetra       | 896.38 |    851.56 |          1</span><br><span class="line"> 17 | posuere                 | 575.74 |    541.20 |          2</span><br><span class="line"> 18 | ligula                  | 530.64 |    498.80 |          2</span><br><span class="line"> 19 | convallis               | 892.43 |    847.81 |          1</span><br><span class="line"> 20 | nulla elit ac           | 161.71 |    145.54 |          3</span><br><span class="line">(20 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>net_price列已更新为折扣后的价钱。</p>
+</blockquote>
+<h3 id="DELETE语句"><a href="#DELETE语句" class="headerlink" title="DELETE语句"></a>DELETE语句</h3><h4 id="DELETE语法"><a href="#DELETE语法" class="headerlink" title="DELETE语法"></a>DELETE语法</h4><blockquote>
+<p>使用DELETE语句从表中删除数据。DELETE语法语法如下:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM table</span><br><span class="line">WHERE condition;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在DELETE FROM子句中指定要从中删除数据的表。</li>
+</ul>
+<ul>
+<li>其次，使用WHERE子句中的条件指定要删除的行。WHERE子句是可选的。但是，如果省略它，则DELETE语句将删除表中的所有行。DELETE语句返回已删除的行数。它可能与WHERE子句中的条件指定的行数不同，因为该表可能包含一个BEFORE DELETE触发器，该触发器在删除之前会执行其他操作。如果未删除任何行，则DELETE语句返回零。</li>
+</ul>
+<blockquote>
+<p>如果要检查引用另一个表中一个或多个列的条件，请使用USING子句，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM table</span><br><span class="line">USING another_table</span><br><span class="line">WHERE table.id = another_table.id AND …</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果不想使用USING子句，则可以使用以下语句中所示的子查询:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM table</span><br><span class="line">WHERE table.id = (SELECT id FROM another_table);</span><br></pre></td></tr></table></figure>
+<h4 id="DELETE-with-WHERE子句示例"><a href="#DELETE-with-WHERE子句示例" class="headerlink" title="DELETE with WHERE子句示例"></a>DELETE with WHERE子句示例</h4><blockquote>
+<p>查看表内容</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   link;</span><br><span class="line"> id |            url            |      name      |   description    |   rel    | last_update</span><br><span class="line">----+---------------------------+----------------+------------------+----------+-------------</span><br><span class="line">  7 | https://www.tumblr.com/   | Tumblr         | Tumblr           | nofollow | 2019-11-25</span><br><span class="line">  8 | http://www.postgresql.org | PostgreSQL     | PostgreSQL       | nofollow | 2019-11-25</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media | O'</span>Reilly Media   | nofollow | 2019-11-26</span><br><span class="line">  3 | http://www.google.com     | Google         | Google           | nofollow | 2019-11-26</span><br><span class="line">  4 | http://www.yahoo.com      | Yahoo          | Yahoo            | nofollow | 2019-11-26</span><br><span class="line">  5 | http://www.bing.com       | Bing           | Bing             | nofollow | 2019-11-26</span><br><span class="line">  6 | http://www.facebook.com   | Facebook       | Facebook         | nofollow | 2019-11-26</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     | Learn PostgreSQL | follow   | 2019-11-26</span><br><span class="line">(8 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>以下语句删除id列中值为8的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE FROM link</span></span><br><span class="line">WHERE id = 8;</span><br><span class="line">DELETE 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该语句返回一个表示已删除一行的内容。</p>
+</blockquote>
+<blockquote>
+<p>注意，如果链接表没有任何ID为8的行，则DELETE语句不执行任何操作并返回零（0）。</p>
+</blockquote>
+<h4 id="DELETE-USING语句示例"><a href="#DELETE-USING语句示例" class="headerlink" title="DELETE USING语句示例"></a>DELETE USING语句示例</h4><blockquote>
+<p>假设要从link表中删除所有和link_tmp表具有相同id列值的行。首先，检查link_tmp表数据:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    *</span><br><span class="line">FROM</span><br><span class="line">    link_tmp;</span><br><span class="line"> id |           url           |   name   | description |   rel    | last_update</span><br><span class="line">----+-------------------------+----------+-------------+----------+-------------</span><br><span class="line">  6 | http://www.facebook.com | Facebook | Facebook    | nofollow | 2019-11-26</span><br><span class="line">  7 | https://www.tumblr.com/ | Tumblr   | Tumblr      | nofollow | 2019-11-25</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其次，将下面的DELETE语句与USING子句一起使用，以删除link表中相应行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE FROM link </span></span><br><span class="line">USING link_tmp</span><br><span class="line">WHERE</span><br><span class="line">    link.id = link_tmp.id;</span><br><span class="line">DELETE 2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>之后，查询link表以验证删除操作</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    *</span><br><span class="line">FROM</span><br><span class="line">    link;</span><br><span class="line"> id |            url            |      name      |   description    |   rel    | last_update</span><br><span class="line">----+---------------------------+----------------+------------------+----------+-------------</span><br><span class="line">  2 | http://www.oreilly.com    | O<span class="string">'Reilly Media | O'</span>Reilly Media   | nofollow | 2019-11-26</span><br><span class="line">  3 | http://www.google.com     | Google         | Google           | nofollow | 2019-11-26</span><br><span class="line">  4 | http://www.yahoo.com      | Yahoo          | Yahoo            | nofollow | 2019-11-26</span><br><span class="line">  5 | http://www.bing.com       | Bing           | Bing             | nofollow | 2019-11-26</span><br><span class="line">  1 | http://www.postgresql.com | PostgreSQL     | Learn PostgreSQL | follow   | 2019-11-26</span><br><span class="line">(5 rows)</span><br></pre></td></tr></table></figure>
+<h4 id="从表中删除所有行"><a href="#从表中删除所有行" class="headerlink" title="从表中删除所有行"></a>从表中删除所有行</h4><blockquote>
+<p>从link表中删除所有行，请在DELETE语句中省略WHERE子句，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE FROM link;</span></span><br><span class="line">DELETE 5</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要删除link_tmp表中的所有行并返回删除的行，请在DELETE语句中使用RETURNING子句，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE FROM link_tmp </span></span><br><span class="line">RETURNING *;</span><br><span class="line"> id |           url           |   name   | description |   rel    | last_update</span><br><span class="line">----+-------------------------+----------+-------------+----------+-------------</span><br><span class="line">  6 | http://www.facebook.com | Facebook | Facebook    | nofollow | 2019-11-26</span><br><span class="line">  7 | https://www.tumblr.com/ | Tumblr   | Tumblr      | nofollow | 2019-11-25</span><br><span class="line">(2 rows)</span><br><span class="line"></span><br><span class="line">DELETE 2</span><br></pre></td></tr></table></figure>
+<h3 id="upsert功能"><a href="#upsert功能" class="headerlink" title="upsert功能"></a>upsert功能</h3><blockquote>
+<p>在关系数据库中，术语upsert称为合并。这个想法是，当您在表中插入新行时，PostgreSQL将更新该行（如果已存在），否则，PostgreSQL将插入新行。这就是为什么我们称动作为upsert（更新或插入）的原因。</p>
+</blockquote>
+<blockquote>
+<p>要在PostgreSQL中使用upsert功能，请使用INSERT ON CONFLICT语句，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO table_name(column_list) VALUES(value_list)</span><br><span class="line">ON CONFLICT target action;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>PostgreSQL将ON CONFLICT target action子句添加到INSERT语句中以支持upsert功能。</p>
+</blockquote>
+<blockquote>
+<p>target可以是:</p>
+<ul>
+<li>(column_name)  —   列名</li>
+</ul>
+<ul>
+<li>ON CONSTRAINT constraint_name  —  其中约束名称可以是UNIQUE约束的名称</li>
+</ul>
+<ul>
+<li>WHERE predicate  —  带谓词的WHERE子句</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>action可以是:</p>
+<ul>
+<li>DO NOTHING   —   表示如果表中已经存在该行，则不执行任何操作。</li>
+</ul>
+<ul>
+<li>DO UPDATE SET column_1 = value_1, .. WHERE condition  —   更新表中的某些字段。</li>
+</ul>
+</blockquote>
+<h3 id="创建样表-1"><a href="#创建样表-1" class="headerlink" title="创建样表"></a>创建样表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE test6 (</span></span><br><span class="line">   test_id serial PRIMARY KEY,</span><br><span class="line">   name VARCHAR UNIQUE,</span><br><span class="line">   email VARCHAR NOT NULL,</span><br><span class="line">   active bool NOT NULL DEFAULT TRUE</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该表由四列组成:test_id，name，email和active。名称列具有关联的唯一约束，以确保其唯一性。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \d test6</span><br><span class="line">                                   数据表 <span class="string">"public.test6"</span></span><br><span class="line">  栏位   |       类型        | 校对规则 |  可空的  |                  预设                  </span><br><span class="line">---------+-------------------+----------+----------+----------------------------------------</span><br><span class="line"> test_id | <span class="built_in">integer</span>           |          | not null | nextval(<span class="string">'test6_test_id_seq'</span>::regclass)</span><br><span class="line"> name    | character varying |          |          | </span><br><span class="line"> email   | character varying |          | not null | </span><br><span class="line"> active  | boolean           |          | not null | <span class="literal">true</span></span><br><span class="line">索引：</span><br><span class="line">    <span class="string">"test6_pkey"</span> PRIMARY KEY, btree (test_id)</span><br><span class="line">    <span class="string">"test6_name_key"</span> UNIQUE CONSTRAINT, btree (name)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>插入数据</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO test6 (NAME, email)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'IBM'</span>, <span class="string">'contact@ibm.com'</span>),</span><br><span class="line">   (</span><br><span class="line">      <span class="string">'Microsoft'</span>,</span><br><span class="line">      <span class="string">'contact@microsoft.com'</span></span><br><span class="line">   ),</span><br><span class="line">   (</span><br><span class="line">      <span class="string">'Intel'</span>,</span><br><span class="line">      <span class="string">'contact@intel.com'</span></span><br><span class="line">   );</span><br><span class="line">INSERT 0 3</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT * FROM test6;</span></span><br><span class="line"> test_id |   name    |         email         | active</span><br><span class="line">---------+-----------+-----------------------+--------</span><br><span class="line">       1 | IBM       | contact@ibm.com       | t</span><br><span class="line">       2 | Microsoft | contact@microsoft.com | t</span><br><span class="line">       3 | Intel     | contact@intel.com     | t</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="PostgreSQL-upsert示例1"><a href="#PostgreSQL-upsert示例1" class="headerlink" title="PostgreSQL upsert示例1"></a>PostgreSQL upsert示例1</h3><blockquote>
+<p>假设Microsoft将联系人电子邮件从<a href="mailto:contact@microsoft.com" target="_blank" rel="noopener">contact@microsoft.com</a>更改为<a href="mailto:hotline@microft.com" target="_blank" rel="noopener">hotline@microft.com</a>，我们可以使用UPDATE语句对其进行更新。但是，为了演示upsert功能，我们使用以下INSERT ON CONFLICT语句:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO test6 (NAME, email)</span></span><br><span class="line">VALUES</span><br><span class="line">   (</span><br><span class="line">      <span class="string">'Microsoft'</span>,</span><br><span class="line">      <span class="string">'hotline@microsoft.com'</span></span><br><span class="line">   ) </span><br><span class="line">ON CONFLICT ON CONSTRAINT test6_name_key </span><br><span class="line">DO NOTHING;</span><br><span class="line">INSERT 0 0</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该语句指定如果客户表中存在客户名称，则将其忽略（不执行任何操作）。</p>
+</blockquote>
+<blockquote>
+<p>如下语句与上面的语句等效，但是它使用name列而不是唯一约束名称作为INSERT语句的目标:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO test6 (name, email)</span></span><br><span class="line">VALUES</span><br><span class="line">   (</span><br><span class="line">      <span class="string">'Microsoft'</span>,</span><br><span class="line">      <span class="string">'hotline@microsoft.com'</span></span><br><span class="line">   ) </span><br><span class="line">ON CONFLICT (name) </span><br><span class="line">DO NOTHING;</span><br><span class="line">INSERT 0 0</span><br></pre></td></tr></table></figure>
+<h3 id="PostgreSQL-upsert示例2"><a href="#PostgreSQL-upsert示例2" class="headerlink" title="PostgreSQL upsert示例2"></a>PostgreSQL upsert示例2</h3><blockquote>
+<p>假设要在插入已经存在的客户时将新电子邮件与旧电子邮件连接起来，在这种情况下，将UPDATE子句用作INSERT语句的操作，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO test6 (name, email)</span></span><br><span class="line">VALUES</span><br><span class="line">   (</span><br><span class="line">      <span class="string">'Microsoft'</span>,</span><br><span class="line">      <span class="string">'hotline@microsoft.com'</span></span><br><span class="line">   ) </span><br><span class="line">ON CONFLICT (name) </span><br><span class="line">DO</span><br><span class="line">      UPDATE</span><br><span class="line">     SET email = EXCLUDED.email || <span class="string">';'</span> || test6.email;</span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT * FROM test6;</span></span><br><span class="line"> test_id |   name    |                    email                    | active</span><br><span class="line">---------+-----------+---------------------------------------------+--------</span><br><span class="line">       1 | IBM       | contact@ibm.com                             | t</span><br><span class="line">       3 | Intel     | contact@intel.com                           | t</span><br><span class="line">       2 | Microsoft | hotline@microsoft.com;contact@microsoft.com | t</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="事务处理"><a href="#事务处理" class="headerlink" title="事务处理"></a>事务处理</h2><blockquote>
+<p>数据库事务是一个工作单元，可能包含一个或多个操作。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL中的事务是原子的，一致的，隔离的和持久的。这些属性通常称为ACID:</p>
+<ul>
+<li>原子性保证了事务以全有或全无的方式完成。</li>
+</ul>
+<ul>
+<li>一致性确保对写入数据库的数据所做的更改必须有效并且遵循预定义的规则。</li>
+</ul>
+<ul>
+<li>隔离度确定其他事务如何看到事务完整性。</li>
+</ul>
+<ul>
+<li>耐久性确保已提交的事务将被永久存储。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>事务的经典示例是从一个银行帐户转帐到另一个银行帐户。完整事务必须确保从发送者的帐户中减去一定金额，然后将相同的金额添加到接收者的帐户中。</p>
+</blockquote>
+<h3 id="创建样表-2"><a href="#创建样表-2" class="headerlink" title="创建样表"></a>创建样表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE accounts (</span></span><br><span class="line">    id INT GENERATED BY DEFAULT AS IDENTITY,</span><br><span class="line">    name VARCHAR(100) NOT NULL,</span><br><span class="line">    balance DEC(15,2) NOT NULL,</span><br><span class="line">    PRIMARY KEY(id)</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<h3 id="开始事务"><a href="#开始事务" class="headerlink" title="开始事务"></a>开始事务</h3><blockquote>
+<p>当执行以下INSERT语句时</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO accounts(name,balance)</span></span><br><span class="line">VALUES(<span class="string">'Bob'</span>,10000);</span><br><span class="line">INSERT 0 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这时候PostgreSQL会立即在accounts表中插入新行。在这种情况下，您不知道事务何时开始，也没有机会拦截更改（例如撤消更改）。</p>
+</blockquote>
+<blockquote>
+<p>要开始事务，请使用以下语句:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BEGIN TRANSACTION;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>或者</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BEGIN WORK;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>或者</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BEGIN;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>例如，以下语句开始一个新的事务并将一个新帐户插入到accounts表中:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># BEGIN;</span></span><br><span class="line"> </span><br><span class="line">INSERT INTO accounts(name,balance)</span><br><span class="line">VALUES(<span class="string">'Alice'</span>,10000);</span><br><span class="line">BEGIN</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在当前会话中，可以通过查询accounts表来查看更改:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT </span></span><br><span class="line">    id,</span><br><span class="line">    name,</span><br><span class="line">    balance</span><br><span class="line">FROM </span><br><span class="line">    accounts;</span><br><span class="line"> id | name  | balance</span><br><span class="line">----+-------+----------</span><br><span class="line">  1 | Bob   | 10000.00</span><br><span class="line">  2 | Alice | 10000.00</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>开启一个新的会话并执行上面的查询，这里将看不到任何更改。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT </span></span><br><span class="line">    id,</span><br><span class="line">    name,</span><br><span class="line">    balance</span><br><span class="line">FROM </span><br><span class="line">    accounts;</span><br><span class="line"> id | name | balance</span><br><span class="line">----+------+----------</span><br><span class="line">  1 | Bob  | 10000.00</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h3 id="进行事务处理"><a href="#进行事务处理" class="headerlink" title="进行事务处理"></a>进行事务处理</h3><blockquote>
+<p>为了使更改对其他会话（或用户）可见，需要使用以下语句来提交事务:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMMIT WORK;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要么</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMMIT TRANSACTION;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>或者简单地</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COMMIT;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>执行COMMIT语句，将Alice的帐户插入帐户表:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># COMMIT;</span></span><br><span class="line">COMMIT</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>现在在任何事务中，都可以通过查询accounts表来查看此更改</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT </span></span><br><span class="line">    id,</span><br><span class="line">    name,</span><br><span class="line">    balance</span><br><span class="line">FROM </span><br><span class="line">    accounts;</span><br><span class="line"> id | name  | balance</span><br><span class="line">----+-------+----------</span><br><span class="line">  1 | Bob   | 10000.00</span><br><span class="line">  2 | Alice | 10000.00</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>执行该COMMIT语句后，PostgreSQL还保证如果发生崩溃，更改将是持久的。</p>
+</blockquote>
+<h3 id="PostgreSQL-COMMIT-银行帐户转帐示例1"><a href="#PostgreSQL-COMMIT-银行帐户转帐示例1" class="headerlink" title="PostgreSQL COMMIT:银行帐户转帐示例1"></a>PostgreSQL COMMIT:银行帐户转帐示例1</h3><blockquote>
+<p>这里将展示如何从Bob的帐户向Alice的帐户转帐1000元。我们将使用两个会话来查看每个操作的更改。</p>
+</blockquote>
+<ul>
+<li>在第一个会话中，我们开始一个新事务:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># BEGIN;</span></span><br><span class="line">BEGIN</span><br></pre></td></tr></table></figure>
+<ul>
+<li>从ID为1的Bob的帐户中减去1000元:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE accounts </span></span><br><span class="line">SET balance = balance - 1000</span><br><span class="line">WHERE id = 1;</span><br><span class="line">UPDATE 1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在第二个会话中，检查两个帐户的帐户余额：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT </span></span><br><span class="line">    id,</span><br><span class="line">    name,</span><br><span class="line">    balance</span><br><span class="line">FROM </span><br><span class="line">    accounts;</span><br><span class="line"> id | name  | balance</span><br><span class="line">----+-------+----------</span><br><span class="line">  1 | Bob   | 10000.00</span><br><span class="line">  2 | Alice | 10000.00</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如上，该更改在其他会话中不可见。</p>
+</blockquote>
+<ul>
+<li>接下来，我们向Alice的帐户中添加相同的金额（1000元）。当然在更改提交前在其他会话依然看不到此此更改:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE accounts</span></span><br><span class="line">SET balance = balance + 1000</span><br><span class="line">WHERE id = 2; </span><br><span class="line">UPDATE 1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>提交更改</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># COMMIT;</span></span><br><span class="line">COMMIT</span><br></pre></td></tr></table></figure>
+<ul>
+<li>现在，您可以在任何会话中查看更改了:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT </span></span><br><span class="line">    id,</span><br><span class="line">    name,</span><br><span class="line">    balance</span><br><span class="line">FROM </span><br><span class="line">    accounts;</span><br><span class="line"> id | name  | balance</span><br><span class="line">----+-------+----------</span><br><span class="line">  1 | Bob   |  9000.00</span><br><span class="line">  2 | Alice | 11000.00</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="回滚事务"><a href="#回滚事务" class="headerlink" title="回滚事务"></a>回滚事务</h3><blockquote>
+<p>要回滚或撤消当前事务的更改，请使用以下任何语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ROLLBACK WORK;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>或者</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ROLLBACK TRANSACTION;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>或简而言之</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ROLLBACK;</span><br></pre></td></tr></table></figure>
+<h3 id="PostgreSQL-COMMIT-银行帐户转帐示例2"><a href="#PostgreSQL-COMMIT-银行帐户转帐示例2" class="headerlink" title="PostgreSQL COMMIT:银行帐户转帐示例2"></a>PostgreSQL COMMIT:银行帐户转帐示例2</h3><blockquote>
+<p>假设您要将1500元从Bob的帐户转移到Alice的帐户。但是，您不小心将钱汇到了Jack的帐户而不是Alice的帐户。您想回滚整个事务。</p>
+</blockquote>
+<ul>
+<li>首先，将Jack的帐户添加到accounts表中:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO accounts(name, balance)</span></span><br><span class="line">VALUES(<span class="string">'Jack'</span>,0);</span><br><span class="line">INSERT 0 1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>接下来，开启事务处理并从Bob的帐户中减去1500元:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># BEGIN;</span></span><br><span class="line"> </span><br><span class="line">UPDATE accounts </span><br><span class="line">SET balance = balance - 1500</span><br><span class="line">WHERE id = 1;</span><br><span class="line">BEGIN</span><br><span class="line"></span><br><span class="line">UPDATE 1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>然后，将相同的金额添加到Alice的帐户中：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE accounts</span></span><br><span class="line">SET balance = balance + 1500</span><br><span class="line">WHERE id = 3; </span><br><span class="line">UPDATE 1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>但是Alice的ID是2，这是一个错误。要撤消更改，请执行以下ROLLBACK语句:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># ROLLBACK;</span></span><br><span class="line">ROLLBACK</span><br></pre></td></tr></table></figure>
+<ul>
+<li>最后，检查所有帐户的余额:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT </span></span><br><span class="line">    id,</span><br><span class="line">    name,</span><br><span class="line">    balance</span><br><span class="line">FROM </span><br><span class="line">    accounts; </span><br><span class="line"> id | name  | balance</span><br><span class="line">----+-------+----------</span><br><span class="line">  1 | Bob   |  9000.00</span><br><span class="line">  2 | Alice | 11000.00</span><br><span class="line">  3 | Jack  |     0.00</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="导入和导出数据"><a href="#导入和导出数据" class="headerlink" title="导入和导出数据"></a>导入和导出数据</h2><h3 id="创建样表-3"><a href="#创建样表-3" class="headerlink" title="创建样表"></a>创建样表</h3><blockquote>
+<p>创建一个名为person的新表</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE persons</span></span><br><span class="line">(</span><br><span class="line">  id serial NOT NULL,</span><br><span class="line">  first_name character varying(50),</span><br><span class="line">  last_name character varying(50),</span><br><span class="line">  dob date,</span><br><span class="line">  email character varying(255),</span><br><span class="line">  CONSTRAINT persons_pkey PRIMARY KEY (id)</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<h3 id="创建CSV数据文件"><a href="#创建CSV数据文件" class="headerlink" title="创建CSV数据文件"></a>创建CSV数据文件</h3><blockquote>
+<p>使用Microsoft Excel创建CSV数据文件并上传至PostgreSQL数据库服务器</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat persons.csv </span></span><br><span class="line">First Name,Last Name,Date of Birth,Email</span><br><span class="line">Wang,Fei,1999-09-09,wangfei@wangzhijian.cn</span><br><span class="line">Li,Ning,2001-01-01,lining@wangzhijian.cn</span><br></pre></td></tr></table></figure>
+<h3 id="将CSV文件导入PostgreSQL表"><a href="#将CSV文件导入PostgreSQL表" class="headerlink" title="将CSV文件导入PostgreSQL表"></a>将CSV文件导入PostgreSQL表</h3><blockquote>
+<p>使用COPY语句将CSV文件导入到表中</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \c <span class="built_in">test</span> postgres</span><br><span class="line">用户 postgres 的口令：</span><br><span class="line">您现在已经连接到数据库 <span class="string">"test"</span>,用户 <span class="string">"postgres"</span>.</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># GRANT pg_read_server_files TO test;</span></span><br><span class="line">GRANT ROLE</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># \COPY persons(first_name,last_name,dob,email) </span></span><br><span class="line">FROM <span class="string">'/root/persons.csv'</span> DELIMITER <span class="string">','</span> CSV HEADER;</span><br><span class="line">COPY 2</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT * FROM persons;</span></span><br><span class="line"> id | first_name | last_name |    dob     |         email</span><br><span class="line">----+------------+-----------+------------+------------------------</span><br><span class="line">  1 | Wang       | Fei       | 1999-09-09 | wangfei@wangzhijian.cn</span><br><span class="line">  2 | Li         | Ning      | 2001-01-01 | lining@wangzhijian.cn</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="将PostgreSQL表导出为CSV文件"><a href="#将PostgreSQL表导出为CSV文件" class="headerlink" title="将PostgreSQL表导出为CSV文件"></a>将PostgreSQL表导出为CSV文件</h3><blockquote>
+<p>将表的数据导出到CSV文件的最简单方法是使用COPY语句。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># \COPY test5 TO '/root/test.csv' DELIMITER ',' CSV HEADER;</span></span><br><span class="line">COPY 20</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在某些情况下，您只想将数据从表的某些列导出到CSV文件。为此，您可以在COPY关键字后指定列名和表名。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># \COPY test5(full_name) TO '/root/test.csv' DELIMITER ',' CSV HEADER;</span></span><br><span class="line">COPY 20</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果可以访问远程PostgreSQL数据库服务器，但是没有足够的权限写入其中的文件，则可以使用PostgreSQL内置命令\copy。要使用\copy命令，只需要对本地计算机具有足够的特权，它不需要PostgreSQL超级用户权限。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/pg7/" rel="next" title="PostgreSQL之分组集和子查询">
+                <i class="fa fa-chevron-left"></i> PostgreSQL之分组集和子查询
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/pg9/" rel="prev" title="PostgreSQL之管理数据库和表">
+                PostgreSQL之管理数据库和表 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#修改数据"><span class="nav-number">1.</span> <span class="nav-text">修改数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#INSERT语句"><span class="nav-number">1.1.</span> <span class="nav-text">INSERT语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#INSERT语法"><span class="nav-number">1.1.1.</span> <span class="nav-text">INSERT语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建样表"><span class="nav-number">1.1.2.</span> <span class="nav-text">创建样表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#INSERT插入单行"><span class="nav-number">1.1.3.</span> <span class="nav-text">INSERT插入单行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#INSERT插入多行"><span class="nav-number">1.1.4.</span> <span class="nav-text">INSERT插入多行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#INSERT插入日期"><span class="nav-number">1.1.5.</span> <span class="nav-text">INSERT插入日期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#INSERT插入来自另一个表的数据"><span class="nav-number">1.1.6.</span> <span class="nav-text">INSERT插入来自另一个表的数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取最后的插入ID"><span class="nav-number">1.1.7.</span> <span class="nav-text">获取最后的插入ID</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UPDATE语句"><span class="nav-number">1.2.</span> <span class="nav-text">UPDATE语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UPDATE语法"><span class="nav-number">1.2.1.</span> <span class="nav-text">UPDATE语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UPDATE更新单列"><span class="nav-number">1.2.2.</span> <span class="nav-text">UPDATE更新单列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UPDATE部分更新表"><span class="nav-number">1.2.3.</span> <span class="nav-text">UPDATE部分更新表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UPDATE更新表中的所有行"><span class="nav-number">1.2.4.</span> <span class="nav-text">UPDATE更新表中的所有行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UPDATE更新联接表"><span class="nav-number">1.2.5.</span> <span class="nav-text">UPDATE更新联接表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PostgreSQL-UPDATE与RETURNING子句"><span class="nav-number">1.2.6.</span> <span class="nav-text">PostgreSQL UPDATE与RETURNING子句</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UPDATE-JOIN"><span class="nav-number">1.3.</span> <span class="nav-text">UPDATE JOIN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建示例表"><span class="nav-number">1.3.1.</span> <span class="nav-text">创建示例表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DELETE语句"><span class="nav-number">1.4.</span> <span class="nav-text">DELETE语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DELETE语法"><span class="nav-number">1.4.1.</span> <span class="nav-text">DELETE语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DELETE-with-WHERE子句示例"><span class="nav-number">1.4.2.</span> <span class="nav-text">DELETE with WHERE子句示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DELETE-USING语句示例"><span class="nav-number">1.4.3.</span> <span class="nav-text">DELETE USING语句示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从表中删除所有行"><span class="nav-number">1.4.4.</span> <span class="nav-text">从表中删除所有行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#upsert功能"><span class="nav-number">1.5.</span> <span class="nav-text">upsert功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建样表-1"><span class="nav-number">1.6.</span> <span class="nav-text">创建样表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL-upsert示例1"><span class="nav-number">1.7.</span> <span class="nav-text">PostgreSQL upsert示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL-upsert示例2"><span class="nav-number">1.8.</span> <span class="nav-text">PostgreSQL upsert示例2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务处理"><span class="nav-number">2.</span> <span class="nav-text">事务处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建样表-2"><span class="nav-number">2.1.</span> <span class="nav-text">创建样表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开始事务"><span class="nav-number">2.2.</span> <span class="nav-text">开始事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进行事务处理"><span class="nav-number">2.3.</span> <span class="nav-text">进行事务处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL-COMMIT-银行帐户转帐示例1"><span class="nav-number">2.4.</span> <span class="nav-text">PostgreSQL COMMIT:银行帐户转帐示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回滚事务"><span class="nav-number">2.5.</span> <span class="nav-text">回滚事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL-COMMIT-银行帐户转帐示例2"><span class="nav-number">2.6.</span> <span class="nav-text">PostgreSQL COMMIT:银行帐户转帐示例2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#导入和导出数据"><span class="nav-number">3.</span> <span class="nav-text">导入和导出数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建样表-3"><span class="nav-number">3.1.</span> <span class="nav-text">创建样表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建CSV数据文件"><span class="nav-number">3.2.</span> <span class="nav-text">创建CSV数据文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将CSV文件导入PostgreSQL表"><span class="nav-number">3.3.</span> <span class="nav-text">将CSV文件导入PostgreSQL表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将PostgreSQL表导出为CSV文件"><span class="nav-number">3.4.</span> <span class="nav-text">将PostgreSQL表导出为CSV文件</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">732k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">20:20</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

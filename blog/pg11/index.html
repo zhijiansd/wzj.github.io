@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="管理数据库架构PostgreSQL SCHEMA  在PostgreSQL中，schema是一个命名空间，其中包含命名的数据库对象，例如表，视图，索引，数据类型，函数和运算符。    要访问模式的对象，请使用schema名称作为前缀来限定其名称：  1schema_name.object_name  或者，可以设置包含schema的搜索路径。   一个数据库可以包含一个或多个schema，而每个s">
+<meta name="keywords" content="pg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL之数据库架构与条件表达式和运算符">
+<meta property="og:url" content="zhijiansd.github.io/blog/pg11/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="管理数据库架构PostgreSQL SCHEMA  在PostgreSQL中，schema是一个命名空间，其中包含命名的数据库对象，例如表，视图，索引，数据类型，函数和运算符。    要访问模式的对象，请使用schema名称作为前缀来限定其名称：  1schema_name.object_name  或者，可以设置包含schema的搜索路径。   一个数据库可以包含一个或多个schema，而每个s">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-20T05:01:55.538Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL之数据库架构与条件表达式和运算符">
+<meta name="twitter:description" content="管理数据库架构PostgreSQL SCHEMA  在PostgreSQL中，schema是一个命名空间，其中包含命名的数据库对象，例如表，视图，索引，数据类型，函数和运算符。    要访问模式的对象，请使用schema名称作为前缀来限定其名称：  1schema_name.object_name  或者，可以设置包含schema的搜索路径。   一个数据库可以包含一个或多个schema，而每个s">
+
+
+
+
+
+
+  <link rel="canonical" href="zhijiansd.github.io/blog/pg11/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PostgreSQL之数据库架构与条件表达式和运算符 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="zhijiansd.github.io/blog/pg11/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PostgreSQL之数据库架构与条件表达式和运算符
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-20 13:00:52 / 修改时间：13:01:55" itemprop="dateCreated datePublished" datetime="2020-05-20T13:00:52+08:00">2020-05-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/pg11/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg11/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">16k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">27 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="管理数据库架构"><a href="#管理数据库架构" class="headerlink" title="管理数据库架构"></a>管理数据库架构</h2><h3 id="PostgreSQL-SCHEMA"><a href="#PostgreSQL-SCHEMA" class="headerlink" title="PostgreSQL SCHEMA"></a>PostgreSQL SCHEMA</h3><blockquote>
+<blockquote>
+<p>在PostgreSQL中，schema是一个命名空间，其中包含命名的数据库对象，例如表，视图，索引，数据类型，函数和运算符。</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>要访问模式的对象，请使用schema名称作为前缀来限定其名称：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">schema_name.object_name</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>或者，可以设置包含schema的搜索路径。</p>
+</blockquote>
+<blockquote>
+<p>一个数据库可以包含一个或多个schema，而每个schema仅属于一个数据库。两个schema可以具有共享相同名称的不同对象。</p>
+</blockquote>
+<blockquote>
+<p>例如，您可能有具有工作人员表的销售架构和也有工作人员表的公共架构。 当您参考人员表时，您必须对其进行如下限定：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public.staff</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>或者</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sales.staff</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用模式的几种方案：</p>
+<ul>
+<li>Schemas允许您将数据库对象(例如表)组织为逻辑组，以使其更易于管理。</li>
+</ul>
+<ul>
+<li>Schemas使多个用户可以使用一个数据库而不会互相干扰。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>PostgreSQL为每个新数据库创建一个名为public的schema。无论您创建什么对象而没有指定模式名称，PostgreSQL都会自动将其放入此public schema。因此，以下语句是等效的：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE table_name(...);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>和</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE public.table_name(...);</span><br></pre></td></tr></table></figure>
+<h4 id="schema搜索路径"><a href="#schema搜索路径" class="headerlink" title="schema搜索路径"></a>schema搜索路径</h4><blockquote>
+<p>我们经常引用没有schema名称的表，例如staff表，而不是完全限定的名称，例如sales.staff表。当我们仅使用表名来引用表时，PostgreSQL通过使用称为schema search path的东西来搜索该表，该路径是要查找的chemas列表。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL将访问schema search path中的第一个匹配表。如果不匹配，则即使该名称存在于数据库的另一个schema中，也会返回错误。</p>
+</blockquote>
+<blockquote>
+<p>搜索路径中的第一个schema称为当前架构。请注意，在创建新对象而不显式指定schema名称时，PostgreSQL也会将当前schema用于新对象。current_schema()函数返回当前模式：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT current_schema();</span></span><br><span class="line"> current_schema</span><br><span class="line">----------------</span><br><span class="line"> public</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>查看当前schema路径</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SHOW search_path;</span></span><br><span class="line">   search_path</span><br><span class="line">-----------------</span><br><span class="line"> <span class="string">"<span class="variable">$user</span>"</span>, public</span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line">SHOW</span><br></pre></td></tr></table></figure>
+<ul>
+<li>“$user”指定PostgreSQL将用于搜索对象的第一个schema，该schema与当前用户同名。例如，如果您使用postgres用户登录并访问staff表。PostgreSQL将在postgres模式中搜索staff表。如果找不到类似的对象，它将继续在public schema中寻找对象。</li>
+</ul>
+<ul>
+<li>第二个元素指的是我们之前看到的public schema。要创建新schema，请使用CREATE SCHEMA语句：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE SCHEMA sales;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要将新schema添加到搜索路径，请使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET search_path TO sales, public;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>现在，如果在不指定schema名称的情况下创建了一个名为staff的新表，PostgreSQL将把这个staff表放入sales schema：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE staff(</span><br><span class="line">    staff_id SERIAL PRIMARY KEY,</span><br><span class="line">    name VARCHAR(45) NOT NULL,</span><br><span class="line">    email VARCHAR(100) NOT NULL UNIQUE</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>访问sales架构中的staff表，可以使用以下语句之一：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM staff;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要么</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM sales.staff;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>public schema是搜索路径中的第二个元素，因此要访问 public schema中的staff表，必须按如下所示限定表名：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM public.staff;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果使用以下命令，则需要使用完全限定的名称来显式引用public架构中的对象：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET search_path TO public;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该public架构不是特殊的架构，因此，您也可以删除它。</p>
+</blockquote>
+<h4 id="schemas和特权"><a href="#schemas和特权" class="headerlink" title="schemas和特权"></a>schemas和特权</h4><blockquote>
+<p>用户只能访问其拥有的架构中的对象。这意味着他们无法访问架构中不属于它们的任何对象。为了使用户能够访问他们不拥有的架构中的对象，必须将USAGE特权授予该架构上的用户，如以下语句所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRANT USAGE ON SCHEMA schema_name TO user_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要允许用户在他们不拥有的架构中创建对象，您需要向他们授予CREATE该架构的特权:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRANT CREATE ON SCHEMA schema_name TO user_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，默认情况下，每个用户在public schema上都具有CREATE和USAGE。</p>
+</blockquote>
+<h4 id="schema操作"><a href="#schema操作" class="headerlink" title="schema操作"></a>schema操作</h4><ul>
+<li>要创建新的schema，请使用以下CREATE SCHEMA语句。</li>
+</ul>
+<ul>
+<li>要重命名schema或更改其所有者，请使用以下ALTER SCHEMA语句。</li>
+</ul>
+<ul>
+<li>要删除schema，请使用以下DROP SCHEMA语句。</li>
+</ul>
+<h3 id="CREATE-SCHEMA语句"><a href="#CREATE-SCHEMA语句" class="headerlink" title="CREATE SCHEMA语句"></a>CREATE SCHEMA语句</h3><blockquote>
+<p>CREATE SCHEMA语句允许您在当前数据库中创建新的架构。</p>
+</blockquote>
+<h4 id="CREATE-SCHEMA语句的语法"><a href="#CREATE-SCHEMA语句的语法" class="headerlink" title="CREATE SCHEMA语句的语法"></a>CREATE SCHEMA语句的语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE SCHEMA [IF NOT EXISTS] schema_name;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在CREATE SCHEMA关键字之后指定架构的名称。模式名称在当前数据库中必须是唯一的。</li>
+</ul>
+<ul>
+<li>其次，可选地IF NOT EXISTS，仅在不存在新模式时用于有条件地创建新模式。尝试创建不使用IF NOT EXISTS选项的现有新模式将导致错误。</li>
+</ul>
+<blockquote>
+<p>请注意，要执行CREATE SCHEMA语句，您必须在当前数据库中具有CREATE特权。</p>
+</blockquote>
+<blockquote>
+<p>为用户创建架构：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE SCHEMA [IF NOT EXISTS] AUTHORIZATION user_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在这种情况下，架构将与user_name具有相同的名称。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL还允许您使用单个语句创建模式和对象列表，例如表和视图，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE SCHEMA schema_name</span><br><span class="line">    CREATE TABLE table_name1 (...)</span><br><span class="line">    CREATE TABLE table_name2 (...)</span><br><span class="line">    CREATE VIEW view_name1</span><br><span class="line">        SELECT select_list FROM table_name1;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，每个子命令都不以分号（;）结尾。</p>
+</blockquote>
+<h4 id="CREATE-SCHEMA用于创建新的架构示例"><a href="#CREATE-SCHEMA用于创建新的架构示例" class="headerlink" title="CREATE SCHEMA用于创建新的架构示例"></a>CREATE SCHEMA用于创建新的架构示例</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE SCHEMA IF NOT EXISTS fly;</span></span><br><span class="line">CREATE SCHEMA</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>从当前数据库返回所有架构</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">  *</span><br><span class="line">FROM</span><br><span class="line">    pg_catalog.pg_namespace</span><br><span class="line">ORDER BY</span><br><span class="line">    nspname;</span><br><span class="line">  oid  |      nspname       | nspowner |               nspacl</span><br><span class="line">-------+--------------------+----------+-------------------------------------</span><br><span class="line"> 18861 | fly                |    16384 |</span><br><span class="line"> 13887 | information_schema |       10 | &#123;postgres=UC/postgres,=U/postgres&#125;</span><br><span class="line">    11 | pg_catalog         |       10 | &#123;postgres=UC/postgres,=U/postgres&#125;</span><br><span class="line"> 12314 | pg_temp_1          |       10 |</span><br><span class="line"> 17777 | pg_temp_3          |       10 |</span><br><span class="line"> 17772 | pg_temp_4          |       10 |</span><br><span class="line">    99 | pg_toast           |       10 |</span><br><span class="line"> 12315 | pg_toast_temp_1    |       10 |</span><br><span class="line"> 17778 | pg_toast_temp_3    |       10 |</span><br><span class="line"> 17773 | pg_toast_temp_4    |       10 |</span><br><span class="line">  2200 | public             |       10 | &#123;postgres=UC/postgres,=UC/postgres&#125;</span><br><span class="line">(11 rows)</span><br></pre></td></tr></table></figure>
+<h4 id="使用CREATE-SCHEMA为用户示例创建模式"><a href="#使用CREATE-SCHEMA为用户示例创建模式" class="headerlink" title="使用CREATE SCHEMA为用户示例创建模式"></a>使用CREATE SCHEMA为用户示例创建模式</h4><blockquote>
+<p>首先，创建一个名为zhi的新用户:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE USER zhi WITH ENCRYPTED PASSWORD 'postgres321!';</span></span><br><span class="line">CREATE ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其次，为zhi创建一个模式:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE SCHEMA AUTHORIZATION zhi;</span></span><br><span class="line">CREATE SCHEMA</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第三，创建将由zhi拥有的新架构：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE SCHEMA IF NOT EXISTS fly AUTHORIZATION zhi;</span></span><br><span class="line">CREATE SCHEMA</span><br></pre></td></tr></table></figure>
+<h5 id="使用CREATE-SCHEMA创建模式及其对象示例"><a href="#使用CREATE-SCHEMA创建模式及其对象示例" class="headerlink" title="使用CREATE SCHEMA创建模式及其对象示例"></a>使用CREATE SCHEMA创建模式及其对象示例</h5><blockquote>
+<p>使用CREATE SCHEMA语句创建一个名为scm的新架构。它还创建一个名为abc的表和一个属于scm模式的名为abc_scm_list的视图：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE SCHEMA scm</span></span><br><span class="line">    CREATE TABLE abc(</span><br><span class="line">        id SERIAL NOT NULL,</span><br><span class="line">        customer_id INT NOT NULL,</span><br><span class="line">        date DATE NOT NULL</span><br><span class="line">    )</span><br><span class="line">    CREATE VIEW abc_scm_list AS</span><br><span class="line">        SELECT ID, date</span><br><span class="line">        FROM abc</span><br><span class="line">        WHERE date &lt;= CURRENT_DATE;</span><br><span class="line">CREATE SCHEMA</span><br></pre></td></tr></table></figure>
+<h3 id="ALTER-SCHEMA语句"><a href="#ALTER-SCHEMA语句" class="headerlink" title="ALTER SCHEMA语句"></a>ALTER SCHEMA语句</h3><h4 id="ALTER-SCHEMA语句语法"><a href="#ALTER-SCHEMA语句语法" class="headerlink" title="ALTER SCHEMA语句语法"></a>ALTER SCHEMA语句语法</h4><blockquote>
+<p>ALTER SCHEMA语句允许您更改模式的定义。例如，您可以按以下方式重命名架构：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ALTER SCHEMA schema_name</span><br><span class="line">RENAME TO new_name;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在ALTER SCHEMA关键字之后指定要重命名的架构的名称。</li>
+</ul>
+<ul>
+<li>其次，在RENAME TO关键字之后指定模式的新名称。</li>
+</ul>
+<blockquote>
+<p>请注意，要执行此语句，您必须是架构的所有者，并且必须具有数据库的CREATE特权。</p>
+</blockquote>
+<blockquote>
+<p>除了重命名模式，ALTER SCHEMA还允许您将模式的所有者更改为新的模式，如以下语句所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ALTER SCHEMA schema_name</span><br><span class="line">OWNER TO &#123; new_owner | CURRENT_USER | SESSION_USER&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在ALTER SCHEMA子句中指定要将所有者更改为的架构的名称。</li>
+</ul>
+<ul>
+<li>其次，在OWNER TO子句中指定新所有者。</li>
+</ul>
+<h4 id="使用ALTER-SCHEMA语句重命名架构"><a href="#使用ALTER-SCHEMA语句重命名架构" class="headerlink" title="使用ALTER SCHEMA语句重命名架构"></a>使用ALTER SCHEMA语句重命名架构</h4><blockquote>
+<p>使用ALTER SCHEMA语句将架构fly重命名为flyme</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># ALTER SCHEMA fly</span></span><br><span class="line">RENAME TO flyme;</span><br><span class="line">ALTER SCHEMA</span><br></pre></td></tr></table></figure>
+<h4 id="使用ALTER-SCHEMA语句更改架构所有者"><a href="#使用ALTER-SCHEMA语句更改架构所有者" class="headerlink" title="使用ALTER SCHEMA语句更改架构所有者"></a>使用ALTER SCHEMA语句更改架构所有者</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># ALTER SCHEMA flyme</span></span><br><span class="line">OWNER TO postgres;</span><br><span class="line">ALTER SCHEMA</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">  *</span><br><span class="line">FROM</span><br><span class="line">    pg_catalog.pg_namespace</span><br><span class="line">WHERE</span><br><span class="line">    nspacl is NULL AND</span><br><span class="line">    nspname NOT LIKE <span class="string">'pg_%'</span></span><br><span class="line">ORDER BY</span><br><span class="line">    nspname;</span><br><span class="line">  oid  | nspname | nspowner | nspacl</span><br><span class="line">-------+---------+----------+--------</span><br><span class="line"> 18861 | flyme   |       10 |</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>从输出中可以清楚地看到，flyme模式现在由ID为10的所有者（即postgres）拥有。</p>
+</blockquote>
+<h3 id="DROP-SCHEMA语句"><a href="#DROP-SCHEMA语句" class="headerlink" title="DROP SCHEMA语句"></a>DROP SCHEMA语句</h3><blockquote>
+<p>DROP SCHEMA从数据库中删除模式及其所有对象。</p>
+</blockquote>
+<h4 id="DROP-SCHEMA语句的语法"><a href="#DROP-SCHEMA语句的语法" class="headerlink" title="DROP SCHEMA语句的语法"></a>DROP SCHEMA语句的语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP SCHEMA [IF EXISTS] schema_name [ CASCADE | RESTRICT ];</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在DROP SCHEMA关键字之后指定要从中删除的架构的名称。</li>
+</ul>
+<ul>
+<li>其次，使用IF EXISTS选项仅在模式存在时才有条件地删除它。</li>
+</ul>
+<ul>
+<li>第三，使用CASCADE删除架构及其所有对象，然后依次删除所有依赖于那些对象的对象。如果只想在模式为空时删除模式，则可以使用RESTRICT选项。默认情况下，PostgreSQL使用RESTRICT。</li>
+</ul>
+<blockquote>
+<p>要执行DROP SCHEMA语句，您必须是要删除的架构的所有者或超级用户。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL允许您使用单个DROP SCHEMA语句同时删除多个模式：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DROP SCHEMA [IF EXISTS] schema_name1 [,schema_name2,...]</span><br><span class="line">[CASCADE | RESTRICT];</span><br></pre></td></tr></table></figure>
+<h4 id="使用DROP-SCHEMA语句删除空模式"><a href="#使用DROP-SCHEMA语句删除空模式" class="headerlink" title="使用DROP SCHEMA语句删除空模式"></a>使用DROP SCHEMA语句删除空模式</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DROP SCHEMA IF EXISTS flyme;</span></span><br><span class="line">DROP SCHEMA</span><br></pre></td></tr></table></figure>
+<h4 id="使用DROP-SCHEMA语句删除多个模式"><a href="#使用DROP-SCHEMA语句删除多个模式" class="headerlink" title="使用DROP SCHEMA语句删除多个模式"></a>使用DROP SCHEMA语句删除多个模式</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># DROP SCHEMA IF EXISTS fly,zhi;</span></span><br><span class="line">DROP SCHEMA</span><br></pre></td></tr></table></figure>
+<h4 id="使用DROP-SCHEMA语句删除非空模式"><a href="#使用DROP-SCHEMA语句删除非空模式" class="headerlink" title="使用DROP SCHEMA语句删除非空模式"></a>使用DROP SCHEMA语句删除非空模式</h4><blockquote>
+<p>直接删除将提示错误</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># DROP SCHEMA IF EXISTS scm;</span></span><br><span class="line">错误:  无法删除 模式 scm 因为有其它对象倚赖它</span><br><span class="line">DETAIL:  表 scm.abc 倚赖于 模式 scm</span><br><span class="line">视图 scm.abc_scm_list 倚赖于 模式 scm</span><br><span class="line">HINT:  使用 DROP .. CASCADE 把倚赖对象一并删除.</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>因此，如果架构不为空，并且想要删除架构及其对象，则必须使用CASCADE选项：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># DROP SCHEMA scm CASCADE;</span></span><br><span class="line">注意:  串联删除2个其它对象</span><br><span class="line">DETAIL:  递归删除 表 scm.abc</span><br><span class="line">递归删除 视图 scm.abc_scm_list</span><br><span class="line">DROP SCHEMA</span><br></pre></td></tr></table></figure>
+<h2 id="条件表达式和运算符"><a href="#条件表达式和运算符" class="headerlink" title="条件表达式和运算符"></a>条件表达式和运算符</h2><h3 id="CASE表达式"><a href="#CASE表达式" class="headerlink" title="CASE表达式"></a>CASE表达式</h3><blockquote>
+<p>PostgreSQL CASE表达式与其他编程语言中的IF/ELSE语句相同。PostgreSQL提供了两种形式的CASE表达式。</p>
+</blockquote>
+<blockquote>
+<p>CASE语句的一般形式:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CASE</span><br><span class="line">      WHEN condition_1  THEN result_1</span><br><span class="line">      WHEN condition_2  THEN result_2</span><br><span class="line">      [WHEN ...]</span><br><span class="line">      [ELSE result_n]</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在这种一般形式下，每个条件都是一个返回布尔值（真或假）的表达式。</p>
+</blockquote>
+<blockquote>
+<p>如果条件评估为真，则CASE表达式返回与条件相对应的结果，并且所有其他CASE分支根本不处理。</p>
+</blockquote>
+<blockquote>
+<p>如果所有条件都为假，则CASE表达式将在ELSE部分返回结果。如果省略ELSE子句，则CASE表达式将返回null。</p>
+</blockquote>
+<blockquote>
+<p>请注意，所有结果表达式必须具有可转换为单个数据类型的数据类型，例如字符串，数字和时间。</p>
+</blockquote>
+<h4 id="简单的CASE表达式"><a href="#简单的CASE表达式" class="headerlink" title="简单的CASE表达式"></a>简单的CASE表达式</h4><blockquote>
+<p>PostgreSQL提供了另一种CASE表达式形式，称为简单形式，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">CASE expression</span><br><span class="line">WHEN value_1 THEN</span><br><span class="line">   result_1</span><br><span class="line">WHEN value_2 THEN</span><br><span class="line">   result_2</span><br><span class="line">[WHEN ...]</span><br><span class="line">ELSE</span><br><span class="line">   result_n</span><br><span class="line">END;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>CASE首先对表达式求值，然后将结果与WHEN子句中的每个值（value_1，value_2，…）进行比较，直到找到匹配项。一旦表达式的结果等于WHEN子句中的值，则CASE在THEN子句中返回相应的结果。</p>
+</blockquote>
+<blockquote>
+<p>如果CASE未找到任何匹配项，则它将在ELSE部分中返回result_n，如果ELSE部分不可用则返回NULL值。这类似于其他编程语言（例如C/C++和Java）中的switch语句。</p>
+</blockquote>
+<blockquote>
+<p>假设您要使用以下逻辑为电影分配价格段：</p>
+<ul>
+<li>如果出租率为0.99，则为大众</li>
+</ul>
+<ul>
+<li>如果租金率为1.99则经济</li>
+</ul>
+<ul>
+<li>如果租金率为4.99，则为豪华<br>您想知道属于大众，经济和豪华价格段的电影数量。 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p>在这种情况下，可以使用CASE表达式来构造查询，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   SUM (</span><br><span class="line">      CASE</span><br><span class="line">      WHEN rental_rate = 0.99 THEN</span><br><span class="line">         1</span><br><span class="line">      ELSE</span><br><span class="line">         0</span><br><span class="line">      END</span><br><span class="line">   ) AS <span class="string">"Mass"</span>,</span><br><span class="line">   SUM (</span><br><span class="line">      CASE</span><br><span class="line">      WHEN rental_rate = 2.99 THEN</span><br><span class="line">         1</span><br><span class="line">      ELSE</span><br><span class="line">         0</span><br><span class="line">      END</span><br><span class="line">   ) AS <span class="string">"Economic"</span>,</span><br><span class="line">   SUM (</span><br><span class="line">      CASE</span><br><span class="line">      WHEN rental_rate = 4.99 THEN</span><br><span class="line">         1</span><br><span class="line">      ELSE</span><br><span class="line">         0</span><br><span class="line">      END</span><br><span class="line">   ) AS <span class="string">"Luxury"</span></span><br><span class="line">FROM</span><br><span class="line">   film;</span><br><span class="line"> Mass | Economic | Luxury</span><br><span class="line">------+----------+--------</span><br><span class="line">  341 |      323 |    336</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在此查询中，如果租金属于该价格范围，使用CASE表达式返回1或0。然后，应用SUM函数计算每个价格段的电影总数。</li>
+</ul>
+<h3 id="COALESCE函数"><a href="#COALESCE函数" class="headerlink" title="COALESCE函数"></a>COALESCE函数</h3><h4 id="COALESCE函数语法"><a href="#COALESCE函数语法" class="headerlink" title="COALESCE函数语法"></a>COALESCE函数语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">COALESCE (argument_1, argument_2, …);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>COALESCE函数接受无限数量的参数。它返回不为空的第一个参数。如果所有参数均为null，则COALESCE函数将返回null。</p>
+</blockquote>
+<blockquote>
+<p>COALESCE函数从左到右评估参数，直到找到第一个非空参数为止。第一个非null参数中的所有其余参数均不进行评估。</p>
+</blockquote>
+<blockquote>
+<p>COALESCE函数提供与SQL标准提供的NVL或IFNULL函数相同的功能。MySQL具有IFNULL函数，而Oracle提供NVL函数。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   COALESCE (1, 2);</span><br><span class="line"> coalesce</span><br><span class="line">----------</span><br><span class="line">        1</span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   COALESCE (NULL, 2 , 1);</span><br><span class="line"> coalesce</span><br><span class="line">----------</span><br><span class="line">        2</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在查询数据时，我们经常使用COLAESCE函数将默认值替换为空值。例如，我们要显示博客文章的摘录，如果未提供摘录，则可以使用文章内容的前150个字符。为此，我们可以使用COALESCE函数，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   COALESCE (excerpt, LEFT(CONTENT, 150))</span><br><span class="line">FROM</span><br><span class="line">   posts;</span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line"><span class="comment">#### COALESCE示例</span></span><br><span class="line">&gt; 创建一个名为items的表</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE items (</span></span><br><span class="line">   ID serial PRIMARY KEY,</span><br><span class="line">   product VARCHAR (100) NOT NULL,</span><br><span class="line">   price NUMERIC NOT NULL,</span><br><span class="line">   discount NUMERIC</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<p>id:标识项目表中项目的主键。<br>product:产品名称。<br>price:产品的价格。<br>discount:产品的折扣。</p>
+<blockquote>
+<p>其次，使用INSERT语句将一些记录插入到item表中，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO items (product, price, discount)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'A'</span>, 1000 ,10),</span><br><span class="line">   (<span class="string">'B'</span>, 1500 ,20),</span><br><span class="line">   (<span class="string">'C'</span>, 800 ,5),</span><br><span class="line">   (<span class="string">'D'</span>, 500, NULL);</span><br><span class="line">INSERT 0 4</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第三，使用以下公式查询产品的净价:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net_price = price - discount;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   product,</span><br><span class="line">   (price - discount) AS net_price</span><br><span class="line">FROM</span><br><span class="line">   items;</span><br><span class="line"> product | net_price</span><br><span class="line">---------+-----------</span><br><span class="line"> A       |       990</span><br><span class="line"> B       |      1480</span><br><span class="line"> C       |       795</span><br><span class="line"> D       |</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果查看第四行，您会注意到产品D的净价格为零，这似乎是不正确的。问题是产品D的折扣为null，因此当我们使用null值计算净价时，PostgreSQL返回null。</p>
+</blockquote>
+<blockquote>
+<p>为了获得正确的价格，我们需要假设折扣为零，则为零。然后我们可以使用COALESCE函数，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   product,</span><br><span class="line">   (price - COALESCE(discount,0)) AS net_price</span><br><span class="line">FROM</span><br><span class="line">   items;</span><br><span class="line"> product | net_price</span><br><span class="line">---------+-----------</span><br><span class="line"> A       |       990</span><br><span class="line"> B       |      1480</span><br><span class="line"> C       |       795</span><br><span class="line"> D       |       500</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>现在产品D的净价为500，因为在计算净价时我们使用零而不是空值。</p>
+</blockquote>
+<blockquote>
+<p>在这种情况下，除了使用COALESCE函数外，还可以使用CASE表达式来处理空值:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   product,</span><br><span class="line">   (</span><br><span class="line">      price - CASE</span><br><span class="line">      WHEN discount IS NULL THEN</span><br><span class="line">         0</span><br><span class="line">      ELSE</span><br><span class="line">         discount</span><br><span class="line">      END</span><br><span class="line">   ) AS net_price</span><br><span class="line">FROM</span><br><span class="line">   items;</span><br><span class="line"> product | net_price</span><br><span class="line">---------+-----------</span><br><span class="line"> A       |       990</span><br><span class="line"> B       |      1480</span><br><span class="line"> C       |       795</span><br><span class="line"> D       |       500</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在上面的查询中，如果折扣为null，则使用零(0)，否则在计算净价格的表达式中使用折扣值。</p>
+</blockquote>
+<blockquote>
+<p>在性能方面，COALESCE函数和CASE表达式相同。与COASE表达式相比，COALESCE函数使查询更短且更易于阅读。</p>
+</blockquote>
+<h3 id="NULLIF函数"><a href="#NULLIF函数" class="headerlink" title="NULLIF函数"></a>NULLIF函数</h3><blockquote>
+<p>NULLIF函数是PostgreSQL提供的最常见的条件表达式之一。</p>
+</blockquote>
+<h4 id="NULLIF函数语法"><a href="#NULLIF函数语法" class="headerlink" title="NULLIF函数语法"></a>NULLIF函数语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NULLIF(argument_1,argument_2);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果argument_1等于argument_2，则NULLIF函数返回空值，否则返回argument_1。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   NULLIF (1, 1); -- <span class="built_in">return</span> NULL</span><br><span class="line"> </span><br><span class="line">SELECT</span><br><span class="line">   NULLIF (1, 0); -- <span class="built_in">return</span> 1</span><br><span class="line"> </span><br><span class="line">SELECT</span><br><span class="line">   NULLIF (<span class="string">'A'</span>, <span class="string">'B'</span>); -- <span class="built_in">return</span> A</span><br></pre></td></tr></table></figure>
+<h4 id="NULLIF函数示例"><a href="#NULLIF函数示例" class="headerlink" title="NULLIF函数示例"></a>NULLIF函数示例</h4><blockquote>
+<p>创建一个名为posts的表</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE posts (</span></span><br><span class="line">   id serial primary key,</span><br><span class="line">   title VARCHAR (255) NOT NULL,</span><br><span class="line">   excerpt VARCHAR (150),</span><br><span class="line">   body TEXT,</span><br><span class="line">   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</span><br><span class="line">   updated_at TIMESTAMP</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>插入数据</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO posts (title, excerpt, body)</span></span><br><span class="line">VALUES</span><br><span class="line">      (<span class="string">'test post 1'</span>,<span class="string">'test post excerpt 1'</span>,<span class="string">'test post body 1'</span>),</span><br><span class="line">      (<span class="string">'test post 2'</span>,<span class="string">''</span>,<span class="string">'test post body 2'</span>),</span><br><span class="line">      (<span class="string">'test post 3'</span>, null ,<span class="string">'test post body 3'</span>);</span><br><span class="line">INSERT 0 3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里的目标是显示帖子概述页面，该页面显示每个帖子的标题和摘录。如果未提供摘录，我们将使用帖子正文的前40个字符。我们可以简单地使用以下查询来获取posts表中的所有行：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   ID,</span><br><span class="line">   title,</span><br><span class="line">   excerpt</span><br><span class="line">FROM</span><br><span class="line">   posts;</span><br><span class="line"> id |    title    |       excerpt</span><br><span class="line">----+-------------+---------------------</span><br><span class="line">  1 | <span class="built_in">test</span> post 1 | <span class="built_in">test</span> post excerpt 1</span><br><span class="line">  2 | <span class="built_in">test</span> post 2 |</span><br><span class="line">  3 | <span class="built_in">test</span> post 3 |</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在摘录栏中看到空值。要替换此空值，我们可以使用COALESCE函数，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   id,</span><br><span class="line">   title,</span><br><span class="line">   COALESCE (excerpt, LEFT(body, 40))</span><br><span class="line">FROM</span><br><span class="line">   posts;</span><br><span class="line"> id |    title    |      coalesce</span><br><span class="line">----+-------------+---------------------</span><br><span class="line">  1 | <span class="built_in">test</span> post 1 | <span class="built_in">test</span> post excerpt 1</span><br><span class="line">  2 | <span class="built_in">test</span> post 2 |</span><br><span class="line">  3 | <span class="built_in">test</span> post 3 | <span class="built_in">test</span> post body 3</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>不幸的是，摘录栏中的null值和“（空）”之间混合使用。这就是为什么我们需要使用NULLIF函数的原因：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   id,</span><br><span class="line">   title,</span><br><span class="line">   COALESCE (</span><br><span class="line">      NULLIF (excerpt, <span class="string">''</span>),</span><br><span class="line">      LEFT (body, 40)</span><br><span class="line">   )</span><br><span class="line">FROM</span><br><span class="line">   posts;</span><br><span class="line"> id |    title    |      coalesce</span><br><span class="line">----+-------------+---------------------</span><br><span class="line">  1 | <span class="built_in">test</span> post 1 | <span class="built_in">test</span> post excerpt 1</span><br><span class="line">  2 | <span class="built_in">test</span> post 2 | <span class="built_in">test</span> post body 2</span><br><span class="line">  3 | <span class="built_in">test</span> post 3 | <span class="built_in">test</span> post body 3</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，如果摘录为空，则NULLIF函数将返回空值，否则它将返回摘录。NULLIF函数的结果由COALESCE函数使用。</li>
+</ul>
+<ul>
+<li>其次，COALESCE函数检查NULLIF函数提供的第一个参数是否为null，然后返回正文的前40个字符；否则，如果摘录不为null，则返回摘录。</li>
+</ul>
+<h4 id="使用NULLIF防止被除零错误"><a href="#使用NULLIF防止被除零错误" class="headerlink" title="使用NULLIF防止被除零错误"></a>使用NULLIF防止被除零错误</h4><blockquote>
+<p>使用NULLIF函数的另一个很好的例子是防止被除零错误。</p>
+</blockquote>
+<blockquote>
+<p>创建一个名为members的新表</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE members (</span></span><br><span class="line">   ID serial PRIMARY KEY,</span><br><span class="line">   name VARCHAR (50) NOT NULL,</span><br><span class="line">   gender SMALLINT NOT NULL -- 1: male, 2 female</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>插入数据</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO members (</span></span><br><span class="line">   name,</span><br><span class="line">   gender</span><br><span class="line">)</span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'John'</span>, 1),</span><br><span class="line">   (<span class="string">'David'</span>,  1),</span><br><span class="line">   (<span class="string">'Bush'</span>, 2);</span><br><span class="line">INSERT 0 3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要计算男性成员与女性成员之间的比例，请使用以下查询：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   (SUM (</span><br><span class="line">      CASE</span><br><span class="line">      WHEN gender = 1 THEN</span><br><span class="line">         1</span><br><span class="line">      ELSE</span><br><span class="line">         0</span><br><span class="line">      END</span><br><span class="line">   ) / SUM (</span><br><span class="line">      CASE</span><br><span class="line">      WHEN gender = 2 THEN</span><br><span class="line">         1</span><br><span class="line">      ELSE</span><br><span class="line">         0</span><br><span class="line">      END</span><br><span class="line">   ) ) * 100 AS <span class="string">"Male/Female ratio"</span></span><br><span class="line">FROM</span><br><span class="line">   members;</span><br><span class="line"> Male/Female ratio</span><br><span class="line">-------------------</span><br><span class="line">               200</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要计算男性成员总数，我们使用SUM函数和CASE表达式。如果性别为1，则CASE表达式返回1，否则返回0；否则，返回0。 SUM函数用于计算男性成员总数。同样的逻辑也适用于计算女性成员的总数。</p>
+</blockquote>
+<blockquote>
+<p>然后，将男性成员总数除以女性成员总数即可得出该比率。在这种情况下，它将返回200％，这是正确的。</p>
+</blockquote>
+<blockquote>
+<p>删除女性成员</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE</span></span><br><span class="line">FROM</span><br><span class="line">   members</span><br><span class="line">WHERE</span><br><span class="line">   gender = 2;</span><br><span class="line">DELETE 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>再次执行查询以计算男女比例，我们得到以下错误消息：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">错误:  除以零</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>原因是女性人数为零。为了防止被除零的错误，我们使用NULLIF函数，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   (</span><br><span class="line">      SUM (</span><br><span class="line">         CASE</span><br><span class="line">         WHEN gender = 1 THEN</span><br><span class="line">            1</span><br><span class="line">         ELSE</span><br><span class="line">            0</span><br><span class="line">         END</span><br><span class="line">      ) / NULLIF (</span><br><span class="line">         SUM (</span><br><span class="line">            CASE</span><br><span class="line">            WHEN gender = 2 THEN</span><br><span class="line">               1</span><br><span class="line">            ELSE</span><br><span class="line">               0</span><br><span class="line">            END</span><br><span class="line">         ),</span><br><span class="line">         0</span><br><span class="line">      )</span><br><span class="line">   ) * 100 AS <span class="string">"Male/Female ratio"</span></span><br><span class="line">FROM</span><br><span class="line">   members;</span><br><span class="line"> Male/Female ratio</span><br><span class="line">-------------------</span><br><span class="line"></span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NULLIF函数检查母成员数是否为零，它返回null。男性成员总数除以null值将返回一个null值，这是正确的。</p>
+</blockquote>
+<h3 id="CAST运算符"><a href="#CAST运算符" class="headerlink" title="CAST运算符"></a>CAST运算符</h3><blockquote>
+<p>在很多情况下，您都希望将一种数据类型的值转换为另一种数据类型。PostgreSQL为您提供了CAST允许您执行此操作的运算符。</p>
+</blockquote>
+<h4 id="CAST类型的语法"><a href="#CAST类型的语法" class="headerlink" title="CAST类型的语法"></a>CAST类型的语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CAST ( expression AS target_type );</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，指定一个可以是常量的表达式，一个表列，一个求值的表达式。</li>
+</ul>
+<ul>
+<li>然后，指定要将表达式结果转换为的目标数据类型。</li>
+</ul>
+<h4 id="PostgreSQL类型转换-运算符"><a href="#PostgreSQL类型转换-运算符" class="headerlink" title="PostgreSQL类型转换::运算符"></a>PostgreSQL类型转换::运算符</h4><blockquote>
+<p>除了CAST语法之外，您还可以使用以下语法将一种类型的值转换为另一种类型：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">expression::<span class="built_in">type</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>示例</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">  <span class="string">'100'</span>::INTEGER,</span><br><span class="line">  <span class="string">'01-OCT-2018'</span>::DATE;</span><br><span class="line"> int4 |    date</span><br><span class="line">------+------------</span><br><span class="line">  100 | 2018-10-01</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，带有强制转换运算符(::)的强制转换语法是特定于PostgreSQL的，并且不符合SQL标准。</p>
+</blockquote>
+<h4 id="将字符串转换为整数"><a href="#将字符串转换为整数" class="headerlink" title="将字符串转换为整数"></a>将字符串转换为整数</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   CAST (<span class="string">'100'</span> AS INTEGER);</span><br><span class="line"> int4</span><br><span class="line">------</span><br><span class="line">  100</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果表达式不能转换为目标类型，PostgreSQL将引发错误。请参见以下示例:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   CAST (<span class="string">'10C'</span> AS INTEGER);</span><br><span class="line">错误:  无效的类型 <span class="built_in">integer</span> 输入语法: <span class="string">"10C"</span></span><br><span class="line">LINE 2:    CAST (<span class="string">'10C'</span> AS INTEGER)</span><br></pre></td></tr></table></figure>
+<h4 id="将字符串转换为日期"><a href="#将字符串转换为日期" class="headerlink" title="将字符串转换为日期"></a>将字符串转换为日期</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   CAST (<span class="string">'2018-01-01'</span> AS DATE),</span><br><span class="line">   CAST (<span class="string">'01-OCT-2018'</span> AS DATE);</span><br><span class="line">    date    |    date</span><br><span class="line">------------+------------</span><br><span class="line"> 2018-01-01 | 2018-10-01</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，将2015-01-01文字字符串转换为January 1st 2015。其次，转换01-OCT-2015为October 1st 2015。</li>
+</ul>
+<h4 id="将字符串强制转换为双精度值"><a href="#将字符串强制转换为双精度值" class="headerlink" title="将字符串强制转换为双精度值"></a>将字符串强制转换为双精度值</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   CAST (<span class="string">'10.2'</span> AS DOUBLE);</span><br><span class="line">错误:  类型 <span class="string">"double"</span> 不存在</span><br><span class="line">LINE 2:    CAST (<span class="string">'10.2'</span> AS DOUBLE)</span><br><span class="line">                           ^</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用DOUBLE PRECISION而不是DOUBLE</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   CAST (<span class="string">'10.2'</span> AS DOUBLE PRECISION);</span><br><span class="line"> float8</span><br><span class="line">--------</span><br><span class="line">   10.2</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h4 id="将字符串强制转换为布尔型"><a href="#将字符串强制转换为布尔型" class="headerlink" title="将字符串强制转换为布尔型"></a>将字符串强制转换为布尔型</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   CAST(<span class="string">'true'</span> AS BOOLEAN),</span><br><span class="line">   CAST(<span class="string">'false'</span> as BOOLEAN),</span><br><span class="line">   CAST(<span class="string">'T'</span> as BOOLEAN),</span><br><span class="line">   CAST(<span class="string">'F'</span> as BOOLEAN);</span><br><span class="line"> bool | bool | bool | bool</span><br><span class="line">------+------+------+------</span><br><span class="line"> t    | f    | t    | f</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h4 id="将字符串转换为时间戳"><a href="#将字符串转换为时间戳" class="headerlink" title="将字符串转换为时间戳"></a>将字符串转换为时间戳</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT '2019-06-15 14:30:20'::timestamp;</span></span><br><span class="line">      timestamp</span><br><span class="line">---------------------</span><br><span class="line"> 2019-06-15 14:30:20</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h4 id="将字符串转换为间隔"><a href="#将字符串转换为间隔" class="headerlink" title="将字符串转换为间隔"></a>将字符串转换为间隔</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT '15 minute'::interval,</span></span><br><span class="line"><span class="string">'2 hour'</span>::interval,</span><br><span class="line"><span class="string">'1 day'</span>::interval,</span><br><span class="line"><span class="string">'2 week'</span>::interval,</span><br><span class="line"><span class="string">'3 month'</span>::interval;</span><br><span class="line"> interval | interval | interval | interval | interval</span><br><span class="line">----------+----------+----------+----------+----------</span><br><span class="line"> 00:15:00 | 02:00:00 | 1 day    | 14 days  | 3 mons</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h4 id="CAST与表格数据一起使用"><a href="#CAST与表格数据一起使用" class="headerlink" title="CAST与表格数据一起使用"></a>CAST与表格数据一起使用</h4><blockquote>
+<p>创建一个包含两列的ratings表：id和rating。rating列的数据类型为VARCHAR(1)：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE ratings (</span></span><br><span class="line">   ID serial PRIMARY KEY,</span><br><span class="line">   rating VARCHAR (1) NOT NULL</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>插入数据</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO ratings (rating)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'A'</span>),</span><br><span class="line">   (<span class="string">'B'</span>),</span><br><span class="line">   (<span class="string">'C'</span>);</span><br><span class="line">INSERT 0 3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>由于要求有所变化，因此我们使用相同的ratings表将评分存储为数字，例如1、2、3，而不是A，B和C：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO ratings (rating)</span></span><br><span class="line">VALUES</span><br><span class="line">   (1),</span><br><span class="line">   (2),</span><br><span class="line">   (3);</span><br><span class="line">INSERT 0 3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>因此，该ratings表存储的混合值包括数字和字符串。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   ratings;</span><br><span class="line"> id | rating</span><br><span class="line">----+--------</span><br><span class="line">  1 | A</span><br><span class="line">  2 | B</span><br><span class="line">  3 | C</span><br><span class="line">  4 | 1</span><br><span class="line">  5 | 2</span><br><span class="line">  6 | 3</span><br><span class="line">(6 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>现在，我们必须将等级列中的所有值转换为整数，所有其他A，B，C等级将显示为零。为此，可以使用CASE表达式，其类型为CAST，如以下查询所示：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">   id,</span><br><span class="line">   CASE</span><br><span class="line">      WHEN rating~E&apos;^\\d+$&apos; THEN</span><br><span class="line">         CAST (rating AS INTEGER)</span><br><span class="line">      ELSE</span><br><span class="line">         0</span><br><span class="line">      END as rating</span><br><span class="line">FROM</span><br><span class="line">   ratings;</span><br><span class="line"> id | rating</span><br><span class="line">----+--------</span><br><span class="line">  1 |      0</span><br><span class="line">  2 |      0</span><br><span class="line">  3 |      0</span><br><span class="line">  4 |      1</span><br><span class="line">  5 |      2</span><br><span class="line">  6 |      3</span><br><span class="line">(6 rows)</span><br><span class="line">sh</span><br><span class="line">test=# SELECT</span><br><span class="line">   id,</span><br><span class="line">   CASE</span><br><span class="line">      WHEN rating~E&apos;^\\d+$&apos; THEN</span><br><span class="line">         CAST (rating AS INTEGER)</span><br><span class="line">      ELSE</span><br><span class="line">         0</span><br><span class="line">      END as rating</span><br><span class="line">FROM</span><br><span class="line">   ratings;</span><br><span class="line"> id | rating</span><br><span class="line">----+--------</span><br><span class="line">  1 |      0</span><br><span class="line">  2 |      0</span><br><span class="line">  3 |      0</span><br><span class="line">  4 |      1</span><br><span class="line">  5 |      2</span><br><span class="line">  6 |      3</span><br><span class="line">(6 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>CASE检查等级，如果它与整数模式匹配，则将等级转换为整数，否则返回0。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/pg10/" rel="next" title="PostgreSQL之数据库约束和数据库类型">
+                <i class="fa fa-chevron-left"></i> PostgreSQL之数据库约束和数据库类型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/pg12/" rel="prev" title="PostgreSQL之存储过程">
+                PostgreSQL之存储过程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#管理数据库架构"><span class="nav-number">1.</span> <span class="nav-text">管理数据库架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL-SCHEMA"><span class="nav-number">1.1.</span> <span class="nav-text">PostgreSQL SCHEMA</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#schema搜索路径"><span class="nav-number">1.1.1.</span> <span class="nav-text">schema搜索路径</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#schemas和特权"><span class="nav-number">1.1.2.</span> <span class="nav-text">schemas和特权</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#schema操作"><span class="nav-number">1.1.3.</span> <span class="nav-text">schema操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CREATE-SCHEMA语句"><span class="nav-number">1.2.</span> <span class="nav-text">CREATE SCHEMA语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CREATE-SCHEMA语句的语法"><span class="nav-number">1.2.1.</span> <span class="nav-text">CREATE SCHEMA语句的语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CREATE-SCHEMA用于创建新的架构示例"><span class="nav-number">1.2.2.</span> <span class="nav-text">CREATE SCHEMA用于创建新的架构示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用CREATE-SCHEMA为用户示例创建模式"><span class="nav-number">1.2.3.</span> <span class="nav-text">使用CREATE SCHEMA为用户示例创建模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#使用CREATE-SCHEMA创建模式及其对象示例"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">使用CREATE SCHEMA创建模式及其对象示例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ALTER-SCHEMA语句"><span class="nav-number">1.3.</span> <span class="nav-text">ALTER SCHEMA语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ALTER-SCHEMA语句语法"><span class="nav-number">1.3.1.</span> <span class="nav-text">ALTER SCHEMA语句语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用ALTER-SCHEMA语句重命名架构"><span class="nav-number">1.3.2.</span> <span class="nav-text">使用ALTER SCHEMA语句重命名架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用ALTER-SCHEMA语句更改架构所有者"><span class="nav-number">1.3.3.</span> <span class="nav-text">使用ALTER SCHEMA语句更改架构所有者</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DROP-SCHEMA语句"><span class="nav-number">1.4.</span> <span class="nav-text">DROP SCHEMA语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DROP-SCHEMA语句的语法"><span class="nav-number">1.4.1.</span> <span class="nav-text">DROP SCHEMA语句的语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用DROP-SCHEMA语句删除空模式"><span class="nav-number">1.4.2.</span> <span class="nav-text">使用DROP SCHEMA语句删除空模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用DROP-SCHEMA语句删除多个模式"><span class="nav-number">1.4.3.</span> <span class="nav-text">使用DROP SCHEMA语句删除多个模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用DROP-SCHEMA语句删除非空模式"><span class="nav-number">1.4.4.</span> <span class="nav-text">使用DROP SCHEMA语句删除非空模式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#条件表达式和运算符"><span class="nav-number">2.</span> <span class="nav-text">条件表达式和运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CASE表达式"><span class="nav-number">2.1.</span> <span class="nav-text">CASE表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#简单的CASE表达式"><span class="nav-number">2.1.1.</span> <span class="nav-text">简单的CASE表达式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#COALESCE函数"><span class="nav-number">2.2.</span> <span class="nav-text">COALESCE函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#COALESCE函数语法"><span class="nav-number">2.2.1.</span> <span class="nav-text">COALESCE函数语法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NULLIF函数"><span class="nav-number">2.3.</span> <span class="nav-text">NULLIF函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#NULLIF函数语法"><span class="nav-number">2.3.1.</span> <span class="nav-text">NULLIF函数语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NULLIF函数示例"><span class="nav-number">2.3.2.</span> <span class="nav-text">NULLIF函数示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用NULLIF防止被除零错误"><span class="nav-number">2.3.3.</span> <span class="nav-text">使用NULLIF防止被除零错误</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAST运算符"><span class="nav-number">2.4.</span> <span class="nav-text">CAST运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CAST类型的语法"><span class="nav-number">2.4.1.</span> <span class="nav-text">CAST类型的语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PostgreSQL类型转换-运算符"><span class="nav-number">2.4.2.</span> <span class="nav-text">PostgreSQL类型转换::运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将字符串转换为整数"><span class="nav-number">2.4.3.</span> <span class="nav-text">将字符串转换为整数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将字符串转换为日期"><span class="nav-number">2.4.4.</span> <span class="nav-text">将字符串转换为日期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将字符串强制转换为双精度值"><span class="nav-number">2.4.5.</span> <span class="nav-text">将字符串强制转换为双精度值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将字符串强制转换为布尔型"><span class="nav-number">2.4.6.</span> <span class="nav-text">将字符串强制转换为布尔型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将字符串转换为时间戳"><span class="nav-number">2.4.7.</span> <span class="nav-text">将字符串转换为时间戳</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将字符串转换为间隔"><span class="nav-number">2.4.8.</span> <span class="nav-text">将字符串转换为间隔</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CAST与表格数据一起使用"><span class="nav-number">2.4.9.</span> <span class="nav-text">CAST与表格数据一起使用</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">732k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">20:20</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

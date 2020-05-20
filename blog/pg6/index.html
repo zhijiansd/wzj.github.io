@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="GROUP BY子句 GROUP BY子句将SELECT语句返回的行分成几组。对于每个组，可以应用聚合函数，例如SUM()来计算项的总和，或者使用COUNT()来获取组中的项数。  GROUP BY子句的语法123SELECT column_1, aggregate_function(column_2)FROM tbl_nameGROUP BY column_1;  GROUP BY子句必须出现在">
+<meta name="keywords" content="pg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL之分组与集合">
+<meta property="og:url" content="zhijiansd.github.io/blog/pg6/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="GROUP BY子句 GROUP BY子句将SELECT语句返回的行分成几组。对于每个组，可以应用聚合函数，例如SUM()来计算项的总和，或者使用COUNT()来获取组中的项数。  GROUP BY子句的语法123SELECT column_1, aggregate_function(column_2)FROM tbl_nameGROUP BY column_1;  GROUP BY子句必须出现在">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-20T03:35:21.775Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL之分组与集合">
+<meta name="twitter:description" content="GROUP BY子句 GROUP BY子句将SELECT语句返回的行分成几组。对于每个组，可以应用聚合函数，例如SUM()来计算项的总和，或者使用COUNT()来获取组中的项数。  GROUP BY子句的语法123SELECT column_1, aggregate_function(column_2)FROM tbl_nameGROUP BY column_1;  GROUP BY子句必须出现在">
+
+
+
+
+
+
+  <link rel="canonical" href="zhijiansd.github.io/blog/pg6/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PostgreSQL之分组与集合 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="zhijiansd.github.io/blog/pg6/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PostgreSQL之分组与集合
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-20 11:27:41 / 修改时间：11:35:21" itemprop="dateCreated datePublished" datetime="2020-05-20T11:27:41+08:00">2020-05-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/pg6/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg6/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">12k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">20 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="GROUP-BY子句"><a href="#GROUP-BY子句" class="headerlink" title="GROUP BY子句"></a>GROUP BY子句</h2><blockquote>
+<p>GROUP BY子句将SELECT语句返回的行分成几组。对于每个组，可以应用聚合函数，例如SUM()来计算项的总和，或者使用COUNT()来获取组中的项数。</p>
+</blockquote>
+<h3 id="GROUP-BY子句的语法"><a href="#GROUP-BY子句的语法" class="headerlink" title="GROUP BY子句的语法"></a>GROUP BY子句的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT column_1, aggregate_function(column_2)</span><br><span class="line">FROM tbl_name</span><br><span class="line">GROUP BY column_1;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>GROUP BY子句必须出现在FROM或WHERE子句之后。GROUP BY子句后面是一列或以逗号分隔的列的列表。除了表列之外，还可以将表达式与GROUP BY子句一起使用。</p>
+</blockquote>
+<h3 id="GROUP-BY子句示例1"><a href="#GROUP-BY子句示例1" class="headerlink" title="GROUP BY子句示例1"></a>GROUP BY子句示例1</h3><blockquote>
+<p>在没有聚合函数的情况下使用GROUP BY查询从payment付款表中获取数据，并将结果按客户ID分组。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   customer_id</span><br><span class="line">FROM</span><br><span class="line">   payment</span><br><span class="line">GROUP BY</span><br><span class="line">   customer_id;</span><br><span class="line"> customer_id </span><br><span class="line">-------------</span><br><span class="line">         184</span><br><span class="line">          87</span><br><span class="line">         477</span><br><span class="line">         273</span><br><span class="line">         550</span><br><span class="line">          51</span><br><span class="line">         394</span><br><span class="line">         272</span><br><span class="line">          70</span><br><span class="line">         190</span><br><span class="line">         350</span><br><span class="line">         539</span><br><span class="line">         554</span><br><span class="line">         278</span><br><span class="line">         424</span><br><span class="line">         406</span><br><span class="line">         176</span><br><span class="line">         576</span><br><span class="line">         309</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在这种情况下，GROUP BY的行为类似于DISTINCT子句，该子句从结果集中删除重复的行。</p>
+</blockquote>
+<h3 id="GROUP-BY子句示例2"><a href="#GROUP-BY子句示例2" class="headerlink" title="GROUP BY子句示例2"></a>GROUP BY子句示例2</h3><blockquote>
+<p>GROUP BY子句与SUM()聚合函数一起使用获取客户已支付多少钱，使用GROUP BY子句将payments表分为几组；对于每个组，使用SUM()函数来计算总金额。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   customer_id,</span><br><span class="line">   SUM (amount)</span><br><span class="line">FROM</span><br><span class="line">   payment</span><br><span class="line">GROUP BY</span><br><span class="line">   customer_id;</span><br><span class="line"> customer_id |  sum   </span><br><span class="line">-------------+--------</span><br><span class="line">         184 |  80.80</span><br><span class="line">          87 | 137.72</span><br><span class="line">         477 | 106.79</span><br><span class="line">         273 | 130.72</span><br><span class="line">         550 | 151.69</span><br><span class="line">          51 | 123.70</span><br><span class="line">         394 |  77.80</span><br><span class="line">         272 |  65.87</span><br><span class="line">          70 |  75.83</span><br><span class="line">         190 | 102.75</span><br><span class="line">         350 |  63.79</span><br><span class="line">         539 |  84.80</span><br><span class="line">         554 |  95.80</span><br><span class="line">         278 |  71.79</span><br><span class="line">         424 | 109.71</span><br><span class="line">         406 | 121.69</span><br><span class="line">         176 | 151.68</span><br><span class="line">         576 | 135.68</span><br><span class="line">         309 | 113.75</span><br><span class="line">--More--</span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line">&gt; GROUP BY子句按客户ID对结果集进行排序，并累加属于同一客户的金额。每当customer_id更改时，它都会将行添加到返回的结果集中。</span><br><span class="line"></span><br><span class="line"><span class="comment">### GROUP BY子句示例3</span></span><br><span class="line">&gt; 将ORDER BY子句与GROUP BY子句一起使用以对组进行排序</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   customer_id,</span><br><span class="line">   SUM (amount)</span><br><span class="line">FROM</span><br><span class="line">   payment</span><br><span class="line">GROUP BY</span><br><span class="line">   customer_id</span><br><span class="line">ORDER BY</span><br><span class="line">   SUM (amount) DESC;</span><br><span class="line"> customer_id |  sum   </span><br><span class="line">-------------+--------</span><br><span class="line">         148 | 211.55</span><br><span class="line">         526 | 208.58</span><br><span class="line">         178 | 194.61</span><br><span class="line">         137 | 191.62</span><br><span class="line">         144 | 189.60</span><br><span class="line">         459 | 183.63</span><br><span class="line">         181 | 167.67</span><br><span class="line">         410 | 167.62</span><br><span class="line">         236 | 166.61</span><br><span class="line">         403 | 162.67</span><br><span class="line">         522 | 161.68</span><br><span class="line">         469 | 158.65</span><br><span class="line">         470 | 157.69</span><br><span class="line">         373 | 156.66</span><br><span class="line">         259 | 154.70</span><br><span class="line">         468 | 154.66</span><br><span class="line">         462 | 152.69</span><br><span class="line">         372 | 152.68</span><br><span class="line">         187 | 151.73</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<h3 id="GROUP-BY子句示例4"><a href="#GROUP-BY子句示例4" class="headerlink" title="GROUP BY子句示例4"></a>GROUP BY子句示例4</h3><blockquote>
+<p>GROUP BY子句与COUNT()函数一起使用计算每个员工正在处理的交易数量，可以根据员工ID对付款表进行分组，并使用COUNT()函数获取交易数量。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   staff_id,</span><br><span class="line">   COUNT (payment_id)</span><br><span class="line">FROM</span><br><span class="line">   payment</span><br><span class="line">GROUP BY</span><br><span class="line">   staff_id;</span><br><span class="line"> staff_id | count</span><br><span class="line">----------+-------</span><br><span class="line">        1 |  7292</span><br><span class="line">        2 |  7304</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该GROUP BY子句按人员ID对结果集进行排序。它保持行的总数，并且每当职员id更改时，它将行添加到返回的结果集中。</p>
+</blockquote>
+<blockquote>
+<p>要过滤组，请使用HAVING 子句。</p>
+</blockquote>
+<h2 id="HAVING子句"><a href="#HAVING子句" class="headerlink" title="HAVING子句"></a>HAVING子句</h2><blockquote>
+<p>将HAVING子句与GROUP BY子句结合使用，以过滤不满足指定条件的组行。</p>
+</blockquote>
+<h3 id="HAVING子句的典型语法"><a href="#HAVING子句的典型语法" class="headerlink" title="HAVING子句的典型语法"></a>HAVING子句的典型语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   column_1,</span><br><span class="line">   aggregate_function (column_2)</span><br><span class="line">FROM</span><br><span class="line">   tbl_name</span><br><span class="line">GROUP BY</span><br><span class="line">   column_1</span><br><span class="line">HAVING</span><br><span class="line">   condition;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>HAVING子句为GROUP BY在该GROUP BY子句应用后由该子句创建的组行设置条件，而WHERE子句为在该GROUP BY子句应用之前为单个行设置条件。这是HAVING和WHERE子句之间的主要区别。</p>
+</blockquote>
+<blockquote>
+<p>在PostgreSQL中，可以使用不带GROUP BY子句的HAVING子句。在这种情况下，HAVING子句会将查询变成单个组。另外，SELECT列表和HAVING子句只能引用聚合函数中的列。如果HAVING子句中的条件为true，则此类查询返回单行；如果为false，则返回零行。</p>
+</blockquote>
+<h3 id="HAVING子句示例1"><a href="#HAVING子句示例1" class="headerlink" title="HAVING子句示例1"></a>HAVING子句示例1</h3><blockquote>
+<p>使用GROUP BY子句获取每个客户的总金额</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   customer_id,</span><br><span class="line">   SUM (amount)</span><br><span class="line">FROM</span><br><span class="line">   payment</span><br><span class="line">GROUP BY</span><br><span class="line">   customer_id;</span><br><span class="line"> customer_id |  sum   </span><br><span class="line">-------------+--------</span><br><span class="line">         184 |  80.80</span><br><span class="line">          87 | 137.72</span><br><span class="line">         477 | 106.79</span><br><span class="line">         273 | 130.72</span><br><span class="line">         550 | 151.69</span><br><span class="line">          51 | 123.70</span><br><span class="line">         394 |  77.80</span><br><span class="line">         272 |  65.87</span><br><span class="line">          70 |  75.83</span><br><span class="line">         190 | 102.75</span><br><span class="line">         350 |  63.79</span><br><span class="line">         539 |  84.80</span><br><span class="line">         554 |  95.80</span><br><span class="line">         278 |  71.79</span><br><span class="line">         424 | 109.71</span><br><span class="line">         406 | 121.69</span><br><span class="line">         176 | 151.68</span><br><span class="line">         576 | 135.68</span><br><span class="line">         309 | 113.75</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用带有SUM函数的HAVING子句来选择花费超过200的客户</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   customer_id,</span><br><span class="line">   SUM (amount)</span><br><span class="line">FROM</span><br><span class="line">   payment</span><br><span class="line">GROUP BY</span><br><span class="line">   customer_id</span><br><span class="line">HAVING</span><br><span class="line">   SUM (amount) &gt; 200;</span><br><span class="line"> customer_id |  sum</span><br><span class="line">-------------+--------</span><br><span class="line">         526 | 208.58</span><br><span class="line">         148 | 211.55</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="HAVING子句示例2"><a href="#HAVING子句示例2" class="headerlink" title="HAVING子句示例2"></a>HAVING子句示例2</h3><blockquote>
+<p>使用带有COUNT函数的HAVING子句查询每个商店的客户数量</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   store_id,</span><br><span class="line">   COUNT (customer_id)</span><br><span class="line">FROM</span><br><span class="line">   customer</span><br><span class="line">GROUP BY</span><br><span class="line">   store_id;</span><br><span class="line"> store_id | count</span><br><span class="line">----------+-------</span><br><span class="line">        1 |   326</span><br><span class="line">        2 |   273</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用带有COUNT函数的HAVING子句选择拥有300个以上客户的商店</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   store_id,</span><br><span class="line">   COUNT (customer_id)</span><br><span class="line">FROM</span><br><span class="line">   customer</span><br><span class="line">GROUP BY</span><br><span class="line">   store_id</span><br><span class="line">HAVING</span><br><span class="line">   COUNT (customer_id) &gt; 300;</span><br><span class="line"> store_id | count</span><br><span class="line">----------+-------</span><br><span class="line">        1 |   326</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h2 id="UNION运算符"><a href="#UNION运算符" class="headerlink" title="UNION运算符"></a>UNION运算符</h2><h3 id="UNION运算符的语法"><a href="#UNION运算符的语法" class="headerlink" title="UNION运算符的语法"></a>UNION运算符的语法</h3><blockquote>
+<p>UNION运算符将两个或多个SELECT语句的结果集组合为一个结果集。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   column_1,</span><br><span class="line">   column_2</span><br><span class="line">FROM</span><br><span class="line">   tbl_name_1</span><br><span class="line">UNION</span><br><span class="line">SELECT</span><br><span class="line">   column_1,</span><br><span class="line">   column_2</span><br><span class="line">FROM</span><br><span class="line">   tbl_name_2;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>以下是适用于查询的规则:</p>
+<ul>
+<li>两个查询必须返回相同数量的列。</li>
+</ul>
+<ul>
+<li>查询中的相应列必须具有兼容的数据类型。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>除非使用UNION ALL，否则UNION运算符将删除所有重复的行。</p>
+</blockquote>
+<blockquote>
+<p>UNION运算符可以将第一个查询中的行放在第二个查询的结果集中的行之前，之后或之间。 要按指定列对组合结果集中的行进行排序，请使用ORDER BY子句。</p>
+</blockquote>
+<h3 id="创建样例表"><a href="#创建样例表" class="headerlink" title="创建样例表"></a>创建样例表</h3><ul>
+<li>y2018q1：存储2018年第一季度的销售数据。</li>
+</ul>
+<ul>
+<li>y2018q2：存储2018年第二季度的销售数据。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE y2018q1 (</span></span><br><span class="line">    name VARCHAR PRIMARY KEY,</span><br><span class="line">    amount NUMERIC (8,2) NOT NULL</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">CREATE TABLE y2018q2 (</span><br><span class="line">    name VARCHAR PRIMARY KEY,</span><br><span class="line">    amount NUMERIC (8,2) NOT NULL</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">INSERT INTO y2018q1 (name,amount)</span><br><span class="line">VALUES</span><br><span class="line">    (<span class="string">'Mike'</span>,150000.25),</span><br><span class="line">    (<span class="string">'Jon'</span>,132000.25),</span><br><span class="line">    (<span class="string">'Mary'</span>,100000);</span><br><span class="line"> </span><br><span class="line">INSERT INTO y2018q2 (name,amount)</span><br><span class="line">VALUES</span><br><span class="line">    (<span class="string">'Mike'</span>,120000.25),</span><br><span class="line">    (<span class="string">'Jon'</span>,142000.25),</span><br><span class="line">    (<span class="string">'Mary'</span>,100000);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">INSERT 0 3</span><br><span class="line"></span><br><span class="line">INSERT 0 3</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># select * from y2018q1;</span></span><br><span class="line"> name |  amount</span><br><span class="line">------+-----------</span><br><span class="line"> Mike | 150000.25</span><br><span class="line"> Jon  | 132000.25</span><br><span class="line"> Mary | 100000.00</span><br><span class="line">(3 rows)</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># select * from y2018q2;</span></span><br><span class="line"> name |  amount</span><br><span class="line">------+-----------</span><br><span class="line"> Mike | 120000.25</span><br><span class="line"> Jon  | 142000.25</span><br><span class="line"> Mary | 100000.00</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="UNION运算符示例1"><a href="#UNION运算符示例1" class="headerlink" title="UNION运算符示例1"></a>UNION运算符示例1</h3><blockquote>
+<p>合并两张表中的数据</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT *</span></span><br><span class="line">FROM</span><br><span class="line">   y2018q1</span><br><span class="line">UNION</span><br><span class="line">SELECT *</span><br><span class="line">FROM</span><br><span class="line">   y2018q2;</span><br><span class="line"> name |  amount</span><br><span class="line">------+-----------</span><br><span class="line"> Mary | 100000.00</span><br><span class="line"> Jon  | 132000.25</span><br><span class="line"> Jon  | 142000.25</span><br><span class="line"> Mike | 120000.25</span><br><span class="line"> Mike | 150000.25</span><br><span class="line">(5 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里删除了重复的行。</p>
+</blockquote>
+<h3 id="UNION运算符示例2"><a href="#UNION运算符示例2" class="headerlink" title="UNION运算符示例2"></a>UNION运算符示例2</h3><blockquote>
+<p>使用UNION ALL获取所有包含重复项的行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT *</span></span><br><span class="line">FROM</span><br><span class="line">   y2018q1</span><br><span class="line">UNION ALL</span><br><span class="line">SELECT *</span><br><span class="line">FROM</span><br><span class="line">   y2018q2;</span><br><span class="line"> name |  amount</span><br><span class="line">------+-----------</span><br><span class="line"> Mike | 150000.25</span><br><span class="line"> Jon  | 132000.25</span><br><span class="line"> Mary | 100000.00</span><br><span class="line"> Mike | 120000.25</span><br><span class="line"> Jon  | 142000.25</span><br><span class="line"> Mary | 100000.00</span><br><span class="line">(6 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="UNION运算符示例3"><a href="#UNION运算符示例3" class="headerlink" title="UNION运算符示例3"></a>UNION运算符示例3</h3><blockquote>
+<p>使用ORDER BY子句对UNION运算符返回的合并结果进行排序</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT *</span></span><br><span class="line">FROM</span><br><span class="line">   y2018q1</span><br><span class="line">UNION ALL</span><br><span class="line">SELECT *</span><br><span class="line">FROM</span><br><span class="line">   y2018q2</span><br><span class="line">ORDER BY </span><br><span class="line"> name ASC,</span><br><span class="line"> amount DESC;</span><br><span class="line"> name |  amount</span><br><span class="line">------+-----------</span><br><span class="line"> Jon  | 142000.25</span><br><span class="line"> Jon  | 132000.25</span><br><span class="line"> Mary | 100000.00</span><br><span class="line"> Mary | 100000.00</span><br><span class="line"> Mike | 150000.25</span><br><span class="line"> Mike | 120000.25</span><br><span class="line">(6 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果将ORDER BY子句放在每个查询的末尾，则组合的结果集将不会按预期排序。因为当UNION运算符组合每个查询的排序结果集时，它不能保证最终结果集中的行顺序。</p>
+</blockquote>
+<h2 id="INTERSECT运算符"><a href="#INTERSECT运算符" class="headerlink" title="INTERSECT运算符"></a>INTERSECT运算符</h2><blockquote>
+<p>INTERSECT运算符将两个或多个SELECT语句的结果集组合为一个结果集。INTERSECT运算符返回两个结果集中都可用或两个查询都返回的任何行。</p>
+</blockquote>
+<h3 id="INTERSECT运算符的语法"><a href="#INTERSECT运算符的语法" class="headerlink" title="INTERSECT运算符的语法"></a>INTERSECT运算符的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">   column_list</span><br><span class="line">FROM</span><br><span class="line">   A</span><br><span class="line">INTERSECT</span><br><span class="line">SELECT</span><br><span class="line">   column_list</span><br><span class="line">FROM</span><br><span class="line">   B;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要使用INTERSECT运算符，SELECT语句中出现的列必须遵循以下规则:</p>
+<ul>
+<li>SELECT子句中的列数及其顺序必须相同。</li>
+</ul>
+<ul>
+<li>列的数据类型必须兼容。</li>
+</ul>
+</blockquote>
+<h3 id="创建示例表"><a href="#创建示例表" class="headerlink" title="创建示例表"></a>创建示例表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE employees (</span></span><br><span class="line">   employee_id serial PRIMARY KEY,</span><br><span class="line">   employee_name VARCHAR (255) NOT NULL</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">CREATE TABLE keys (</span><br><span class="line">   employee_id INT PRIMARY KEY,</span><br><span class="line">   effective_date DATE NOT NULL,</span><br><span class="line">   FOREIGN KEY (employee_id) REFERENCES employees (employee_id)</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">CREATE TABLE hipos (</span><br><span class="line">   employee_id INT PRIMARY KEY,</span><br><span class="line">   effective_date DATE NOT NULL,</span><br><span class="line">   FOREIGN KEY (employee_id) REFERENCES employees (employee_id)</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>employees表存储员工主数据，keys表存储关键员工，hipos表存储高潜力和高影响力的员工。</p>
+</blockquote>
+<h3 id="插入示例数据"><a href="#插入示例数据" class="headerlink" title="插入示例数据"></a>插入示例数据</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO employees (employee_name)</span></span><br><span class="line">VALUES</span><br><span class="line">   (<span class="string">'Joyce Edwards'</span>),</span><br><span class="line">   (<span class="string">'Diane Collins'</span>),</span><br><span class="line">   (<span class="string">'Alice Stewart'</span>),</span><br><span class="line">   (<span class="string">'Julie Sanchez'</span>),</span><br><span class="line">   (<span class="string">'Heather Morris'</span>),</span><br><span class="line">   (<span class="string">'Teresa Rogers'</span>),</span><br><span class="line">   (<span class="string">'Doris Reed'</span>),</span><br><span class="line">   (<span class="string">'Gloria Cook'</span>),</span><br><span class="line">   (<span class="string">'Evelyn Morgan'</span>),</span><br><span class="line">   (<span class="string">'Jean Bell'</span>);</span><br><span class="line"> </span><br><span class="line">INSERT INTO keys</span><br><span class="line">VALUES</span><br><span class="line">   (1, <span class="string">'2000-02-01'</span>),</span><br><span class="line">   (2, <span class="string">'2001-06-01'</span>),</span><br><span class="line">   (5, <span class="string">'2002-01-01'</span>),</span><br><span class="line">   (7, <span class="string">'2005-06-01'</span>);</span><br><span class="line"> </span><br><span class="line">INSERT INTO hipos</span><br><span class="line">VALUES</span><br><span class="line">   (9, <span class="string">'2000-01-01'</span>),</span><br><span class="line">   (2, <span class="string">'2002-06-01'</span>),</span><br><span class="line">   (5, <span class="string">'2006-06-01'</span>),</span><br><span class="line">   (10, <span class="string">'2005-06-01'</span>);</span><br><span class="line">INSERT 0 10</span><br><span class="line"></span><br><span class="line">INSERT 0 4</span><br><span class="line"></span><br><span class="line">INSERT 0 4</span><br></pre></td></tr></table></figure>
+<h3 id="INTERSECT运算符示例1"><a href="#INTERSECT运算符示例1" class="headerlink" title="INTERSECT运算符示例1"></a>INTERSECT运算符示例1</h3><blockquote>
+<p>获取关键雇员和高潜力、高影响力的员工。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   employee_id</span><br><span class="line">FROM</span><br><span class="line">   keys;</span><br><span class="line"> employee_id</span><br><span class="line">-------------</span><br><span class="line">           1</span><br><span class="line">           2</span><br><span class="line">           5</span><br><span class="line">           7</span><br><span class="line">(4 rows)</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   employee_id</span><br><span class="line">FROM hipos;</span><br><span class="line"> employee_id</span><br><span class="line">-------------</span><br><span class="line">           9</span><br><span class="line">           2</span><br><span class="line">           5</span><br><span class="line">          10</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>获取既是关键雇员，又是高潜力和高影响力的员工。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   employee_id</span><br><span class="line">FROM</span><br><span class="line">   keys</span><br><span class="line">INTERSECT</span><br><span class="line">SELECT</span><br><span class="line">        employee_id</span><br><span class="line">FROM</span><br><span class="line">   hipos;</span><br><span class="line"> employee_id</span><br><span class="line">-------------</span><br><span class="line">           2</span><br><span class="line">           5</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>结果显示，员工ID 2和ID 5既是关键雇员，又是高潜力和高影响力的员工。</p>
+</blockquote>
+<h3 id="INTERSECT运算符示例2"><a href="#INTERSECT运算符示例2" class="headerlink" title="INTERSECT运算符示例2"></a>INTERSECT运算符示例2</h3><blockquote>
+<p>要对INTERSECT运算符返回的结果集进行排序，可以将ORDER BY子句放在语句的末尾，而不是在每个SELECT语句的末尾。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   employee_id</span><br><span class="line">FROM</span><br><span class="line">   keys</span><br><span class="line">INTERSECT</span><br><span class="line">SELECT</span><br><span class="line">        employee_id</span><br><span class="line">FROM</span><br><span class="line">   hipos</span><br><span class="line">ORDER BY employee_id;</span><br><span class="line"> employee_id</span><br><span class="line">-------------</span><br><span class="line">           2</span><br><span class="line">           5</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="EXCEPT运算符"><a href="#EXCEPT运算符" class="headerlink" title="EXCEPT运算符"></a>EXCEPT运算符</h2><blockquote>
+<p>EXCEPT运算符通过比较两个或多个查询的结果集来返回行。EXCEPT运算符从第一个(左)查询返回不属于第二个(右)查询输出的不同行。</p>
+</blockquote>
+<h3 id="EXCEPT运算符的语法"><a href="#EXCEPT运算符的语法" class="headerlink" title="EXCEPT运算符的语法"></a>EXCEPT运算符的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SELECT column_list</span><br><span class="line">FROM A</span><br><span class="line">WHERE condition_a</span><br><span class="line">EXCEPT </span><br><span class="line">SELECT column_list</span><br><span class="line">FROM B</span><br><span class="line">WHERE condition_b;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要使用EXCEPT运算符组合查询，必须遵守以下规则:</p>
+<ul>
+<li>在两个查询中，列数及其顺序必须相同。</li>
+</ul>
+<ul>
+<li>各个列的数据类型必须兼容。</li>
+</ul>
+</blockquote>
+<h3 id="EXCEPT运算符示例"><a href="#EXCEPT运算符示例" class="headerlink" title="EXCEPT运算符示例"></a>EXCEPT运算符示例</h3><blockquote>
+<p>查询返回电影表中的电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   film_id,</span><br><span class="line">   title</span><br><span class="line">FROM</span><br><span class="line">   film</span><br><span class="line">ORDER BY</span><br><span class="line">   title;</span><br><span class="line"> film_id |            title            </span><br><span class="line">---------+-----------------------------</span><br><span class="line">       1 | Academy Dinosaur</span><br><span class="line">       2 | Ace Goldfinger</span><br><span class="line">       3 | Adaptation Holes</span><br><span class="line">       4 | Affair Prejudice</span><br><span class="line">       5 | African Egg</span><br><span class="line">       6 | Agent Truman</span><br><span class="line">       7 | Airplane Sierra</span><br><span class="line">       8 | Airport Pollock</span><br><span class="line">       9 | Alabama Devil</span><br><span class="line">      10 | Aladdin Calendar</span><br><span class="line">      11 | Alamo Videotape</span><br><span class="line">      12 | Alaska Phantom</span><br><span class="line">      14 | Alice Fantasia</span><br><span class="line">      15 | Alien Center</span><br><span class="line">      13 | Ali Forever</span><br><span class="line">      16 | Alley Evolution</span><br><span class="line">      17 | Alone Trip</span><br><span class="line">      18 | Alter Victory</span><br><span class="line">      19 | Amadeus Holy</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>查询库存中的电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   distinct inventory.film_id,</span><br><span class="line">   title</span><br><span class="line">FROM</span><br><span class="line">   inventory</span><br><span class="line">INNER JOIN film ON film.film_id = inventory.film_id</span><br><span class="line">ORDER BY title;</span><br><span class="line"> film_id |            title            </span><br><span class="line">---------+-----------------------------</span><br><span class="line">       1 | Academy Dinosaur</span><br><span class="line">       2 | Ace Goldfinger</span><br><span class="line">       3 | Adaptation Holes</span><br><span class="line">       4 | Affair Prejudice</span><br><span class="line">       5 | African Egg</span><br><span class="line">       6 | Agent Truman</span><br><span class="line">       7 | Airplane Sierra</span><br><span class="line">       8 | Airport Pollock</span><br><span class="line">       9 | Alabama Devil</span><br><span class="line">      10 | Aladdin Calendar</span><br><span class="line">      11 | Alamo Videotape</span><br><span class="line">      12 | Alaska Phantom</span><br><span class="line">      15 | Alien Center</span><br><span class="line">      13 | Ali Forever</span><br><span class="line">      16 | Alley Evolution</span><br><span class="line">      17 | Alone Trip</span><br><span class="line">      18 | Alter Victory</span><br><span class="line">      19 | Amadeus Holy</span><br><span class="line">      20 | Amelie Hellfighters</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这两个查询都返回一个包含两列的结果集：film_id和title。</p>
+</blockquote>
+<blockquote>
+<p>使用EXCEPT运算符获取不在库存中的电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   film_id,</span><br><span class="line">   title</span><br><span class="line">FROM</span><br><span class="line">   film</span><br><span class="line">EXCEPT</span><br><span class="line">   SELECT</span><br><span class="line">      DISTINCT inventory.film_id,</span><br><span class="line">      title</span><br><span class="line">   FROM</span><br><span class="line">      inventory</span><br><span class="line">   INNER JOIN film ON film.film_id = inventory.film_id</span><br><span class="line">ORDER BY title;</span><br><span class="line"> film_id |         title</span><br><span class="line">---------+------------------------</span><br><span class="line">      14 | Alice Fantasia</span><br><span class="line">      33 | Apollo Teen</span><br><span class="line">      36 | Argonauts Town</span><br><span class="line">      38 | Ark Ridgemont</span><br><span class="line">      41 | Arsenic Independence</span><br><span class="line">      87 | Boondock Ballroom</span><br><span class="line">     108 | Butch Panther</span><br><span class="line">     128 | Catch Amistad</span><br><span class="line">     144 | Chinatown Gladiator</span><br><span class="line">     148 | Chocolate Duck</span><br><span class="line">     171 | Commandments Express</span><br><span class="line">     192 | Crossing Divorce</span><br><span class="line">     195 | Crowds Telemark</span><br><span class="line">     198 | Crystal Breaking</span><br><span class="line">     217 | Dazed Punk</span><br><span class="line">     221 | Deliverance Mulholland</span><br><span class="line">     318 | Firehouse Vietnam</span><br><span class="line">     325 | Floats Garden</span><br><span class="line">     332 | Frankenstein Stranger</span><br><span class="line">     359 | Gladiator Westward</span><br><span class="line">     386 | Gump Date</span><br><span class="line">     404 | Hate Handicap</span><br><span class="line">     419 | Hocus Frida</span><br><span class="line">     495 | Kentuckian Giant</span><br><span class="line">     497 | Kill Brotherhood</span><br><span class="line">     607 | Muppet Mile</span><br><span class="line">     642 | Order Betrayed</span><br><span class="line">     669 | Pearl Destiny</span><br><span class="line">     671 | Perdition Fargo</span><br><span class="line">     701 | Psycho Shrunk</span><br><span class="line">     712 | Raiders Antitrust</span><br><span class="line">     713 | Rainbow Shock</span><br><span class="line">     742 | Roof Champion</span><br><span class="line">     801 | Sister Freddy</span><br><span class="line">     802 | Sky Miracle</span><br><span class="line">     860 | Suicides Silence</span><br><span class="line">     874 | Tadpole Park</span><br><span class="line">     909 | Treasure Command</span><br><span class="line">     943 | Villain Desperate</span><br><span class="line">     950 | Volume House</span><br><span class="line">     954 | Wake Jaws</span><br><span class="line">     955 | Walls Artist</span><br><span class="line">(42 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在语句的末尾放置了ORDER BY子句，以按名称对电影进行排序。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/pg5/" rel="next" title="PostgreSQL之连接多个表">
+                <i class="fa fa-chevron-left"></i> PostgreSQL之连接多个表
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/pg7/" rel="prev" title="PostgreSQL之分组集和子查询">
+                PostgreSQL之分组集和子查询 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#GROUP-BY子句"><span class="nav-number">1.</span> <span class="nav-text">GROUP BY子句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUP-BY子句的语法"><span class="nav-number">1.1.</span> <span class="nav-text">GROUP BY子句的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUP-BY子句示例1"><span class="nav-number">1.2.</span> <span class="nav-text">GROUP BY子句示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUP-BY子句示例2"><span class="nav-number">1.3.</span> <span class="nav-text">GROUP BY子句示例2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUP-BY子句示例4"><span class="nav-number">1.4.</span> <span class="nav-text">GROUP BY子句示例4</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HAVING子句"><span class="nav-number">2.</span> <span class="nav-text">HAVING子句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HAVING子句的典型语法"><span class="nav-number">2.1.</span> <span class="nav-text">HAVING子句的典型语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HAVING子句示例1"><span class="nav-number">2.2.</span> <span class="nav-text">HAVING子句示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HAVING子句示例2"><span class="nav-number">2.3.</span> <span class="nav-text">HAVING子句示例2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UNION运算符"><span class="nav-number">3.</span> <span class="nav-text">UNION运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UNION运算符的语法"><span class="nav-number">3.1.</span> <span class="nav-text">UNION运算符的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建样例表"><span class="nav-number">3.2.</span> <span class="nav-text">创建样例表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UNION运算符示例1"><span class="nav-number">3.3.</span> <span class="nav-text">UNION运算符示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UNION运算符示例2"><span class="nav-number">3.4.</span> <span class="nav-text">UNION运算符示例2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UNION运算符示例3"><span class="nav-number">3.5.</span> <span class="nav-text">UNION运算符示例3</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#INTERSECT运算符"><span class="nav-number">4.</span> <span class="nav-text">INTERSECT运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#INTERSECT运算符的语法"><span class="nav-number">4.1.</span> <span class="nav-text">INTERSECT运算符的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建示例表"><span class="nav-number">4.2.</span> <span class="nav-text">创建示例表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插入示例数据"><span class="nav-number">4.3.</span> <span class="nav-text">插入示例数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#INTERSECT运算符示例1"><span class="nav-number">4.4.</span> <span class="nav-text">INTERSECT运算符示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#INTERSECT运算符示例2"><span class="nav-number">4.5.</span> <span class="nav-text">INTERSECT运算符示例2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXCEPT运算符"><span class="nav-number">5.</span> <span class="nav-text">EXCEPT运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#EXCEPT运算符的语法"><span class="nav-number">5.1.</span> <span class="nav-text">EXCEPT运算符的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXCEPT运算符示例"><span class="nav-number">5.2.</span> <span class="nav-text">EXCEPT运算符示例</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">732k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">20:20</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

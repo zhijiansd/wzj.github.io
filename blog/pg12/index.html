@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="PostgreSQL存储过程 在PostgreSQL中，过程语言（例如PL/pgSQL，C，Perl，Python和Tcl）被称为存储过程。该过程添加了许多过程元素，例如控制结构，循环和复杂的计算，以扩展SQL标准。它使您可以在PostgreSQL中开发复杂的功能和存储过程，而这是使用普通SQL可能无法实现的。   这里将重点介绍与Oracle PL/SQL相似的PL/pgSQL过程语言。以下是选">
+<meta name="keywords" content="pg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL之存储过程">
+<meta property="og:url" content="zhijiansd.github.io/blog/pg12/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="PostgreSQL存储过程 在PostgreSQL中，过程语言（例如PL/pgSQL，C，Perl，Python和Tcl）被称为存储过程。该过程添加了许多过程元素，例如控制结构，循环和复杂的计算，以扩展SQL标准。它使您可以在PostgreSQL中开发复杂的功能和存储过程，而这是使用普通SQL可能无法实现的。   这里将重点介绍与Oracle PL/SQL相似的PL/pgSQL过程语言。以下是选">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-20T05:18:28.006Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL之存储过程">
+<meta name="twitter:description" content="PostgreSQL存储过程 在PostgreSQL中，过程语言（例如PL/pgSQL，C，Perl，Python和Tcl）被称为存储过程。该过程添加了许多过程元素，例如控制结构，循环和复杂的计算，以扩展SQL标准。它使您可以在PostgreSQL中开发复杂的功能和存储过程，而这是使用普通SQL可能无法实现的。   这里将重点介绍与Oracle PL/SQL相似的PL/pgSQL过程语言。以下是选">
+
+
+
+
+
+
+  <link rel="canonical" href="zhijiansd.github.io/blog/pg12/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PostgreSQL之存储过程 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="zhijiansd.github.io/blog/pg12/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PostgreSQL之存储过程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-20 13:03:16 / 修改时间：13:18:28" itemprop="dateCreated datePublished" datetime="2020-05-20T13:03:16+08:00">2020-05-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/pg12/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg12/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">32k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">53 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="PostgreSQL存储过程"><a href="#PostgreSQL存储过程" class="headerlink" title="PostgreSQL存储过程"></a>PostgreSQL存储过程</h2><blockquote>
+<p>在PostgreSQL中，过程语言（例如PL/pgSQL，C，Perl，Python和Tcl）被称为存储过程。该过程添加了许多过程元素，例如控制结构，循环和复杂的计算，以扩展SQL标准。它使您可以在PostgreSQL中开发复杂的功能和存储过程，而这是使用普通SQL可能无法实现的。</p>
+</blockquote>
+<blockquote>
+<p>这里将重点介绍与Oracle PL/SQL相似的PL/pgSQL过程语言。以下是选择PL/pgSQL的原因：</p>
+<ul>
+<li>PL/pgSQL简单易学。</li>
+</ul>
+<ul>
+<li>PostgreSQL默认附带PL/pgSQL。在PL/pgSQL中开发的用户定义函数可以像任何内置函数一样使用。</li>
+</ul>
+<ul>
+<li>PL/pgSQL具有许多功能，可让您开发复杂的用户定义函数。</li>
+</ul>
+</blockquote>
+<h3 id="入门"><a href="#入门" class="headerlink" title="入门"></a>入门</h3><blockquote>
+<p>PostgreSQL允许使用各种过程语言元素（通常称为存储过程）使用用户定义的函数和存储过程来扩展数据库功能。</p>
+</blockquote>
+<blockquote>
+<p>存储过程定义用于创建触发器的功能或自定义聚合功能。此外，存储过程还添加了许多过程功能，例如控制结构和复杂的计算。这些使您可以更轻松，更有效地开发自定义功能。</p>
+</blockquote>
+<blockquote>
+<p>可以使用DO命令调用过程代码块，而无需定义函数或存储过程。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL将过程语言分为两大类：</p>
+<ul>
+<li>任何用户都可以使用安全语言。SQL和PL/pgSQL是安全的语言。</li>
+</ul>
+<ul>
+<li>沙盒语言仅由超级用户使用，因为沙盒语言提供了绕过安全性并允许访问外部源的功能。C是沙盒语言的示例。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>缺省情况下，PostgreSQL支持三种过程语言：SQL，PL/pgSQL和C。还可以使用扩展将其他过程语言（例如Perl，Python和TCL）加载到PostgreSQL中。</p>
+</blockquote>
+<h4 id="使用PostgreSQL存储过程的优点"><a href="#使用PostgreSQL存储过程的优点" class="headerlink" title="使用PostgreSQL存储过程的优点"></a>使用PostgreSQL存储过程的优点</h4><ul>
+<li>减少应用程序和数据库服务器之间的往返次数。所有SQL语句都包装在存储在PostgreSQL数据库服务器中的函数内，因此应用程序仅需发出函数调用即可返回结果，而不必发送多个SQL语句并等待每次调用之间的结果。</li>
+</ul>
+<ul>
+<li>由于用户定义的函数和存储过程已预编译并存储在PostgreSQL数据库服务器中，因此提高了应用程序性能。</li>
+</ul>
+<ul>
+<li>可在许多应用程序中重用。一旦开发了功能，就可以在任何应用程序中重用它。</li>
+</ul>
+<h4 id="使用PostgreSQL存储过程的缺点"><a href="#使用PostgreSQL存储过程的缺点" class="headerlink" title="使用PostgreSQL存储过程的缺点"></a>使用PostgreSQL存储过程的缺点</h4><ul>
+<li>由于存储过程编程需要许多开发人员不具备的专业技能，因此软件开发速度缓慢。</li>
+</ul>
+<ul>
+<li>难以管理版本且难以调试。</li>
+</ul>
+<ul>
+<li>可能无法移植到其他数据库管理系统，例如MySQL或Microsoft SQL Server。</li>
+</ul>
+<h3 id="PL-pgSQL块结构"><a href="#PL-pgSQL块结构" class="headerlink" title="PL/pgSQL块结构"></a>PL/pgSQL块结构</h3><blockquote>
+<p>PL/pgSQL是一种块结构语言，因此，PL/pgSQL函数或存储过程被组织为块。</p>
+</blockquote>
+<h4 id="PL-pgSQL的语法"><a href="#PL-pgSQL的语法" class="headerlink" title="PL/pgSQL的语法"></a>PL/pgSQL的语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[ &lt;&lt;label&gt;&gt; ]</span><br><span class="line">[ DECLARE</span><br><span class="line">    declarations ]</span><br><span class="line">BEGIN</span><br><span class="line">    statements;</span><br><span class="line">   ...</span><br><span class="line">END [ label ];</span><br></pre></td></tr></table></figure>
+<ul>
+<li>每个块都有两个部分:声明和正文。声明部分是可选的，而主体部分是必需的。该块以END关键字后的分号（;）结尾。</li>
+</ul>
+<ul>
+<li>块的开头和结尾可能有可选标签。如果要EXIT在块主体的语句中指定它，或者要限定在块中声明的变量的名称，请使用块标签。</li>
+</ul>
+<ul>
+<li>在声明部分，您可以声明主体部分中使用的所有变量。声明部分中的每个语句均以分号（;）结尾。</li>
+</ul>
+<ul>
+<li>正文部分是您放置代码的地方。主体部分中的每个语句也以分号（;）终止。</li>
+</ul>
+<h4 id="PL-pgSQL块结构示例"><a href="#PL-pgSQL块结构示例" class="headerlink" title="PL/pgSQL块结构示例"></a>PL/pgSQL块结构示例</h4><blockquote>
+<p>匿名块</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">&lt;&lt;first_block&gt;&gt;</span><br><span class="line">DECLARE</span><br><span class="line">  counter <span class="built_in">integer</span> := 0;</span><br><span class="line">BEGIN</span><br><span class="line">   counter := counter + 1;</span><br><span class="line">   RAISE NOTICE <span class="string">'The current value of counter is %'</span>, counter;</span><br><span class="line">END first_block $$;</span><br><span class="line">注意:  The current value of counter is 1</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<ul>
+<li>请注意，DO语句不属于该块。它用于执行匿名块。</li>
+</ul>
+<ul>
+<li>在声明部分，声明了一个变量counter并将其值设置为零。</li>
+</ul>
+<ul>
+<li>在主体部分内部，将计数器的值增加到1并使用RAISE NOTICE语句输出其值。</li>
+</ul>
+<ul>
+<li>first_block标签仅用于演示目的。在此示例中，它什么也不做。</li>
+</ul>
+<blockquote>
+<p>双美元（$$）是单引号（’）的替代。开发PL/pgSQL块，函数或存储过程时，必须以字符串文字形式传递其主体。如果您使用双美元（$$），则可以避免引用问题。您也可以在$$之间使用令牌，例如$function$或$procedure$。</p>
+</blockquote>
+<h4 id="PL-pgSQL子块"><a href="#PL-pgSQL子块" class="headerlink" title="PL/pgSQL子块"></a>PL/pgSQL子块</h4><blockquote>
+<p>PL/pgSQL允许您将一个块放置在另一个块的主体内。嵌套在另一个块内的该块称为子块。包含子块的块称为外部块。</p>
+</blockquote>
+<blockquote>
+<p>子块用于对语句进行分组，以便可以将大块划分为较小和更多的逻辑子块。子块中的变量可以具有与外部块中的变量相同的名称，即使这不是一个好习惯。</p>
+</blockquote>
+<blockquote>
+<p>当在子块中声明与外部块中名称相同的变量时，外部块中的变量将隐藏在子块中。如果要访问外部块中的变量，请使用块标签来限定其名称，如以下示例所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">&lt;&lt;outer_block&gt;&gt;</span><br><span class="line">DECLARE</span><br><span class="line">  counter <span class="built_in">integer</span> := 0;</span><br><span class="line">BEGIN</span><br><span class="line">   counter := counter + 1;</span><br><span class="line">   RAISE NOTICE <span class="string">'The current value of counter is %'</span>, counter;</span><br><span class="line"> </span><br><span class="line">   DECLARE</span><br><span class="line">       counter <span class="built_in">integer</span> := 0;</span><br><span class="line">   BEGIN</span><br><span class="line">       counter := counter + 10;</span><br><span class="line">       RAISE NOTICE <span class="string">'The current value of counter in the subblock is %'</span>, counter;</span><br><span class="line">       RAISE NOTICE <span class="string">'The current value of counter in the outer block is %'</span>, outer_block.counter;</span><br><span class="line">   END;</span><br><span class="line"> </span><br><span class="line">   RAISE NOTICE <span class="string">'The current value of counter in the outer block is %'</span>, counter;</span><br><span class="line">  </span><br><span class="line">END outer_block $$;</span><br><span class="line">注意:  The current value of counter is 1</span><br><span class="line">注意:  The current value of counter <span class="keyword">in</span> the subblock is 10</span><br><span class="line">注意:  The current value of counter <span class="keyword">in</span> the outer block is 1</span><br><span class="line">注意:  The current value of counter <span class="keyword">in</span> the outer block is 1</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，我们在outer_block中声明了一个名为counter的变量。</li>
+</ul>
+<ul>
+<li>接下来，在子块中，我们还声明了一个具有相同名称的变量。</li>
+</ul>
+<ul>
+<li>然后，在进入子块之前，计数器的值为1。在子块中，我们将计数器的值增加到10并打印出来。注意，更改仅影响子块中的计数器变量。</li>
+</ul>
+<ul>
+<li>之后，我们使用块标签在外部块中引用计数器变量，以限定其名称external_block.counter。</li>
+</ul>
+<ul>
+<li>最后，我们在外部块中打印出计数器变量的值，其值保持不变。</li>
+</ul>
+<h3 id="PL-pgSQL变量"><a href="#PL-pgSQL变量" class="headerlink" title="PL/pgSQL变量"></a>PL/pgSQL变量</h3><blockquote>
+<p>PL/pgSQL变量是内存位置的有意义的名称。变量保存一个可以通过块或功能更改的值。变量始终与特定的数据类型相关联。</p>
+</blockquote>
+<blockquote>
+<p>在使用变量之前，必须在PL/pgSQL块的声明部分中对其进行声明。声明变量的语法:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">variable_name data_type [:= expression];</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，指定变量的名称。将有意义的名称分配给变量是一个好习惯。例如，应该使用index或i代替命名变量counter。</li>
+</ul>
+<ul>
+<li>其次，将特定的数据类型与变量关联。数据类型可以是任何有效的PostgreSQL数据类型，例如INTEGER，NUMERIC，VARCHAR和CHAR。</li>
+</ul>
+<ul>
+<li>第三，可选地为变量分配默认值。如果不这样做，则变量的初始值将初始化为NULL。</li>
+</ul>
+<blockquote>
+<p>声明和初始化各种变量</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">DO $$</span><br><span class="line">DECLARE</span><br><span class="line">   counter    INTEGER := 1;</span><br><span class="line">   first_name VARCHAR(50) := <span class="string">'John'</span>;</span><br><span class="line">   last_name  VARCHAR(50) := <span class="string">'Doe'</span>;</span><br><span class="line">   payment    NUMERIC(11,2) := 20.5;</span><br><span class="line">BEGIN</span><br><span class="line">   RAISE NOTICE <span class="string">'% % % has been paid % USD'</span>, counter, first_name, last_name, payment;</span><br><span class="line">END $$;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>counter变量是被初始化为1的整数</li>
+</ul>
+<ul>
+<li>first_name和last_name是VARCHAR，50个字符，并初始化John和Doe文字字符串。</li>
+</ul>
+<ul>
+<li>payment是有两个小数数字和初始化20.5<blockquote>
+<p>请注意，当输入该块时，PostgreSQL将评估默认值并为变量设置它们。</p>
+</blockquote>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">   created_at time := NOW();</span><br><span class="line">BEGIN</span><br><span class="line">   RAISE NOTICE <span class="string">'%'</span>, created_at;</span><br><span class="line">   PERFORM pg_sleep(10);</span><br><span class="line">   RAISE NOTICE <span class="string">'%'</span>, created_at;</span><br><span class="line">END $$;</span><br><span class="line">注意:  23:07:05.060536</span><br><span class="line">注意:  23:07:05.060536</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，声明一个变量，其默认值初始化为当前时间。</li>
+</ul>
+<ul>
+<li>其次，打印出变量的值并在10秒内暂停执行</li>
+</ul>
+<ul>
+<li>第三，再次打印出created_at变量的值。</li>
+</ul>
+<h4 id="复制数据类型"><a href="#复制数据类型" class="headerlink" title="复制数据类型"></a>复制数据类型</h4><blockquote>
+<p>PostgreSQL使您可以定义一个数据类型的变量，该数据类型引用表的列的数据类型或另一个变量的数据类型：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">variable_name table_name.column_name%TYPE;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">variable_name variable%TYPE;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>定义一个变量city_name，其名称name与city表的列名称相同，其数据类型如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">city_name city.name%TYPE := <span class="string">'San Francisco'</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>通过使用复制类型功能，您可以获得以下优点：</p>
+<ul>
+<li>首先，您无需关心列的数据类型。您声明一个变量以仅保留查询中该列的值。</li>
+</ul>
+<ul>
+<li>其次，当列的数据类型更改时，您无需更改函数中的变量声明即可适应新的更改。</li>
+</ul>
+<ul>
+<li>第三，由于内部变量的类型可以从一个调用更改为另一个调用，因此可以将变量的类型引用为函数参数的数据类型以创建多态函数。</li>
+</ul>
+</blockquote>
+<h4 id="为变量分配别名"><a href="#为变量分配别名" class="headerlink" title="为变量分配别名"></a>为变量分配别名</h4><blockquote>
+<p>PostgreSQL允许您为任何变量定义别名，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new_name ALIAS FOR old_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>别名主要用于触发过程中，以便为具有预定名称（例如NEW或OLD）的变量分配更有意义的名称。</p>
+</blockquote>
+<h3 id="PL-pgSQL常量"><a href="#PL-pgSQL常量" class="headerlink" title="PL/pgSQL常量"></a>PL/pgSQL常量</h3><blockquote>
+<p>与变量不同，常量的值一旦初始化就无法更改。以下是使用常量的原因:</p>
+</blockquote>
+<ul>
+<li>首先，常量使代码更具可读性。例如，假设我们有一个公式如下:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">price = net_price * 0.8;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>0.8是什么意思？ 它可以解释为任何东西。但是，我们可以为其赋予其折扣的的含义:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">price = net_price * ZK;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>其次，常量减少了维护工作，假设您在函数中具有用于计算价格的公式。当折扣从例如0.8更改为0.9时，您需要更改所有这些硬编码值。但是，通过使用常量，您只需要在声明和初始化常量的一个地方进行更改。</li>
+</ul>
+<h4 id="声明常量语法"><a href="#声明常量语法" class="headerlink" title="声明常量语法"></a>声明常量语法</h4><blockquote>
+<p>要在PL/pgSQL中声明一个常量，请使用以下语法：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">constant_name CONSTANT data_type := expression;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，指定常量名称。按照惯例，它采用大写形式，例如ZK和DISCOUNT。</li>
+</ul>
+<ul>
+<li>其次，放置CONSTANT关键字并指定与常量关联的数据类型。</li>
+</ul>
+<ul>
+<li>第三，为常量初始化一个值。</li>
+</ul>
+<h4 id="PL-pgSQL常量示例"><a href="#PL-pgSQL常量示例" class="headerlink" title="PL/pgSQL常量示例"></a>PL/pgSQL常量示例</h4><blockquote>
+<p>为折扣声明一个名为zk的常量，并根据净价计算售价：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">   ZK CONSTANT NUMERIC := 0.8;</span><br><span class="line">   net_price    NUMERIC := 50;</span><br><span class="line">BEGIN</span><br><span class="line">   RAISE NOTICE <span class="string">'The price is %'</span>, net_price * ZK ;</span><br><span class="line">END $$;</span><br><span class="line">注意:  The price is 40.0</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>现在，尝试如下更改常量的值出现错误:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">   ZK constant NUMERIC := 0.8;</span><br><span class="line">   net_price    NUMERIC := 50;</span><br><span class="line">BEGIN</span><br><span class="line">   RAISE NOTICE <span class="string">'The price is %'</span>, net_price * ZK ;</span><br><span class="line">   ZK := 0.85;</span><br><span class="line">END $$;</span><br><span class="line">错误:  变量<span class="string">"zk"</span>被声明为常量</span><br><span class="line">LINE 7:    ZK := 0.85;</span><br><span class="line">           ^</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，当在运行时而不是编译时输入该块时，PostgreSQL会计算常量的值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">   start_at CONSTANT time := now();</span><br><span class="line">BEGIN</span><br><span class="line">   RAISE NOTICE <span class="string">'Start executing block at %'</span>, start_at;</span><br><span class="line">END $$;</span><br><span class="line">注意:  Start executing block at 11:38:34.260159</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>每次我们调用该块时，PostgreSQL都会评估NOW()函数。为了证明这一点，我们再次执行该块:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">   start_at CONSTANT time := now();</span><br><span class="line">BEGIN</span><br><span class="line">   RAISE NOTICE <span class="string">'Start executing block at %'</span>, start_at;</span><br><span class="line">END $$;</span><br><span class="line">注意:  Start executing block at 11:39:52.209155</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<h3 id="PL-pgSQL错误和消息"><a href="#PL-pgSQL错误和消息" class="headerlink" title="PL/pgSQL错误和消息"></a>PL/pgSQL错误和消息</h3><blockquote>
+<p>要发出消息，请使用RAISE语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RAISE level format;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在RAISE语句之后是用于指定错误严重性的级别选项。PostgreSQL有以下级别：</p>
+<ul>
+<li>DEBUG(调试)</li>
+</ul>
+<ul>
+<li>LOG(日志)</li>
+</ul>
+<ul>
+<li>NOTICE(注意)</li>
+</ul>
+<ul>
+<li>INFO(信息)</li>
+</ul>
+<ul>
+<li>WARNING(警告)</li>
+</ul>
+<ul>
+<li>EXCEPTION(例外)</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>如果您未指定级别，则默认情况下，RAISE语句将使用EXCEPTION级别，这会引发错误并停止并停止当前事务。</p>
+</blockquote>
+<blockquote>
+<p>格式是指定消息的字符串。该格式使用百分比(%)占位符，这些占位符将由下一个参数替换。占位符的数量必须与参数的数量匹配，否则，PostgreSQL将报告错误消息。</p>
+</blockquote>
+<blockquote>
+<p>以下示例说明了RAISE语句，该语句在当前时间报告不同的消息:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">BEGIN</span><br><span class="line">  RAISE INFO <span class="string">'information message %'</span>, now() ;</span><br><span class="line">  RAISE LOG <span class="string">'log message %'</span>, now();</span><br><span class="line">  RAISE DEBUG <span class="string">'debug message %'</span>, now();</span><br><span class="line">  RAISE WARNING <span class="string">'warning message %'</span>, now();</span><br><span class="line">  RAISE NOTICE <span class="string">'notice message %'</span>, now();</span><br><span class="line">END $$;</span><br><span class="line">信息:  information message 2019-12-03 12:03:41.136714+08</span><br><span class="line">警告:  warning message 2019-12-03 12:03:41.136714+08</span><br><span class="line">注意:  notice message 2019-12-03 12:03:41.136714+08</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，并非所有消息都报告给客户端，只有INFO，WARNING和NOTICE级别的消息报告给客户端。这由client_min_messages 和log_min_messages 配置参数控制。</p>
+</blockquote>
+<h4 id="PL-pgSQL引发错误提示"><a href="#PL-pgSQL引发错误提示" class="headerlink" title="PL/pgSQL引发错误提示"></a>PL/pgSQL引发错误提示</h4><blockquote>
+<p>要引发错误提示，请在RAISE语句后使用EXCEPTION级别。请注意，RAISE语句默认情况下使用EXCEPTION级别。</p>
+</blockquote>
+<blockquote>
+<p>除了引发错误提示之外，还可以在RAISE语句中使用以下子句来添加更多详细信息：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">USING option = expression</span><br></pre></td></tr></table></figure>
+<ul>
+<li>MESSAGE：设置错误消息文本</li>
+</ul>
+<ul>
+<li>HINT：提供提示信息，以便更容易发现错误的根本原因。</li>
+</ul>
+<ul>
+<li>DETAIL：提供有关错误的详细信息。</li>
+</ul>
+<ul>
+<li>ERRCODE：标识错误代码，可以通过条件名称或直接由五个字符组成的SQLSTATE代码。 </li>
+</ul>
+<blockquote>
+<p>引发重复的电子邮件错误消息：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">   email varchar(255) := <span class="string">'info@postgresql.org'</span>;</span><br><span class="line">BEGIN</span><br><span class="line">  -- check email <span class="keyword">for</span> duplicate</span><br><span class="line">  -- ...</span><br><span class="line">  -- report duplicate email</span><br><span class="line">  RAISE EXCEPTION <span class="string">'Duplicate email: %'</span>, email</span><br><span class="line">      USING HINT = <span class="string">'Check the email again'</span>;</span><br><span class="line">END $$;</span><br><span class="line">错误:  Duplicate email: info@postgresql.org</span><br><span class="line">HINT:  Check the email again</span><br><span class="line">CONTEXT:  在RAISE的第8行的PL/pgSQL函数inline_code_block</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>以下示例说明了如何引发SQLSTATE及其对应条件：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DO $$</span><br><span class="line">BEGIN</span><br><span class="line">   --...</span><br><span class="line">   RAISE SQLSTATE <span class="string">'2210B'</span>;</span><br><span class="line">END $$;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DO $$</span><br><span class="line">BEGIN</span><br><span class="line">   --...</span><br><span class="line">   RAISE invalid_regular_expression;</span><br><span class="line">END $$;</span><br></pre></td></tr></table></figure>
+<h4 id="使用ASSERT语句进行调试检查"><a href="#使用ASSERT语句进行调试检查" class="headerlink" title="使用ASSERT语句进行调试检查"></a>使用ASSERT语句进行调试检查</h4><blockquote>
+<p>ASSERT语句的语法</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ASSERT condition [, message];</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>条件是布尔表达式。如果条件评估为TRUE，则ASSERT语句不执行任何操作。如果条件评估为FALSE或NULL，则引发ASSERT_FAILURE。</p>
+</blockquote>
+<blockquote>
+<p>如果不提供该消息，则PL/pgSQL默认使用“断言失败”消息。如果提供了该消息，则ASSERT语句将使用它来替换默认消息。</p>
+</blockquote>
+<h3 id="CREATE-FUNCTION语句"><a href="#CREATE-FUNCTION语句" class="headerlink" title="CREATE FUNCTION语句"></a>CREATE FUNCTION语句</h3><h4 id="CREATE-FUNCTION语句语法"><a href="#CREATE-FUNCTION语句语法" class="headerlink" title="CREATE FUNCTION语句语法"></a>CREATE FUNCTION语句语法</h4><blockquote>
+<p>要在PostgreSQL中创建新的用户定义函数，请使用CREATE FUNCTION语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CREATE FUNCTION function_name(p1 <span class="built_in">type</span>, p2 <span class="built_in">type</span>)</span><br><span class="line">RETURNS <span class="built_in">type</span> AS</span><br><span class="line">BEGIN</span><br><span class="line">-- logic</span><br><span class="line">END;</span><br><span class="line">LANGUAGE language_name;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在CREATE FUNCTION关键字之后指定函数的名称。</li>
+</ul>
+<ul>
+<li>然后，在函数名称后的括号内放入逗号分隔的参数列表。</li>
+</ul>
+<ul>
+<li>接下来，在RETURNS关键字之后指定函数的返回类型。</li>
+</ul>
+<ul>
+<li>之后，将代码放入BEGIN和END块中。该函数始终以分号（;）结尾，后跟END关键字。</li>
+</ul>
+<ul>
+<li>最后，在使用PL/pgSQL的情况下，说明函数的过程语言，例如plpgsql。</li>
+</ul>
+<h4 id="CREATE-FUNCTION语句示例"><a href="#CREATE-FUNCTION语句示例" class="headerlink" title="CREATE FUNCTION语句示例"></a>CREATE FUNCTION语句示例</h4><blockquote>
+<p>开发一个名为inc的非常简单的函数，该函数将整数增加1并返回结果。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE FUNCTION inc(val integer) RETURNS integer AS $$</span></span><br><span class="line">BEGIN</span><br><span class="line">RETURN val + 1;</span><br><span class="line">END; $$</span><br><span class="line">LANGUAGE PLPGSQL;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>提供给CREATE FUNCTION的整个函数定义必须是一个单引号字符串。这意味着如果函数具有任何单引号（’），则必须对其进行转义。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL提供了一种称为“$”的功能，该功能使您可以选择一个合适的字符串,从而您不必对其进行转义。</p>
+</blockquote>
+<blockquote>
+<p>如果函数有效，则PostgreSQL将创建函数并返回CREATE FUNCTION语句，如上所示。</p>
+</blockquote>
+<blockquote>
+<p>调用函数:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT inc(20);</span></span><br><span class="line"> inc</span><br><span class="line">-----</span><br><span class="line">  21</span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT inc(inc(20));</span></span><br><span class="line"> inc</span><br><span class="line">-----</span><br><span class="line">  22</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h3 id="PL-pgSQL函数参数"><a href="#PL-pgSQL函数参数" class="headerlink" title="PL/pgSQL函数参数"></a>PL/pgSQL函数参数</h3><h4 id="PL-pgSQL-IN参数"><a href="#PL-pgSQL-IN参数" class="headerlink" title="PL/pgSQL IN参数"></a>PL/pgSQL IN参数</h4><blockquote>
+<p>从创建一个名为get_sum()的新函数:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_sum(</span></span><br><span class="line">   a NUMERIC,</span><br><span class="line">   b NUMERIC)</span><br><span class="line">RETURNS NUMERIC AS $$</span><br><span class="line">BEGIN</span><br><span class="line">   RETURN a + b;</span><br><span class="line">END; $$</span><br><span class="line"> </span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>get_sum()函数接受两个参数：a和b并返回一个数字。这两个参数的数据类型为NUMERIC。默认情况下，PostgreSQL中任何参数的参数类型均为IN参数。可以将IN参数传递给函数，但不能将它们作为结果的一部分取回。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT get_sum(10,20);</span></span><br><span class="line"> get_sum</span><br><span class="line">---------</span><br><span class="line">      30</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h4 id="PL-pgSQL-OUT参数"><a href="#PL-pgSQL-OUT参数" class="headerlink" title="PL/pgSQL OUT参数"></a>PL/pgSQL OUT参数</h4><blockquote>
+<p>OUT参数被定义为函数参数列表的一部分，并作为结果的一部分返回。</p>
+</blockquote>
+<blockquote>
+<p>要定义OUT参数，请使用OUT关键字，如以下示例所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION abc(</span></span><br><span class="line">   a NUMERIC,</span><br><span class="line">   b NUMERIC,</span><br><span class="line">   c NUMERIC,</span><br><span class="line">        OUT high NUMERIC,</span><br><span class="line">   OUT low NUMERIC)</span><br><span class="line">AS $$</span><br><span class="line">BEGIN</span><br><span class="line">   high := GREATEST(a,b,c);</span><br><span class="line">   low := LEAST(a,b,c);</span><br><span class="line">END; $$</span><br><span class="line"> </span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>abc函数接受5个参数：</p>
+<ul>
+<li>三个IN参数：a，b，c。</li>
+</ul>
+<ul>
+<li>两个OUT参数：high（高）和low（低）。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>在函数内部，使用GREATEST和LEAST内置函数可以获取最大多和最小的三个IN参数。因为我们使用OUT参数，所以我们不需要RETURN语句。OUT参数在需要返回多个值而不定义自定义类型的函数中很有用。</p>
+</blockquote>
+<blockquote>
+<p>以下语句调用abc函数：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT abc(10,20,30);</span></span><br><span class="line">   abc</span><br><span class="line">---------</span><br><span class="line"> (30,10)</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>输出分隔为列，请使用以下语法:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT * FROM abc(10,20,30);</span></span><br><span class="line"> high | low</span><br><span class="line">------+-----</span><br><span class="line">   30 |  10</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h4 id="PL-pgSQL-INOUT参数"><a href="#PL-pgSQL-INOUT参数" class="headerlink" title="PL/pgSQL INOUT参数"></a>PL/pgSQL INOUT参数</h4><blockquote>
+<p>INOUT参数是IN和OUT参数的组合。这意味着调用者可以将值传递给函数。然后，函数更改参数，并将值作为结果的一部分传回。</p>
+</blockquote>
+<blockquote>
+<p>下面的示例展示平方函数，该函数接受一个数字并返回该数字的平方:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION square(</span></span><br><span class="line">   INOUT a NUMERIC)</span><br><span class="line">AS $$</span><br><span class="line">BEGIN</span><br><span class="line">   a := a * a;</span><br><span class="line">END; $$</span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT square(4);</span></span><br><span class="line"> square</span><br><span class="line">--------</span><br><span class="line">     16</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h4 id="PL-pgSQL-VARIADIC参数"><a href="#PL-pgSQL-VARIADIC参数" class="headerlink" title="PL/pgSQL VARIADIC参数"></a>PL/pgSQL VARIADIC参数</h4><blockquote>
+<p>PostgreSQL函数可以接受可变数量的参数，但条件是所有参数都具有相同的数据类型。参数作为数组传递给函数。请参见以下示例：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION sum_avg(</span></span><br><span class="line">   VARIADIC list NUMERIC[],</span><br><span class="line">   OUT total NUMERIC,</span><br><span class="line">        OUT average NUMERIC)</span><br><span class="line">AS $$</span><br><span class="line">BEGIN</span><br><span class="line">   SELECT INTO total SUM(list[i])</span><br><span class="line">   FROM generate_subscripts(list, 1) g(i);</span><br><span class="line"> </span><br><span class="line">   SELECT INTO average AVG(list[i])</span><br><span class="line">   FROM generate_subscripts(list, 1) g(i);</span><br><span class="line">   </span><br><span class="line">END; $$</span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT * FROM sum_avg(10,20,30);</span></span><br><span class="line"> total |       average</span><br><span class="line">-------+---------------------</span><br><span class="line">    60 | 20.0000000000000000</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h3 id="PL-pgSQL函数重载"><a href="#PL-pgSQL函数重载" class="headerlink" title="PL/pgSQL函数重载"></a>PL/pgSQL函数重载</h3><blockquote>
+<p>PostgreSQL允许多个函数具有相同的名称，只要参数不同即可。如果多个函数具有相同的名称，则可以说这些函数已重载。调用函数时，PostgreSQL根据输入参数确定正在调用的确切函数。</p>
+</blockquote>
+<blockquote>
+<p>get_rental_function函数接受p_customer_id作为参数。它返回特定客户租借DVD的持续时间总和（以天为单位）。例如，我们可以获取客户ID为232的客户的租期，我们调用get_rental_duration函数，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_rental_duration(p_customer_id INTEGER)</span></span><br><span class="line">   RETURNS INTEGER AS $$</span><br><span class="line">   </span><br><span class="line">DECLARE</span><br><span class="line">   rental_duration INTEGER;</span><br><span class="line">BEGIN</span><br><span class="line">   -- get the rate based on film_id</span><br><span class="line">   SELECT INTO rental_duration SUM( EXTRACT( DAY FROM return_date - rental_date))</span><br><span class="line">    FROM rental</span><br><span class="line">   WHERE customer_id=p_customer_id;</span><br><span class="line"> </span><br><span class="line">   RETURN rental_duration;</span><br><span class="line">END; $$</span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT get_rental_duration(232);</span></span><br><span class="line"> get_rental_duration</span><br><span class="line">---------------------</span><br><span class="line">                  90</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>假设我们想知道从特定日期到现在的客户的租期。我们可以在get_retal_duration（）函数中再添加一个参数p_from_date，或者可以开发一个具有相同名称但具有两个参数的新函数，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_rental_duration(p_customer_id INTEGER, p_from_date DATE)</span></span><br><span class="line">   RETURNS INTEGER AS $$</span><br><span class="line">DECLARE</span><br><span class="line">   rental_duration <span class="built_in">integer</span>;</span><br><span class="line">BEGIN</span><br><span class="line">   -- get the rental duration based on customer_id and rental date</span><br><span class="line">   SELECT INTO rental_duration</span><br><span class="line">               SUM( EXTRACT( DAY FROM return_date + <span class="string">'12:00:00'</span> - rental_date))</span><br><span class="line">   FROM rental</span><br><span class="line">   WHERE customer_id= p_customer_id AND</span><br><span class="line">        rental_date &gt;= p_from_date;</span><br><span class="line">   </span><br><span class="line">   RETURN rental_duration;</span><br><span class="line">END; $$</span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该函数与第一个函数具有相同的名称，只是它具有两个参数。我们说get_rental_duration（integer）函数被get_rental_duration（integer，date）函数重载。以下语句获取自2005年7月1日起客户ID为232的客户的租期：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT get_rental_duration(232,'2005-07-01');</span></span><br><span class="line"> get_rental_duration</span><br><span class="line">---------------------</span><br><span class="line">                  85</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，如果我们忽略第二个参数，PostgreSQL将调用第一个函数。</p>
+</blockquote>
+<h4 id="PL-pgSQL函数重载和默认值"><a href="#PL-pgSQL函数重载和默认值" class="headerlink" title="PL/pgSQL函数重载和默认值"></a>PL/pgSQL函数重载和默认值</h4><blockquote>
+<p>在get_rental_duration（integer，date）函数中，如果我们想为第二个参数添加默认值，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_rental_duration(</span></span><br><span class="line">      p_customer_id INTEGER,</span><br><span class="line">      p_from_date DATE DEFAULT <span class="string">'2005-01-01'</span></span><br><span class="line">   )</span><br><span class="line">   RETURNS INTEGER AS $$</span><br><span class="line">DECLARE</span><br><span class="line">   rental_duration <span class="built_in">integer</span>;</span><br><span class="line">BEGIN</span><br><span class="line">   -- get the rental duration based on customer_id and rental date</span><br><span class="line">   SELECT INTO rental_duration</span><br><span class="line">               SUM( EXTRACT( DAY FROM return_date + <span class="string">'12:00:00'</span> - rental_date))</span><br><span class="line">   FROM rental</span><br><span class="line">   WHERE customer_id= p_customer_id AND</span><br><span class="line">        rental_date &gt;= p_from_date;</span><br><span class="line">   </span><br><span class="line">   RETURN rental_duration;</span><br><span class="line">END; $$</span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这意味着如果我们忽略传递p_from_date参数，PostgreSQL将使用2015年1月1日作为默认值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT get_rental_duration(232);</span></span><br><span class="line">错误:  函数 get_rental_duration(<span class="built_in">integer</span>) 不是唯一的</span><br><span class="line">LINE 1: SELECT get_rental_duration(232)</span><br><span class="line">               ^</span><br><span class="line">HINT:  无法选择最佳候选函数. 你也许需要增加明确的类型转换.</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>PostgreSQL应该使用一个参数调用第一个函数还是使用两个参数调用第二个函数？它无法选择。因此，当重载现有功能时，应始终使它们的功能接口不同。现在，可以通过显式传递第二个参数来仅使用第二个函数。无法使用第一个函数，因为它使PostgreSQL混淆了调用哪个函数。</p>
+</blockquote>
+<blockquote>
+<p>我们需要删除具有默认值的get_rental_duration()函数，并再次使用两个参数重新创建get_rental_duration函数，而无需为第二个参数指定默认值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DROP FUNCTION get_rental_duration(INTEGER,DATE);</span></span><br><span class="line">DROP FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，删除函数时，必须同时指定参数和函数名称。实际上，在PostgreSQL中，函数的完整名称包括名称和参数。</p>
+</blockquote>
+<blockquote>
+<p>最后一个重要说明是，应避免使用过多的重载，这会使开发人员难以通过查看代码来知道将调用哪个函数。</p>
+</blockquote>
+<blockquote>
+<p>使用ILIKE运算符返回标题匹配特定图案的所有电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_film (p_pattern VARCHAR)</span></span><br><span class="line">   RETURNS TABLE (</span><br><span class="line">      film_title VARCHAR,</span><br><span class="line">      film_release_year INT</span><br><span class="line">)</span><br><span class="line">AS $$</span><br><span class="line">BEGIN</span><br><span class="line">   RETURN QUERY SELECT</span><br><span class="line">      title,</span><br><span class="line">      cast( release_year as <span class="built_in">integer</span>)</span><br><span class="line">   FROM</span><br><span class="line">      film</span><br><span class="line">   WHERE</span><br><span class="line">      title ILIKE p_pattern ;</span><br><span class="line">END; $$</span><br><span class="line"> </span><br><span class="line">LANGUAGE <span class="string">'plpgsql'</span>;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>get_film（varchar）函数接受一个参数p_pattern，这是您要与影片标题匹配的模式。要从函数返回表，请使用RETURNS TABLE语法并指定表的列。每列均以逗号(,)分隔。</p>
+</blockquote>
+<blockquote>
+<p>在该函数中，我们返回一个查询，该查询是SELECT语句的结果。请注意，SELECT语句中的列必须与我们要返回的表的列匹配。由于电影表的的数据类型release_year不是整数，因此我们必须使用强制类型转换将其转换为整数。</p>
+</blockquote>
+<blockquote>
+<p>调用get_film（varchar）函数来获取标题以Al开头的所有电影:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   get_film (<span class="string">'Al%'</span>);</span><br><span class="line">    film_title    | film_release_year</span><br><span class="line">------------------+-------------------</span><br><span class="line"> Alabama Devil    |              2006</span><br><span class="line"> Aladdin Calendar |              2006</span><br><span class="line"> Alamo Videotape  |              2006</span><br><span class="line"> Alaska Phantom   |              2006</span><br><span class="line"> Ali Forever      |              2006</span><br><span class="line"> Alice Fantasia   |              2006</span><br><span class="line"> Alien Center     |              2006</span><br><span class="line"> Alley Evolution  |              2006</span><br><span class="line"> Alone Trip       |              2006</span><br><span class="line"> Alter Victory    |              2006</span><br><span class="line">(10 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果使用以下语句调用该函数，PostgreSQL返回一个包含一列的表，其中包含电影数组:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   get_film (<span class="string">'Al%'</span>);</span><br><span class="line">         get_film</span><br><span class="line">---------------------------</span><br><span class="line"> (<span class="string">"Alabama Devil"</span>,2006)</span><br><span class="line"> (<span class="string">"Aladdin Calendar"</span>,2006)</span><br><span class="line"> (<span class="string">"Alamo Videotape"</span>,2006)</span><br><span class="line"> (<span class="string">"Alaska Phantom"</span>,2006)</span><br><span class="line"> (<span class="string">"Ali Forever"</span>,2006)</span><br><span class="line"> (<span class="string">"Alice Fantasia"</span>,2006)</span><br><span class="line"> (<span class="string">"Alien Center"</span>,2006)</span><br><span class="line"> (<span class="string">"Alley Evolution"</span>,2006)</span><br><span class="line"> (<span class="string">"Alone Trip"</span>,2006)</span><br><span class="line"> (<span class="string">"Alter Victory"</span>,2006)</span><br><span class="line">(10 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>实际上，通常在将每一行添加到函数的结果集中之前对其进行处理。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_film (p_pattern VARCHAR,p_year INT)</span></span><br><span class="line">   RETURNS TABLE (</span><br><span class="line">      film_title VARCHAR,</span><br><span class="line">      film_release_year INT</span><br><span class="line">) AS $$</span><br><span class="line">DECLARE</span><br><span class="line">    var_r record;</span><br><span class="line">BEGIN</span><br><span class="line">   FOR var_r IN(SELECT</span><br><span class="line">                  title,</span><br><span class="line">                  release_year</span><br><span class="line">                FROM film</span><br><span class="line">            WHERE title ILIKE p_pattern AND</span><br><span class="line">                         release_year = p_year)  </span><br><span class="line">   LOOP</span><br><span class="line">        film_title := upper(var_r.title) ;</span><br><span class="line">      film_release_year := var_r.release_year;</span><br><span class="line">        RETURN NEXT;</span><br><span class="line">   END LOOP;</span><br><span class="line">END; $$</span><br><span class="line">LANGUAGE <span class="string">'plpgsql'</span>;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>创建了一个具有类似名称get_film（varchar，int）的函数，但是接受两个参数：</p>
+<ul>
+<li>第一个参数是p_pattern，如果标题与此模式匹配，我们将使用p_pattern搜索电影。我们使用ILIKE运算符执行搜索。</li>
+</ul>
+<ul>
+<li>第二个参数是电影的发行年份。</li>
+</ul>
+<ul>
+<li>因为要在返回每个行之前对其进行处理，所以我们使用FOR LOOP语句对其进行处理。在每次迭代中，我们使用UPPER函数使影片的标题大写。 </li>
+</ul>
+</blockquote>
+<blockquote>
+<p>RETURN NEXT语句在该函数的结果集中添加一行。继续执行，并在循环的每次迭代中建立结果集。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   get_film (<span class="string">'wr%'</span>, 2006);</span><br><span class="line">   film_title   | film_release_year</span><br><span class="line">----------------+-------------------</span><br><span class="line"> WRATH MILE     |              2006</span><br><span class="line"> WRONG BEHAVIOR |              2006</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="PL-pgSQL-IF语句"><a href="#PL-pgSQL-IF语句" class="headerlink" title="PL/pgSQL IF语句"></a>PL/pgSQL IF语句</h3><blockquote>
+<p>IF语句用于有条件地执行命令。PL/pgSQL为您提供了三种形式的IF语句。</p>
+</blockquote>
+<h4 id="IF语句的最简单形式"><a href="#IF语句的最简单形式" class="headerlink" title="IF语句的最简单形式"></a>IF语句的最简单形式</h4><blockquote>
+<p>如果条件为真，则IF语句执行语句。如果条件的计算结果为false，则将控制传递到END IF部分之后的下一个语句。下面说明了IF语句的最简单形式：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">IF condition THEN</span><br><span class="line">   statement;</span><br><span class="line">END IF;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>条件是一个布尔表达式，其结果为true或false。</p>
+</blockquote>
+<blockquote>
+<p>该语句是在条件为真时将执行的语句。它可以是任何有效的语句，甚至可以是另一个IF语句。IF代码语句放在另一个IF语句内，称为嵌套IF语句。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">  a <span class="built_in">integer</span> := 10;</span><br><span class="line">  b <span class="built_in">integer</span> := 20;</span><br><span class="line">BEGIN</span><br><span class="line">  IF a &gt; b THEN</span><br><span class="line">   RAISE NOTICE <span class="string">'a is greater than b'</span>;</span><br><span class="line">  END IF;</span><br><span class="line"> </span><br><span class="line">  IF a &lt; b THEN</span><br><span class="line">   RAISE NOTICE <span class="string">'a is less than b'</span>;</span><br><span class="line">  END IF;</span><br><span class="line"> </span><br><span class="line">  IF a = b THEN</span><br><span class="line">   RAISE NOTICE <span class="string">'a is equal to b'</span>;</span><br><span class="line">  END IF;</span><br><span class="line">END $$;</span><br><span class="line">注意:  a is less than b</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中，我们声明了两个变量a和b。在块的主体中，我们使用IF语句的布尔表达式中的比较运算符&gt;，&lt;和=比较a和b的值，并打印出相应的消息。</p>
+</blockquote>
+<h4 id="IF-THEN-ELSE语句"><a href="#IF-THEN-ELSE语句" class="headerlink" title="IF THEN ELSE语句"></a>IF THEN ELSE语句</h4><h5 id="IF-THEN-ELSE语句的语法"><a href="#IF-THEN-ELSE语句的语法" class="headerlink" title="IF THEN ELSE语句的语法"></a>IF THEN ELSE语句的语法</h5><blockquote>
+<p>IF THEN ELSE语句在条件为true时执行命令，在条件为false时执行替代命令。下面说明了IF THEN ELSE语句的语法：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">IF condition THEN</span><br><span class="line">  statements;</span><br><span class="line">ELSE</span><br><span class="line">  alternative-statements;</span><br><span class="line">END IF;</span><br></pre></td></tr></table></figure>
+<h5 id="IF-THEN-ELSE语句示例"><a href="#IF-THEN-ELSE语句示例" class="headerlink" title="IF THEN ELSE语句示例"></a>IF THEN ELSE语句示例</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">  a <span class="built_in">integer</span> := 10;</span><br><span class="line">  b <span class="built_in">integer</span> := 20;</span><br><span class="line">BEGIN</span><br><span class="line">   IF a &gt; b THEN</span><br><span class="line">      RAISE NOTICE <span class="string">'a is greater than b'</span>;</span><br><span class="line">   ELSE</span><br><span class="line">      RAISE NOTICE <span class="string">'a is not greater than b'</span>;</span><br><span class="line">   END IF;</span><br><span class="line">END $$;</span><br><span class="line">注意:  a is not greater than b</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>由于表达式a &gt; b为假，因此将执行ELSE子句中的语句。</p>
+</blockquote>
+<h4 id="IF-THEN-ELSIF-THEN-ELSE语句"><a href="#IF-THEN-ELSIF-THEN-ELSE语句" class="headerlink" title="IF THEN ELSIF THEN ELSE语句"></a>IF THEN ELSIF THEN ELSE语句</h4><h5 id="IF-THEN-ELSIF-THEN-ELSE语句语法"><a href="#IF-THEN-ELSIF-THEN-ELSE语句语法" class="headerlink" title="IF THEN ELSIF THEN ELSE语句语法"></a>IF THEN ELSIF THEN ELSE语句语法</h5><blockquote>
+<p>IF和IF THEN ELSE语句仅允许您评估一个条件。但是，使用这种形式的IF语句，您可能需要评估多个条件。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">IF condition-1 THEN</span><br><span class="line">  <span class="keyword">if</span>-statement;</span><br><span class="line">ELSIF condition-2 THEN</span><br><span class="line">  elsif-statement-2</span><br><span class="line">...</span><br><span class="line">ELSIF condition-n THEN</span><br><span class="line">  elsif-statement-n;</span><br><span class="line">ELSE</span><br><span class="line">  <span class="keyword">else</span>-statement;</span><br><span class="line">END IF:</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>条件为true，则执行该分支中的相应语句。例如，如果condition-1，condition-2等为true，则将执行相应的语句：if-statement，elseif-statement-2等。如果满足一个条件，PostgreSQL将停止评估下面的条件。</p>
+</blockquote>
+<blockquote>
+<p>如果所有条件都为false，则执行最后一个ELSE分支中的语句。</p>
+</blockquote>
+<h5 id="IF-THEN-ELSIF-THEN-ELSE示例"><a href="#IF-THEN-ELSIF-THEN-ELSE示例" class="headerlink" title="IF THEN ELSIF THEN ELSE示例"></a>IF THEN ELSIF THEN ELSE示例</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DO $$</span></span><br><span class="line">DECLARE</span><br><span class="line">   a <span class="built_in">integer</span> := 10;</span><br><span class="line">   b <span class="built_in">integer</span> := 10;</span><br><span class="line">BEGIN</span><br><span class="line">  IF a &gt; b THEN</span><br><span class="line">     RAISE NOTICE <span class="string">'a is greater than b'</span>;</span><br><span class="line">  ELSIF a &lt; b THEN</span><br><span class="line">     RAISE NOTICE <span class="string">'a is less than b'</span>;</span><br><span class="line">  ELSE</span><br><span class="line">     RAISE NOTICE <span class="string">'a is equal to b'</span>;</span><br><span class="line">  END IF;</span><br><span class="line">END $$;</span><br><span class="line">注意:  a is equal to b</span><br><span class="line">DO</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中，因为a等于b，所以将执行ELSE分支中的语句。</p>
+</blockquote>
+<h3 id="PL-pgSQL-CASE语句"><a href="#PL-pgSQL-CASE语句" class="headerlink" title="PL/pgSQL CASE语句"></a>PL/pgSQL CASE语句</h3><blockquote>
+<p>除了IF语句外，PostgreSQL还提供了CASE允许有条件地执行代码块的语句。该CASE语句有两种形式：简单CASE语句和搜索的CASE语句。</p>
+</blockquote>
+<h4 id="简单的CASE语句"><a href="#简单的CASE语句" class="headerlink" title="简单的CASE语句"></a>简单的CASE语句</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CASE search-expression</span><br><span class="line">   WHEN expression_1 [, expression_2, ...] THEN</span><br><span class="line">      when-statements</span><br><span class="line">  [ ... ]</span><br><span class="line">  [ELSE</span><br><span class="line">      <span class="keyword">else</span>-statements ]</span><br><span class="line">END CASE;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>search-expression是一个表达式，它将使用相等操作数（=）与每个WHEN分支中的表达式求值。如果找到匹配项，则执行相应的WHEN分支中的when语句。下面的后续表达式将不被评估。</p>
+</blockquote>
+<blockquote>
+<p>如果找不到匹配项，则执行ELSE分支中的else语句。ELSE分支是可选的。如果找不到匹配项，并且没有ELSE分支，则PostgreSQL将引发CASE_NOT_FOUND异常。</p>
+</blockquote>
+<h4 id="简单CASE语句的示例"><a href="#简单CASE语句的示例" class="headerlink" title="简单CASE语句的示例"></a>简单CASE语句的示例</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_price_segment(p_film_id integer)</span></span><br><span class="line">   RETURNS VARCHAR(50) AS $$</span><br><span class="line">DECLARE</span><br><span class="line">   rate   NUMERIC;</span><br><span class="line">   price_segment VARCHAR(50);</span><br><span class="line">BEGIN</span><br><span class="line">     -- get the rate based on film_id</span><br><span class="line">    SELECT INTO rate rental_rate</span><br><span class="line">    FROM film</span><br><span class="line">    WHERE film_id = p_film_id;</span><br><span class="line">      </span><br><span class="line">     CASE rate</span><br><span class="line">   WHEN 0.99 THEN</span><br><span class="line">            price_segment = <span class="string">'Mass'</span>;</span><br><span class="line">   WHEN 2.99 THEN</span><br><span class="line">            price_segment = <span class="string">'Mainstream'</span>;</span><br><span class="line">   WHEN 4.99 THEN</span><br><span class="line">            price_segment = <span class="string">'High End'</span>;</span><br><span class="line">   ELSE</span><br><span class="line">       price_segment = <span class="string">'Unspecified'</span>;</span><br><span class="line">   END CASE;</span><br><span class="line">   </span><br><span class="line">   RETURN price_segment;</span><br><span class="line">END; $$</span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT get_price_segment(123) AS "Price Segment";</span></span><br><span class="line"> Price Segment</span><br><span class="line">---------------</span><br><span class="line"> High End</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中，我们创建了一个名为get_price_segment的新函数，该函数接受p_film_id作为参数。根据电影的租金，它返回价格段：大众，主流，高端。如果价格不是0.99、2.99或4.99，则该函数返回未指定的价格。</p>
+</blockquote>
+<h4 id="搜索的CASE语句"><a href="#搜索的CASE语句" class="headerlink" title="搜索的CASE语句"></a>搜索的CASE语句</h4><blockquote>
+<p>以下语法说明了搜索到的CASE语句</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">CASE</span><br><span class="line">    WHEN boolean-expression-1 THEN</span><br><span class="line">      statements</span><br><span class="line">  [ WHEN boolean-expression-2 THEN</span><br><span class="line">      statements</span><br><span class="line">    ... ]</span><br><span class="line">  [ ELSE</span><br><span class="line">      statements ]</span><br><span class="line">END CASE;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>搜索的CASE语句基于每个WHEN子句中布尔表达式的结果执行语句。PostgreSQL从上到下依次评估布尔表达式，直到一个表达式为真。然后评估停止并执行相应的语句。控件在END CASE之后传递到下一个语句。</p>
+</blockquote>
+<blockquote>
+<p>如果找不到正确的结果，则执行ELSE子句中的语句。ELSE子句是可选的。如果省略ELSE子句，但没有真实结果，则PostgreSQL将引发CASE_NOT_FOUND异常。</p>
+</blockquote>
+<h4 id="搜索的CASE语句示例"><a href="#搜索的CASE语句示例" class="headerlink" title="搜索的CASE语句示例"></a>搜索的CASE语句示例</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_customer_service (p_customer_id INTEGER)</span></span><br><span class="line">   RETURNS VARCHAR (25) AS $$</span><br><span class="line">DECLARE</span><br><span class="line">    total_payment NUMERIC ;</span><br><span class="line">    service_level VARCHAR (25) ;</span><br><span class="line">BEGIN</span><br><span class="line">   -- get the rate based on film_id</span><br><span class="line">     SELECT</span><br><span class="line">   INTO total_payment SUM (amount)</span><br><span class="line">     FROM</span><br><span class="line">   payment</span><br><span class="line">     WHERE</span><br><span class="line">   customer_id = p_customer_id ;</span><br><span class="line">  </span><br><span class="line">   CASE</span><br><span class="line">      WHEN total_payment &gt; 200 THEN</span><br><span class="line">         service_level = <span class="string">'Platinum'</span> ;</span><br><span class="line">      WHEN total_payment &gt; 100 THEN</span><br><span class="line">    service_level = <span class="string">'Gold'</span> ;</span><br><span class="line">      ELSE</span><br><span class="line">         service_level = <span class="string">'Silver'</span> ;</span><br><span class="line">   END CASE ;</span><br><span class="line"> </span><br><span class="line">   RETURN service_level ;</span><br><span class="line">END ; $$</span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>get_customer_service函数接受p_customer_id作为参数。它首先从付款表中获得客户支付的总付款。然后，基于总付款，该函数使用搜索到的CASE语句返回服务级别白金，黄金和白银。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   148 AS customer,</span><br><span class="line">   get_customer_service (148)</span><br><span class="line">UNION</span><br><span class="line"> </span><br><span class="line">SELECT</span><br><span class="line">   178 AS customer,</span><br><span class="line">   get_customer_service (178)</span><br><span class="line">UNION</span><br><span class="line"> </span><br><span class="line">SELECT</span><br><span class="line">   81 AS customer,</span><br><span class="line">   get_customer_service (81);</span><br><span class="line"> customer | get_customer_service</span><br><span class="line">----------+----------------------</span><br><span class="line">      178 | Gold</span><br><span class="line">       81 | Silver</span><br><span class="line">      148 | Platinum</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，搜索到的case语句类似于IF ELSIF ELSE语句。</p>
+</blockquote>
+<h3 id="PL-pgSQL循环语句"><a href="#PL-pgSQL循环语句" class="headerlink" title="PL/pgSQL循环语句"></a>PL/pgSQL循环语句</h3><blockquote>
+<p>PostgreSQL提供了三个循环语句：LOOP，WHILE循环和FOR循环。</p>
+</blockquote>
+<h4 id="LOOP语句"><a href="#LOOP语句" class="headerlink" title="LOOP语句"></a>LOOP语句</h4><h4 id="LOOP语句的语法"><a href="#LOOP语句的语法" class="headerlink" title="LOOP语句的语法"></a>LOOP语句的语法</h4><blockquote>
+<p>有时，您需要重复执行一个语句块，直到条件变为真为止。为此，可以使用PL/pgSQL LOOP语句。下面说明了LOOP语句的语法：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;&lt;label&gt;&gt;</span><br><span class="line">LOOP</span><br><span class="line">   Statements;</span><br><span class="line">   EXIT [&lt;&lt;label&gt;&gt;] WHEN condition;</span><br><span class="line">END LOOP;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>LOOP语句也称为无条件循环语句，因为它执行该语句直到EXIT语句中的条件计算为true。请注意，在EXIT语句中的WHEN关键字之后指定的条件是布尔表达式，其结果为true或false。</p>
+</blockquote>
+<blockquote>
+<p>循环语句可以嵌套。一个LOOP语句放置在另一个LOOP语句中，这称为嵌套循环。在这种情况下，需要为循环标签指定要在EXIT语句中终止的循环。</p>
+</blockquote>
+<h4 id="PL-pgSQL-LOOP示例"><a href="#PL-pgSQL-LOOP示例" class="headerlink" title="PL/pgSQL LOOP示例"></a>PL/pgSQL LOOP示例</h4><blockquote>
+<p>使用LOOP语句开发返回第n个斐波纳契序列号的函数。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION fibonacci (n INTEGER)</span></span><br><span class="line">   RETURNS INTEGER AS $$</span><br><span class="line">DECLARE</span><br><span class="line">   counter INTEGER := 0 ;</span><br><span class="line">   i INTEGER := 0 ;</span><br><span class="line">   j INTEGER := 1 ;</span><br><span class="line">BEGIN</span><br><span class="line"> </span><br><span class="line">   IF (n &lt; 1) THEN</span><br><span class="line">      RETURN 0 ;</span><br><span class="line">   END IF;</span><br><span class="line">   </span><br><span class="line">   LOOP</span><br><span class="line">      EXIT WHEN counter = n ;</span><br><span class="line">      counter := counter + 1 ;</span><br><span class="line">      SELECT j, i + j INTO i,   j ;</span><br><span class="line">   END LOOP ;</span><br><span class="line">   </span><br><span class="line">   RETURN i ;</span><br><span class="line">END ;</span><br><span class="line">$$ LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Fibonacci函数接受一个整数并返回第n个斐波那契数。根据定义，斐波那契数是以0和1开头的整数序列，每个后继数字是前两个数的和，例如1、1、2（1 + 1），3（2 + 1）， 5（3 +2），8（5 + 3），……</p>
+</blockquote>
+<blockquote>
+<p>在声明部分，将计数器变量初始化为零(0)。在循环内部，当计数器等于n时，循环退出。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT j, i + j INTO i,   j ;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在不使用临时变量的情况下，同时交换i和j。</p>
+</blockquote>
+<h3 id="WHILE循环"><a href="#WHILE循环" class="headerlink" title="WHILE循环"></a>WHILE循环</h3><blockquote>
+<p>WHILE循环语句执行一个语句块，直到条件评估为false。在WHILE循环语句中，PostgreSQL在执行语句块之前先评估条件。如果条件为true，则执行语句块，直到评估为false。</p>
+</blockquote>
+<h4 id="WHILE循环语法"><a href="#WHILE循环语法" class="headerlink" title="WHILE循环语法"></a>WHILE循环语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[ &lt;&lt;label&gt;&gt; ]</span><br><span class="line">WHILE condition LOOP</span><br><span class="line">   statements;</span><br><span class="line">END LOOP;</span><br></pre></td></tr></table></figure>
+<h4 id="WHILE循环示例"><a href="#WHILE循环示例" class="headerlink" title="WHILE循环示例"></a>WHILE循环示例</h4><blockquote>
+<p>使用loop语句重写Fibonacci函数，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION fibonacci (n INTEGER)</span></span><br><span class="line">   RETURNS INTEGER AS $$</span><br><span class="line">DECLARE</span><br><span class="line">   counter INTEGER := 0 ;</span><br><span class="line">   i INTEGER := 0 ;</span><br><span class="line">   j INTEGER := 1 ;</span><br><span class="line">BEGIN</span><br><span class="line"> </span><br><span class="line">   IF (n &lt; 1) THEN</span><br><span class="line">      RETURN 0 ;</span><br><span class="line">   END IF;</span><br><span class="line">   </span><br><span class="line">   WHILE counter &lt;= n LOOP</span><br><span class="line">      counter := counter + 1 ;</span><br><span class="line">      SELECT j, i + j INTO i,   j ;</span><br><span class="line">   END LOOP ;</span><br><span class="line">   </span><br><span class="line">   RETURN i ;</span><br><span class="line">END ;</span><br><span class="line">$$ LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<h3 id="FOR循环语句"><a href="#FOR循环语句" class="headerlink" title="FOR循环语句"></a>FOR循环语句</h3><blockquote>
+<p>FOR循环语句是PostgreSQL中最复杂的循环语句。</p>
+</blockquote>
+<h4 id="用于遍历整数范围"><a href="#用于遍历整数范围" class="headerlink" title="用于遍历整数范围"></a>用于遍历整数范围</h4><blockquote>
+<p>FOR循环遍历整数范围的loop语句的语法:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[ &lt;&lt;label&gt;&gt; ]</span><br><span class="line">FOR loop_counter IN [ REVERSE ] from.. to [ BY expression ] LOOP</span><br><span class="line">    statements</span><br><span class="line">END LOOP [ label ];</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，PostgreSQL创建一个仅在循环内部存在的整数变量loop_counter。默认情况下，循环计数器是在每次迭代之后添加的。如果使用REVERSE关键字，PostgreSQL将减去循环计数器。</li>
+</ul>
+<ul>
+<li>其次，from和to是指定范围下限和上限的表达式。PostgreSQL在进入循环之前先对这些表达式求值。</li>
+</ul>
+<ul>
+<li>第三，BY子句后面的表达式指定迭代步骤。如果省略此选项，则默认步骤为1。PostgreSQL在循环条目中也对该表达式求值一次。</li>
+</ul>
+<h4 id="FOR循环语句示例1"><a href="#FOR循环语句示例1" class="headerlink" title="FOR循环语句示例1"></a>FOR循环语句示例1</h4><blockquote>
+<p>循环遍历1到5，并在每次迭代中打印出一条消息。计数器需要1、2、3、4、5。在每次循环迭代中，PostgreSQL将1加到计数器上。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">DO $$</span><br><span class="line">BEGIN</span><br><span class="line">   FOR counter IN 1..5 LOOP</span><br><span class="line">   RAISE NOTICE <span class="string">'Counter: %'</span>, counter;</span><br><span class="line">   END LOOP;</span><br><span class="line">END; $$</span><br></pre></td></tr></table></figure>
+<h4 id="FOR循环语句示例2"><a href="#FOR循环语句示例2" class="headerlink" title="FOR循环语句示例2"></a>FOR循环语句示例2</h4><blockquote>
+<p>从5循环到1，并在每次迭代中打印一条消息。计数器取5、4、3、2、1。在每次迭代中，PostgreSQL从计数器中减去1。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">DO $$</span><br><span class="line">BEGIN</span><br><span class="line">   FOR counter IN REVERSE 5..1 LOOP</span><br><span class="line">      RAISE NOTICE <span class="string">'Counter: %'</span>, counter;</span><br><span class="line">   END LOOP;</span><br><span class="line">END; $$</span><br></pre></td></tr></table></figure>
+<h4 id="FOR循环语句示例3"><a href="#FOR循环语句示例3" class="headerlink" title="FOR循环语句示例3"></a>FOR循环语句示例3</h4><blockquote>
+<p>在1到6之间循环，并在每次循环迭代中打印出计数器。计数器取1、3、5。在每次迭代中，PostgreSQL将2加到计数器上。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">DO $$</span><br><span class="line">BEGIN</span><br><span class="line">  FOR counter IN 1..6 BY 2 LOOP</span><br><span class="line">    RAISE NOTICE <span class="string">'Counter: %'</span>, counter;</span><br><span class="line">  END LOOP;</span><br><span class="line">END; $$</span><br></pre></td></tr></table></figure>
+<h3 id="FOR循环遍历查询结果"><a href="#FOR循环遍历查询结果" class="headerlink" title="FOR循环遍历查询结果"></a>FOR循环遍历查询结果</h3><h4 id="遍历查询结果的语法"><a href="#遍历查询结果的语法" class="headerlink" title="遍历查询结果的语法"></a>遍历查询结果的语法</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[ &lt;&lt;label&gt;&gt; ]</span><br><span class="line">FOR target IN query LOOP</span><br><span class="line">    statements</span><br><span class="line">END LOOP [ label ];</span><br></pre></td></tr></table></figure>
+<h4 id="遍历查询结果示例"><a href="#遍历查询结果示例" class="headerlink" title="遍历查询结果示例"></a>遍历查询结果示例</h4><blockquote>
+<p>以下函数接受一个整数，该整数指定要从示例数据库的film表中查询的行数。FOR循环语句循环遍历查询返回的行，并打印出电影标题。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION for_loop_through_query(</span></span><br><span class="line">   n INTEGER DEFAULT 10</span><br><span class="line">)</span><br><span class="line">RETURNS VOID AS $$</span><br><span class="line">DECLARE</span><br><span class="line">    rec RECORD;</span><br><span class="line">BEGIN</span><br><span class="line">    FOR rec IN SELECT title</span><br><span class="line">          FROM film</span><br><span class="line">          ORDER BY title</span><br><span class="line">          LIMIT n</span><br><span class="line">    LOOP</span><br><span class="line">   RAISE NOTICE <span class="string">'%'</span>, rec.title;</span><br><span class="line">    END LOOP;</span><br><span class="line">END;</span><br><span class="line">$$ LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT for_loop_through_query(5);</span></span><br><span class="line"> for_loop_through_query</span><br><span class="line">------------------------</span><br><span class="line"></span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line">注意:  Academy Dinosaur</span><br><span class="line">注意:  Ace Goldfinger</span><br><span class="line">注意:  Adaptation Holes</span><br><span class="line">注意:  Affair Prejudice</span><br><span class="line">注意:  African Egg</span><br></pre></td></tr></table></figure>
+<h3 id="用于遍历动态查询的查询结果"><a href="#用于遍历动态查询的查询结果" class="headerlink" title="用于遍历动态查询的查询结果"></a>用于遍历动态查询的查询结果</h3><h4 id="遍历动态查询的语法"><a href="#遍历动态查询的语法" class="headerlink" title="遍历动态查询的语法"></a>遍历动态查询的语法</h4><blockquote>
+<p>有时，您想在PL/pgSQL函数中构造一个动态查询并遍历其结果。为此，可以使用FOR循环语句的语法：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[ &lt;&lt;label&gt;&gt; ]</span><br><span class="line">FOR row IN EXECUTE string_expression [ USING query_param [, ... ] ]</span><br><span class="line">LOOP</span><br><span class="line">    statements</span><br><span class="line">END LOOP [ label ];</span><br></pre></td></tr></table></figure>
+<ul>
+<li>可以使用字符串表达式（它是文本格式的SQL语句）代替SQL语句。这使您可以动态构造查询。</li>
+</ul>
+<ul>
+<li>如果查询具有参数，则可以使用USING语句将参数传递给查询。</li>
+</ul>
+<h4 id="遍历动态查询示例"><a href="#遍历动态查询示例" class="headerlink" title="遍历动态查询示例"></a>遍历动态查询示例</h4><blockquote>
+<p>下面的函数演示了如何使用FOR循环语句在动态查询中循环。它接受两个参数：</p>
+<ul>
+<li>sort_type：1表示按标题对查询结果进行排序，2表示按发行年份对结果进行排序。</li>
+</ul>
+<ul>
+<li>n：要从电影表中查询的行数。注意，它将在USING子句中使用。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>首先，我们基于输入参数构建查询，然后在FOR循环函数中执行查询。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION for_loop_through_dyn_query(</span></span><br><span class="line">   sort_type INTEGER,</span><br><span class="line">   n INTEGER</span><br><span class="line">)</span><br><span class="line">RETURNS VOID AS $$</span><br><span class="line">DECLARE</span><br><span class="line">    rec RECORD;</span><br><span class="line">    query text;</span><br><span class="line">BEGIN</span><br><span class="line">      </span><br><span class="line">   query := <span class="string">'SELECT title, release_year FROM film '</span>;</span><br><span class="line">   IF sort_type = 1 THEN</span><br><span class="line">      query := query || <span class="string">'ORDER BY title'</span>;</span><br><span class="line">   ELSIF sort_type = 2 THEN</span><br><span class="line">     query := query || <span class="string">'ORDER BY release_year'</span>;</span><br><span class="line">   ELSE</span><br><span class="line">      RAISE EXCEPTION <span class="string">'Invalid sort type %s'</span>, sort_type;</span><br><span class="line">   END IF;</span><br><span class="line"> </span><br><span class="line">   query := query || <span class="string">' LIMIT $1'</span>;</span><br><span class="line"> </span><br><span class="line">   FOR rec IN EXECUTE query USING n</span><br><span class="line">        LOOP</span><br><span class="line">      RAISE NOTICE <span class="string">'% - %'</span>, rec.release_year, rec.title;</span><br><span class="line">   END LOOP;</span><br><span class="line">  </span><br><span class="line">END;</span><br><span class="line">$$ LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>调用for_loop_through_dyn_query()获取5部电影并按标题排序:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT for_loop_through_dyn_query(1,5);</span></span><br><span class="line"> for_loop_through_dyn_query</span><br><span class="line">----------------------------</span><br><span class="line"></span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line">注意:  2006 - Academy Dinosaur</span><br><span class="line">注意:  2006 - Ace Goldfinger</span><br><span class="line">注意:  2006 - Adaptation Holes</span><br><span class="line">注意:  2006 - Affair Prejudice</span><br><span class="line">注意:  2006 - African Egg</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>调用for_loop_through_dyn_query()获取5部电影并按发行年份排序:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT for_loop_through_dyn_query(2,5);</span></span><br><span class="line"> for_loop_through_dyn_query</span><br><span class="line">----------------------------</span><br><span class="line"></span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line">注意:  2006 - Grosse Wonderful</span><br><span class="line">注意:  2006 - Airport Pollock</span><br><span class="line">注意:  2006 - Bright Encounters</span><br><span class="line">注意:  2006 - Academy Dinosaur</span><br><span class="line">注意:  2006 - Chamber Italian</span><br></pre></td></tr></table></figure>
+<h3 id="PL-pgSQL游标"><a href="#PL-pgSQL游标" class="headerlink" title="PL/pgSQL游标"></a>PL/pgSQL游标</h3><blockquote>
+<p>PL/pgSQL游标允许我们封装查询并一次处理每个单独的行。当我们想要将大型结果集划分为多个部分并分别处理每个部分时，我们使用游标。如果我们立即处理它，则可能会出现内存溢出错误。</p>
+</blockquote>
+<blockquote>
+<p>另外，我们可以开发一个返回对游标的引用的函数。这是从函数返回大结果集的有效方法。函数的调用者可以基于游标引用来处理结果集。</p>
+</blockquote>
+<blockquote>
+<p>使用游标的步骤:</p>
+<ul>
+<li>首先，声明一个游标。</li>
+</ul>
+<ul>
+<li>接下来，打开光标。</li>
+</ul>
+<ul>
+<li>然后，将结果集中的行提取到目标中。</li>
+</ul>
+<ul>
+<li>之后，检查是否还有剩余的行要提取。是，执行步骤3，否则执行步骤5。</li>
+</ul>
+<ul>
+<li>最后，关闭光标。</li>
+</ul>
+</blockquote>
+<h4 id="声明游标"><a href="#声明游标" class="headerlink" title="声明游标"></a>声明游标</h4><blockquote>
+<p>要访问游标，需要在块的声明部分声明一个游标变量。PostgreSQL为我们提供了一种称为REFCURSOR的特殊类型来声明游标变量:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DECLARE</span><br><span class="line">   my_cursor REFCURSOR;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>声明与查询绑定的游标的另一种方法是使用以下语法:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cursor_name [ [NO] SCROLL ] CURSOR [( name datatype, name data <span class="built_in">type</span>, ...)] FOR query;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，为游标指定一个变量名。</li>
+</ul>
+<ul>
+<li>接下来，指定是否可以使用SCROLL向后滚动光标。如果使用NO SCROLL，则不能向后滚动光标。</li>
+</ul>
+<ul>
+<li>然后，放置CURSOR关键字，后跟一个逗号分隔的参数列表（名称数据类型），这些参数定义了查询的参数。 打开游标时，这些参数将被值替换。</li>
+</ul>
+<ul>
+<li>之后，可以在FOR关键字之后指定一个查询。可以在此处使用任何有效的SELECT语句。</li>
+</ul>
+<blockquote>
+<p>声明游标示例</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DECLARE</span><br><span class="line">    cur_films  CURSOR FOR SELECT * FROM film;</span><br><span class="line">    cur_films2 CURSOR (year <span class="built_in">integer</span>) FOR SELECT * FROM film WHERE release_year = year;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>cur_films是一个游标，它封装了film表中的所有行。</li>
+</ul>
+<ul>
+<li>cur_films2是一个游标，用于将具有特定发行年份的电影封装在film表中。</li>
+</ul>
+<h4 id="打开游标"><a href="#打开游标" class="headerlink" title="打开游标"></a>打开游标</h4><blockquote>
+<p>必须先打开游标才能将其用于查询行。PostgreSQL提供了打开未绑定和绑定的游标的语法。</p>
+</blockquote>
+<h5 id="打开未绑定的游标"><a href="#打开未绑定的游标" class="headerlink" title="打开未绑定的游标"></a>打开未绑定的游标</h5><blockquote>
+<p>使用以下语法打开未绑定的游标：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OPEN unbound_cursor_variable [ [ NO ] SCROLL ] FOR query;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>因为声明时未绑定的游标变量未绑定到任何查询，所以在打开它时必须指定查询:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OPEN my_cursor FOR SELECT * FROM city WHERE counter = p_country;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>PostgreSQL允许我们打开游标并将其绑定到动态查询。语法如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">OPEN unbound_cursor_variable[ [ NO ] SCROLL ]</span><br><span class="line">FOR EXECUTE query_string [USING expression [, ... ] ];</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在以下示例中，我们构建了一个动态查询，该查询基于sort_field参数对行进行排序，并打开执行该动态查询的游标:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">query := <span class="string">'SELECT * FROM city ORDER BY $1'</span>;</span><br><span class="line"> </span><br><span class="line">OPEN cur_city FOR EXECUTE query USING sort_field;</span><br></pre></td></tr></table></figure>
+<h5 id="打开绑定的游标"><a href="#打开绑定的游标" class="headerlink" title="打开绑定的游标"></a>打开绑定的游标</h5><blockquote>
+<p>因为声明时绑定的游标已经绑定到查询，所以当我们打开它时，只需要在必要时将参数传递给查询:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OPEN cursor_variable[ (name:=value,name:=value,...)];</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在以下示例中，我们打开了上面声明的绑定游标cur_films和cur_films2：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">OPEN cur_films;</span><br><span class="line">OPEN cur_films2(year:=2005);</span><br></pre></td></tr></table></figure>
+<h5 id="使用游标"><a href="#使用游标" class="headerlink" title="使用游标"></a>使用游标</h5><blockquote>
+<p>打开游标后，我们可以使用FETCH，MOVE，UPDATE或DELETE语句对其进行操作。</p>
+</blockquote>
+<h4 id="获取下一行"><a href="#获取下一行" class="headerlink" title="获取下一行"></a>获取下一行</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FETCH [ direction &#123; FROM | IN &#125; ] cursor_variable INTO target_variable;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>FETCH语句从游标中获取下一行，并为其分配一个target_variable，该target_variable可以是记录，行变量或逗号分隔的变量列表。如果找不到更多行，则将target_variable设置为NULL。</p>
+</blockquote>
+<blockquote>
+<p>默认情况下，如果您未明确指定方向，则光标会移至下一行。以下内容对游标有效：</p>
+<ul>
+<li>NEXT</li>
+</ul>
+<ul>
+<li>LAST</li>
+</ul>
+<ul>
+<li>PRIOR</li>
+</ul>
+<ul>
+<li>FIRST</li>
+</ul>
+<ul>
+<li>ABSOLUTE count</li>
+</ul>
+<ul>
+<li>RELATIVE count</li>
+</ul>
+<ul>
+<li>FORWARD</li>
+</ul>
+<ul>
+<li>BACKWARD</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>请注意，FORWARD和BACKWARD方向仅适用于使用SCROLL选项声明的游标。</p>
+</blockquote>
+<blockquote>
+<p>获取游标的示例:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FETCH cur_films INTO row_film;</span><br><span class="line">FETCH LAST FROM row_film INTO title, release_year;</span><br></pre></td></tr></table></figure>
+<h4 id="移动光标"><a href="#移动光标" class="headerlink" title="移动光标"></a>移动光标</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MOVE [ direction &#123; FROM | IN &#125; ] cursor_variable;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果只想移动光标而不检索任何行，则可以使用MOVE语句。该方向接受与FETCH语句相同的值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">MOVE cur_films2;</span><br><span class="line">MOVE LAST FROM cur_films;</span><br><span class="line">MOVE RELATIVE -1 FROM cur_films;</span><br><span class="line">MOVE FORWARD 3 FROM cur_films;</span><br></pre></td></tr></table></figure>
+<h4 id="删除或更新行"><a href="#删除或更新行" class="headerlink" title="删除或更新行"></a>删除或更新行</h4><blockquote>
+<p>定位游标后，可以使用DELETE WHERE CURRENT OF或UPDATE WHERE CURRENT OF语句删除或更新游标标识的行，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">UPDATE table_name</span><br><span class="line">SET column = value, ...</span><br><span class="line">WHERE CURRENT OF cursor_variable;</span><br><span class="line"> </span><br><span class="line">DELETE FROM table_name</span><br><span class="line">WHERE CURRENT OF cursor_variable;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>参见以下示例:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UPDATE film SET release_year = p_year</span><br><span class="line">WHERE CURRENT OF cur_films;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要关闭打开的游标，使用CLOSE语句，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CLOSE cursor_variable;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>CLOSE语句释放资源，或者释放了游标变量，使其能够再次使用OPEN语句打开。</p>
+</blockquote>
+<h4 id="PL-pgSQL游标–全部组合在一起"><a href="#PL-pgSQL游标–全部组合在一起" class="headerlink" title="PL/pgSQL游标–全部组合在一起"></a>PL/pgSQL游标–全部组合在一起</h4><blockquote>
+<p>以下get_film_titles（integer）函数接受一个表示电影发行年份的参数。在函数内部，查询所有发行年份等于传递给该函数的发行年份的电影。使用光标在各行之间循环，并连接标题和电影的发行年份，该电影的标题包含ful 。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION get_film_titles(p_year INTEGER)</span></span><br><span class="line">   RETURNS text AS $$</span><br><span class="line">DECLARE</span><br><span class="line">    titles TEXT DEFAULT <span class="string">''</span>;</span><br><span class="line">    rec_film   RECORD;</span><br><span class="line">    cur_films CURSOR(p_year INTEGER)</span><br><span class="line">       FOR SELECT title, release_year</span><br><span class="line">       FROM film</span><br><span class="line">       WHERE release_year = p_year;</span><br><span class="line">BEGIN</span><br><span class="line">   -- Open the cursor</span><br><span class="line">   OPEN cur_films(p_year);</span><br><span class="line">   </span><br><span class="line">   LOOP</span><br><span class="line">    -- fetch row into the film</span><br><span class="line">      FETCH cur_films INTO rec_film;</span><br><span class="line">    -- <span class="built_in">exit</span> when no more row to fetch</span><br><span class="line">      EXIT WHEN NOT FOUND;</span><br><span class="line"> </span><br><span class="line">    -- build the output</span><br><span class="line">      IF rec_film.title LIKE <span class="string">'%ful%'</span> THEN</span><br><span class="line">         titles := titles || <span class="string">','</span> || rec_film.title || <span class="string">':'</span> || rec_film.release_year;</span><br><span class="line">      END IF;</span><br><span class="line">   END LOOP;</span><br><span class="line">  </span><br><span class="line">   -- Close the cursor</span><br><span class="line">   CLOSE cur_films;</span><br><span class="line"> </span><br><span class="line">   RETURN titles;</span><br><span class="line">END; $$</span><br><span class="line"> </span><br><span class="line">LANGUAGE plpgsql;</span><br><span class="line">CREATE FUNCTION</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT get_film_titles(2006);</span></span><br><span class="line">                                             get_film_titles</span><br><span class="line">----------------------------------------------------------------------------------------------------------</span><br><span class="line"> ,Grosse Wonderful:2006,Day Unfaithful:2006,Reap Unfaithful:2006,Unfaithful Kill:2006,Wonderful Drop:2006</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h3 id="PostgreSQL创建过程"><a href="#PostgreSQL创建过程" class="headerlink" title="PostgreSQL创建过程"></a>PostgreSQL创建过程</h3><h4 id="CREATE-PROCEDURE语句语法"><a href="#CREATE-PROCEDURE语句语法" class="headerlink" title="CREATE PROCEDURE语句语法"></a>CREATE PROCEDURE语句语法</h4><blockquote>
+<p>要创建新的存储过程，请使用CREATE PROCEDURE语句。下面显示了CREATE PROCEDURE语句的简化语法：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE [OR REPLACE] PROCEDURE procedure_name(parameter_list)</span><br><span class="line">LANGUAGE language_name</span><br><span class="line">AS $$</span><br><span class="line">    stored_procedure_body;</span><br><span class="line">$$;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先，在CREATE PROCEDURE子句之后指定存储过程的名称。</li>
+</ul>
+<ul>
+<li>接下来，定义一个类似于用户定义功能的参数列表的参数列表。</li>
+</ul>
+<ul>
+<li>然后，为存储过程指定编程语言，例如PLpgSQL和SQL。</li>
+</ul>
+<ul>
+<li>之后，将代码放在该存储过程主体的AS关键字之后。</li>
+</ul>
+<ul>
+<li>最后，使用双元（$$）结束存储过程。</li>
+</ul>
+<blockquote>
+<p>与用户定义的函数不同，存储过程没有返回值。如果要更早地结束过程，可以使用不带任何表达式的RETURN语句，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RETURN;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要从存储过程返回值，则可以使用输出参数。输出参数的最终值将返回给调用方。</p>
+</blockquote>
+<h4 id="创建存储过程示例"><a href="#创建存储过程示例" class="headerlink" title="创建存储过程示例"></a>创建存储过程示例</h4><blockquote>
+<p>使用以下accounts表进行演示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE accounts (</span></span><br><span class="line">    id INT GENERATED BY DEFAULT AS IDENTITY,</span><br><span class="line">    name VARCHAR(100) NOT NULL,</span><br><span class="line">    balance DEC(15,2) NOT NULL,</span><br><span class="line">    PRIMARY KEY(id)</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">INSERT INTO accounts(name,balance)</span><br><span class="line">VALUES(<span class="string">'Bob'</span>,10000);</span><br><span class="line"> </span><br><span class="line">INSERT INTO accounts(name,balance)</span><br><span class="line">VALUES(<span class="string">'Alice'</span>,10000);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>以下是accounts表中的数据：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT * FROM accounts;</span></span><br><span class="line"> id | name  | balance</span><br><span class="line">----+-------+----------</span><br><span class="line">  1 | Bob   | 10000.00</span><br><span class="line">  2 | Alice | 10000.00</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>创建一个名为transfer的存储过程，该过程将指定的金额从一个帐户转移到另一个帐户:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE PROCEDURE transfer(INT, INT, DEC)</span></span><br><span class="line">LANGUAGE plpgsql    </span><br><span class="line">AS $$</span><br><span class="line">BEGIN</span><br><span class="line">    -- subtracting the amount from the sender<span class="string">'s account</span></span><br><span class="line"><span class="string">    UPDATE accounts</span></span><br><span class="line"><span class="string">    SET balance = balance - $3</span></span><br><span class="line"><span class="string">    WHERE id = $1;</span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">    -- adding the amount to the receiver'</span>s account</span><br><span class="line">    UPDATE accounts</span><br><span class="line">    SET balance = balance + <span class="variable">$3</span></span><br><span class="line">    WHERE id = <span class="variable">$2</span>;</span><br><span class="line"> </span><br><span class="line">    COMMIT;</span><br><span class="line">END;</span><br><span class="line">$$;</span><br><span class="line">CREATE PROCEDURE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要调用存储过程，请使用CALL语句，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL stored_procedure_name(parameter_list);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>调用存储过程并验证:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CALL transfer(1,2,1000);</span></span><br><span class="line">CALL</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT * FROM accounts;</span></span><br><span class="line"> id | name  | balance</span><br><span class="line">----+-------+----------</span><br><span class="line">  1 | Bob   |  9000.00</span><br><span class="line">  2 | Alice | 11000.00</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/pg11/" rel="next" title="PostgreSQL之数据库架构与条件表达式和运算符">
+                <i class="fa fa-chevron-left"></i> PostgreSQL之数据库架构与条件表达式和运算符
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/pg13/" rel="prev" title="PostgreSQL之触发器">
+                PostgreSQL之触发器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PostgreSQL存储过程"><span class="nav-number">1.</span> <span class="nav-text">PostgreSQL存储过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#入门"><span class="nav-number">1.1.</span> <span class="nav-text">入门</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用PostgreSQL存储过程的优点"><span class="nav-number">1.1.1.</span> <span class="nav-text">使用PostgreSQL存储过程的优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用PostgreSQL存储过程的缺点"><span class="nav-number">1.1.2.</span> <span class="nav-text">使用PostgreSQL存储过程的缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL块结构"><span class="nav-number">1.2.</span> <span class="nav-text">PL/pgSQL块结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL的语法"><span class="nav-number">1.2.1.</span> <span class="nav-text">PL/pgSQL的语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL块结构示例"><span class="nav-number">1.2.2.</span> <span class="nav-text">PL/pgSQL块结构示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL子块"><span class="nav-number">1.2.3.</span> <span class="nav-text">PL/pgSQL子块</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL变量"><span class="nav-number">1.3.</span> <span class="nav-text">PL/pgSQL变量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#复制数据类型"><span class="nav-number">1.3.1.</span> <span class="nav-text">复制数据类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为变量分配别名"><span class="nav-number">1.3.2.</span> <span class="nav-text">为变量分配别名</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL常量"><span class="nav-number">1.4.</span> <span class="nav-text">PL/pgSQL常量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#声明常量语法"><span class="nav-number">1.4.1.</span> <span class="nav-text">声明常量语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL常量示例"><span class="nav-number">1.4.2.</span> <span class="nav-text">PL/pgSQL常量示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL错误和消息"><span class="nav-number">1.5.</span> <span class="nav-text">PL/pgSQL错误和消息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL引发错误提示"><span class="nav-number">1.5.1.</span> <span class="nav-text">PL/pgSQL引发错误提示</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用ASSERT语句进行调试检查"><span class="nav-number">1.5.2.</span> <span class="nav-text">使用ASSERT语句进行调试检查</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CREATE-FUNCTION语句"><span class="nav-number">1.6.</span> <span class="nav-text">CREATE FUNCTION语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CREATE-FUNCTION语句语法"><span class="nav-number">1.6.1.</span> <span class="nav-text">CREATE FUNCTION语句语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CREATE-FUNCTION语句示例"><span class="nav-number">1.6.2.</span> <span class="nav-text">CREATE FUNCTION语句示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL函数参数"><span class="nav-number">1.7.</span> <span class="nav-text">PL/pgSQL函数参数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL-IN参数"><span class="nav-number">1.7.1.</span> <span class="nav-text">PL/pgSQL IN参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL-OUT参数"><span class="nav-number">1.7.2.</span> <span class="nav-text">PL/pgSQL OUT参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL-INOUT参数"><span class="nav-number">1.7.3.</span> <span class="nav-text">PL/pgSQL INOUT参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL-VARIADIC参数"><span class="nav-number">1.7.4.</span> <span class="nav-text">PL/pgSQL VARIADIC参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL函数重载"><span class="nav-number">1.8.</span> <span class="nav-text">PL/pgSQL函数重载</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL函数重载和默认值"><span class="nav-number">1.8.1.</span> <span class="nav-text">PL/pgSQL函数重载和默认值</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL-IF语句"><span class="nav-number">1.9.</span> <span class="nav-text">PL/pgSQL IF语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IF语句的最简单形式"><span class="nav-number">1.9.1.</span> <span class="nav-text">IF语句的最简单形式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IF-THEN-ELSE语句"><span class="nav-number">1.9.2.</span> <span class="nav-text">IF THEN ELSE语句</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#IF-THEN-ELSE语句的语法"><span class="nav-number">1.9.2.1.</span> <span class="nav-text">IF THEN ELSE语句的语法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IF-THEN-ELSE语句示例"><span class="nav-number">1.9.2.2.</span> <span class="nav-text">IF THEN ELSE语句示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IF-THEN-ELSIF-THEN-ELSE语句"><span class="nav-number">1.9.3.</span> <span class="nav-text">IF THEN ELSIF THEN ELSE语句</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#IF-THEN-ELSIF-THEN-ELSE语句语法"><span class="nav-number">1.9.3.1.</span> <span class="nav-text">IF THEN ELSIF THEN ELSE语句语法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IF-THEN-ELSIF-THEN-ELSE示例"><span class="nav-number">1.9.3.2.</span> <span class="nav-text">IF THEN ELSIF THEN ELSE示例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL-CASE语句"><span class="nav-number">1.10.</span> <span class="nav-text">PL/pgSQL CASE语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#简单的CASE语句"><span class="nav-number">1.10.1.</span> <span class="nav-text">简单的CASE语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单CASE语句的示例"><span class="nav-number">1.10.2.</span> <span class="nav-text">简单CASE语句的示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#搜索的CASE语句"><span class="nav-number">1.10.3.</span> <span class="nav-text">搜索的CASE语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#搜索的CASE语句示例"><span class="nav-number">1.10.4.</span> <span class="nav-text">搜索的CASE语句示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL循环语句"><span class="nav-number">1.11.</span> <span class="nav-text">PL/pgSQL循环语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LOOP语句"><span class="nav-number">1.11.1.</span> <span class="nav-text">LOOP语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LOOP语句的语法"><span class="nav-number">1.11.2.</span> <span class="nav-text">LOOP语句的语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL-LOOP示例"><span class="nav-number">1.11.3.</span> <span class="nav-text">PL/pgSQL LOOP示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WHILE循环"><span class="nav-number">1.12.</span> <span class="nav-text">WHILE循环</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#WHILE循环语法"><span class="nav-number">1.12.1.</span> <span class="nav-text">WHILE循环语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WHILE循环示例"><span class="nav-number">1.12.2.</span> <span class="nav-text">WHILE循环示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FOR循环语句"><span class="nav-number">1.13.</span> <span class="nav-text">FOR循环语句</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#用于遍历整数范围"><span class="nav-number">1.13.1.</span> <span class="nav-text">用于遍历整数范围</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FOR循环语句示例1"><span class="nav-number">1.13.2.</span> <span class="nav-text">FOR循环语句示例1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FOR循环语句示例2"><span class="nav-number">1.13.3.</span> <span class="nav-text">FOR循环语句示例2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FOR循环语句示例3"><span class="nav-number">1.13.4.</span> <span class="nav-text">FOR循环语句示例3</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FOR循环遍历查询结果"><span class="nav-number">1.14.</span> <span class="nav-text">FOR循环遍历查询结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#遍历查询结果的语法"><span class="nav-number">1.14.1.</span> <span class="nav-text">遍历查询结果的语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#遍历查询结果示例"><span class="nav-number">1.14.2.</span> <span class="nav-text">遍历查询结果示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用于遍历动态查询的查询结果"><span class="nav-number">1.15.</span> <span class="nav-text">用于遍历动态查询的查询结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#遍历动态查询的语法"><span class="nav-number">1.15.1.</span> <span class="nav-text">遍历动态查询的语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#遍历动态查询示例"><span class="nav-number">1.15.2.</span> <span class="nav-text">遍历动态查询示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PL-pgSQL游标"><span class="nav-number">1.16.</span> <span class="nav-text">PL/pgSQL游标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#声明游标"><span class="nav-number">1.16.1.</span> <span class="nav-text">声明游标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#打开游标"><span class="nav-number">1.16.2.</span> <span class="nav-text">打开游标</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#打开未绑定的游标"><span class="nav-number">1.16.2.1.</span> <span class="nav-text">打开未绑定的游标</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#打开绑定的游标"><span class="nav-number">1.16.2.2.</span> <span class="nav-text">打开绑定的游标</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用游标"><span class="nav-number">1.16.2.3.</span> <span class="nav-text">使用游标</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取下一行"><span class="nav-number">1.16.3.</span> <span class="nav-text">获取下一行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#移动光标"><span class="nav-number">1.16.4.</span> <span class="nav-text">移动光标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除或更新行"><span class="nav-number">1.16.5.</span> <span class="nav-text">删除或更新行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PL-pgSQL游标–全部组合在一起"><span class="nav-number">1.16.6.</span> <span class="nav-text">PL/pgSQL游标–全部组合在一起</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL创建过程"><span class="nav-number">1.17.</span> <span class="nav-text">PostgreSQL创建过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CREATE-PROCEDURE语句语法"><span class="nav-number">1.17.1.</span> <span class="nav-text">CREATE PROCEDURE语句语法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建存储过程示例"><span class="nav-number">1.17.2.</span> <span class="nav-text">创建存储过程示例</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">732k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">20:20</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

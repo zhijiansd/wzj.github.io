@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="GROUPING SETS(分组集) 分组集是用于分组的一组列。通常，单个聚合查询定义单个分组集。  创建样例表12345678910111213141516171819202122232425test=# CREATE TABLE sales (    brand VARCHAR NOT NULL,    segment VARCHAR NOT NULL,    quantity INT NOT">
+<meta name="keywords" content="pg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL之分组集和子查询">
+<meta property="og:url" content="zhijiansd.github.io/blog/pg7/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="GROUPING SETS(分组集) 分组集是用于分组的一组列。通常，单个聚合查询定义单个分组集。  创建样例表12345678910111213141516171819202122232425test=# CREATE TABLE sales (    brand VARCHAR NOT NULL,    segment VARCHAR NOT NULL,    quantity INT NOT">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-20T04:15:37.196Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL之分组集和子查询">
+<meta name="twitter:description" content="GROUPING SETS(分组集) 分组集是用于分组的一组列。通常，单个聚合查询定义单个分组集。  创建样例表12345678910111213141516171819202122232425test=# CREATE TABLE sales (    brand VARCHAR NOT NULL,    segment VARCHAR NOT NULL,    quantity INT NOT">
+
+
+
+
+
+
+  <link rel="canonical" href="zhijiansd.github.io/blog/pg7/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PostgreSQL之分组集和子查询 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="zhijiansd.github.io/blog/pg7/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PostgreSQL之分组集和子查询
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-20 11:34:50 / 修改时间：12:15:37" itemprop="dateCreated datePublished" datetime="2020-05-20T11:34:50+08:00">2020-05-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/pg7/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg7/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">32k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">53 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="GROUPING-SETS-分组集"><a href="#GROUPING-SETS-分组集" class="headerlink" title="GROUPING SETS(分组集)"></a>GROUPING SETS(分组集)</h2><blockquote>
+<p>分组集是用于分组的一组列。通常，单个聚合查询定义单个分组集。</p>
+</blockquote>
+<h3 id="创建样例表"><a href="#创建样例表" class="headerlink" title="创建样例表"></a>创建样例表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE sales (</span></span><br><span class="line">    brand VARCHAR NOT NULL,</span><br><span class="line">    segment VARCHAR NOT NULL,</span><br><span class="line">    quantity INT NOT NULL,</span><br><span class="line">    PRIMARY KEY (brand, segment)</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">INSERT INTO sales (brand, segment, quantity)</span><br><span class="line">VALUES</span><br><span class="line">    (<span class="string">'ABC'</span>, <span class="string">'Premium'</span>, 100),</span><br><span class="line">    (<span class="string">'ABC'</span>, <span class="string">'Basic'</span>, 200),</span><br><span class="line">    (<span class="string">'XYZ'</span>, <span class="string">'Premium'</span>, 100),</span><br><span class="line">    (<span class="string">'XYZ'</span>, <span class="string">'Basic'</span>, 300);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">INSERT 0 4</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># select * from sales;</span></span><br><span class="line"> brand | segment | quantity</span><br><span class="line">-------+---------+----------</span><br><span class="line"> ABC   | Premium |      100</span><br><span class="line"> ABC   | Basic   |      200</span><br><span class="line"> XYZ   | Premium |      100</span><br><span class="line"> XYZ   | Basic   |      300</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该销售表存储按品牌和细分销售的产品数量。</p>
+</blockquote>
+<h3 id="GROUPING-SETS分组集示例1"><a href="#GROUPING-SETS分组集示例1" class="headerlink" title="GROUPING SETS分组集示例1"></a>GROUPING SETS分组集示例1</h3><blockquote>
+<p>以下查询定义品牌和细分的分组集，它返回按品牌和细分销售的产品数量。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    brand,</span><br><span class="line">    segment,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    brand,</span><br><span class="line">    segment;</span><br><span class="line"> brand | segment | sum</span><br><span class="line">-------+---------+-----</span><br><span class="line"> XYZ   | Basic   | 300</span><br><span class="line"> ABC   | Premium | 100</span><br><span class="line"> ABC   | Basic   | 200</span><br><span class="line"> XYZ   | Premium | 100</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="GROUPING-SETS分组集示例2"><a href="#GROUPING-SETS分组集示例2" class="headerlink" title="GROUPING SETS分组集示例2"></a>GROUPING SETS分组集示例2</h3><blockquote>
+<p>查询按品牌出售的产品数量</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    brand,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    brand;</span><br><span class="line"> brand | sum</span><br><span class="line">-------+-----</span><br><span class="line"> ABC   | 300</span><br><span class="line"> XYZ   | 400</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="GROUPING-SETS分组集示例3"><a href="#GROUPING-SETS分组集示例3" class="headerlink" title="GROUPING SETS分组集示例3"></a>GROUPING SETS分组集示例3</h3><blockquote>
+<p>查询按细分查找销售的产品数量</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    segment,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    segment;</span><br><span class="line"> segment | sum</span><br><span class="line">---------+-----</span><br><span class="line"> Basic   | 500</span><br><span class="line"> Premium | 200</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="GROUPING-SETS分组集示例4"><a href="#GROUPING-SETS分组集示例4" class="headerlink" title="GROUPING SETS分组集示例4"></a>GROUPING SETS分组集示例4</h3><blockquote>
+<p>查询所有品牌和细分市场出售的产品数量</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales;</span><br><span class="line"> sum</span><br><span class="line">-----</span><br><span class="line"> 700</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<h3 id="GROUPING-SETS分组集示例5"><a href="#GROUPING-SETS分组集示例5" class="headerlink" title="GROUPING SETS分组集示例5"></a>GROUPING SETS分组集示例5</h3><blockquote>
+<p>可使用UNION ALL统一以上所有查询，因为UNION ALL要求所有结果集具有相同数量的具有兼容数据类型的列，所以需要通过向每个选择列表中添加NULL来调整查询，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    brand,</span><br><span class="line">    segment,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    brand,</span><br><span class="line">    segment</span><br><span class="line"> </span><br><span class="line">UNION ALL</span><br><span class="line"> </span><br><span class="line">SELECT</span><br><span class="line">    brand,</span><br><span class="line">    NULL,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    brand</span><br><span class="line"> </span><br><span class="line">UNION ALL</span><br><span class="line"> </span><br><span class="line">SELECT</span><br><span class="line">    NULL,</span><br><span class="line">    segment,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    segment</span><br><span class="line"> </span><br><span class="line">UNION ALL</span><br><span class="line"> </span><br><span class="line">SELECT</span><br><span class="line">    NULL,</span><br><span class="line">    NULL,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales;</span><br><span class="line"> brand | segment | sum</span><br><span class="line">-------+---------+-----</span><br><span class="line"> XYZ   | Basic   | 300</span><br><span class="line"> ABC   | Premium | 100</span><br><span class="line"> ABC   | Basic   | 200</span><br><span class="line"> XYZ   | Premium | 100</span><br><span class="line"> ABC   |         | 300</span><br><span class="line"> XYZ   |         | 400</span><br><span class="line">       | Basic   | 500</span><br><span class="line">       | Premium | 200</span><br><span class="line">       |         | 700</span><br><span class="line">(9 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该查询生成了一个包含所有分组集汇总的单个结果集。</p>
+</blockquote>
+<h3 id="GROUPING-SETS的语法"><a href="#GROUPING-SETS的语法" class="headerlink" title="GROUPING SETS的语法"></a>GROUPING SETS的语法</h3><blockquote>
+<p>GROUPING SETS允许您在同一查询中定义多个分组集。GROUPING SETS的一般语法如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">    c1,</span><br><span class="line">    c2,</span><br><span class="line">    aggregate_function(c3)</span><br><span class="line">FROM</span><br><span class="line">    table_name</span><br><span class="line">GROUP BY</span><br><span class="line">    GROUPING SETS (</span><br><span class="line">        (c1, c2),</span><br><span class="line">        (c1),</span><br><span class="line">        (c2),</span><br><span class="line">        ()</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用此语法，有四个分组集(c1，c2)，(c1)，(c2)和()。</p>
+</blockquote>
+<h3 id="GROUPING-SETS分组集示例6"><a href="#GROUPING-SETS分组集示例6" class="headerlink" title="GROUPING SETS分组集示例6"></a>GROUPING SETS分组集示例6</h3><blockquote>
+<p>使用GROUPING SETS查询</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    brand,</span><br><span class="line">    segment,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    GROUPING SETS (</span><br><span class="line">        (brand, segment),</span><br><span class="line">        (brand),</span><br><span class="line">        (segment),</span><br><span class="line">        ()</span><br><span class="line">    );</span><br><span class="line"> brand | segment | sum</span><br><span class="line">-------+---------+-----</span><br><span class="line">       |         | 700</span><br><span class="line"> XYZ   | Basic   | 300</span><br><span class="line"> ABC   | Premium | 100</span><br><span class="line"> ABC   | Basic   | 200</span><br><span class="line"> XYZ   | Premium | 100</span><br><span class="line"> ABC   |         | 300</span><br><span class="line"> XYZ   |         | 400</span><br><span class="line">       | Basic   | 500</span><br><span class="line">       | Premium | 200</span><br><span class="line">(9 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="分组功能"><a href="#分组功能" class="headerlink" title="分组功能"></a>分组功能</h3><blockquote>
+<p>GROUPING函数接受列的名称，如果该列是当前分组集的成员，则返回位0，否则返回1。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   GROUPING(brand) grouping_brand,</span><br><span class="line">   GROUPING(segment) grouping_segement,</span><br><span class="line">   brand,</span><br><span class="line">   segment,</span><br><span class="line">   SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">   sales</span><br><span class="line">GROUP BY</span><br><span class="line">   GROUPING SETS (</span><br><span class="line">      (brand, segment),</span><br><span class="line">      (brand),</span><br><span class="line">      (segment),</span><br><span class="line">      ()</span><br><span class="line">   )</span><br><span class="line">ORDER BY</span><br><span class="line">   brand,</span><br><span class="line">   segment;</span><br><span class="line"> grouping_brand | grouping_segement | brand | segment | sum</span><br><span class="line">----------------+-------------------+-------+---------+-----</span><br><span class="line">              0 |                 0 | ABC   | Basic   | 200</span><br><span class="line">              0 |                 0 | ABC   | Premium | 100</span><br><span class="line">              0 |                 1 | ABC   |         | 300</span><br><span class="line">              0 |                 0 | XYZ   | Basic   | 300</span><br><span class="line">              0 |                 0 | XYZ   | Premium | 100</span><br><span class="line">              0 |                 1 | XYZ   |         | 400</span><br><span class="line">              1 |                 0 |       | Basic   | 500</span><br><span class="line">              1 |                 0 |       | Premium | 200</span><br><span class="line">              1 |                 1 |       |         | 700</span><br><span class="line">(9 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="CUBE"><a href="#CUBE" class="headerlink" title="CUBE"></a>CUBE</h2><blockquote>
+<p>CUBE是GROUP BY子句的子命令。多维数据集允许生成多个分组集。分组集是要分组到的一组列。</p>
+</blockquote>
+<h3 id="CUBE子句的语法"><a href="#CUBE子句的语法" class="headerlink" title="CUBE子句的语法"></a>CUBE子句的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">    c1,</span><br><span class="line">    c2,</span><br><span class="line">    c3,</span><br><span class="line">    aggregate (c4)</span><br><span class="line">FROM</span><br><span class="line">    table_name</span><br><span class="line">GROUP BY</span><br><span class="line">    CUBE (c1, c2, c3);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用以下语法:</p>
+<ul>
+<li>首先，在SELECT语句的GROUP BY子句中指定CUBE子句。</li>
+</ul>
+<ul>
+<li>其次，在选择列表中，指定要分析的列（维或维列）和聚合函数表达式。</li>
+</ul>
+<ul>
+<li>第三，在GROUP BY子句中，在CUBE子句的括号内指定维列。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>该查询将基于CUBE中指定的维度列生成所有可能的分组集。多维数据集子句是定义多个分组集的一种简短方法，因此以下内容等效:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">CUBE(c1,c2,c3) </span><br><span class="line"> </span><br><span class="line">GROUPING SETS (</span><br><span class="line">    (c1,c2,c3), </span><br><span class="line">    (c1,c2),</span><br><span class="line">    (c1,c3),</span><br><span class="line">    (c2,c3),</span><br><span class="line">    (c1),</span><br><span class="line">    (c2),</span><br><span class="line">    (c3), </span><br><span class="line">    ()</span><br><span class="line"> )</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>通常，如果CUBE中指定的列数为n，则将有2的N次方个组合。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL允许您执行部分多维数据集以减少计算的聚合数量。下面显示了语法:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">    c1,</span><br><span class="line">    c2,</span><br><span class="line">    c3,</span><br><span class="line">    aggregate (c4)</span><br><span class="line">FROM</span><br><span class="line">    table_name</span><br><span class="line">GROUP BY</span><br><span class="line">    c1,</span><br><span class="line">    CUBE (c1, c2);</span><br></pre></td></tr></table></figure>
+<h3 id="CUBE子句示例1"><a href="#CUBE子句示例1" class="headerlink" title="CUBE子句示例1"></a>CUBE子句示例1</h3><blockquote>
+<p>使用CUBE子句来生成多个分组集</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    brand,</span><br><span class="line">    segment,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    CUBE (brand, segment)</span><br><span class="line">ORDER BY</span><br><span class="line">    brand,</span><br><span class="line">    segment;</span><br><span class="line"> brand | segment | sum</span><br><span class="line">-------+---------+-----</span><br><span class="line"> ABC   | Basic   | 200</span><br><span class="line"> ABC   | Premium | 100</span><br><span class="line"> ABC   |         | 300</span><br><span class="line"> XYZ   | Basic   | 300</span><br><span class="line"> XYZ   | Premium | 100</span><br><span class="line"> XYZ   |         | 400</span><br><span class="line">       | Basic   | 500</span><br><span class="line">       | Premium | 200</span><br><span class="line">       |         | 700</span><br><span class="line">(9 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="CUBE子句示例2"><a href="#CUBE子句示例2" class="headerlink" title="CUBE子句示例2"></a>CUBE子句示例2</h3><blockquote>
+<p>查询部分多维数据集</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    brand,</span><br><span class="line">    segment,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    brand,</span><br><span class="line">    CUBE (segment)</span><br><span class="line">ORDER BY</span><br><span class="line">    brand,</span><br><span class="line">    segment;</span><br><span class="line"> brand | segment | sum</span><br><span class="line">-------+---------+-----</span><br><span class="line"> ABC   | Basic   | 200</span><br><span class="line"> ABC   | Premium | 100</span><br><span class="line"> ABC   |         | 300</span><br><span class="line"> XYZ   | Basic   | 300</span><br><span class="line"> XYZ   | Premium | 100</span><br><span class="line"> XYZ   |         | 400</span><br><span class="line">(6 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="ROLLUP-汇总"><a href="#ROLLUP-汇总" class="headerlink" title="ROLLUP(汇总)"></a>ROLLUP(汇总)</h2><blockquote>
+<p>ROLLUP是GROUP BY子句的子命令，为定义多个分组集提供了捷径。分组集是要分组到的一组列。</p>
+</blockquote>
+<blockquote>
+<p>与CUBE子句不同，ROLLUP不会基于指定的列生成所有可能的分组集。它只是其中的一部分。</p>
+</blockquote>
+<blockquote>
+<p>ROLLUP假定输入列之间为层次结构，并生成考虑该层次结构有意义的所有分组集。这就是为什么经常使用ROLLUP生成报表的小计和总计的原因。</p>
+</blockquote>
+<blockquote>
+<p>例如，多维数据集（c1，c2，c3）进行所有八个可能的分组集:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(c1, c2, c3)</span><br><span class="line">(c1, c2)</span><br><span class="line">(c2, c3)</span><br><span class="line">(c1,c3)</span><br><span class="line">(c1)</span><br><span class="line">(c2)</span><br><span class="line">(c3)</span><br><span class="line">()</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>但是，假设层次结构c1 &gt; c2 &gt; c3，ROLLUP（c1，c2，c3）仅生成四个分组集:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(c1, c2, c3)</span><br><span class="line">(c1, c2)</span><br><span class="line">(c1)</span><br><span class="line">()</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>ROLLUP的常用用法是年、月、日的层次结构，按年、月和日计算数据汇总。</p>
+</blockquote>
+<h3 id="ROLLUP的语法"><a href="#ROLLUP的语法" class="headerlink" title="ROLLUP的语法:"></a>ROLLUP的语法:</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">    c1,</span><br><span class="line">    c2,</span><br><span class="line">    c3,</span><br><span class="line">    aggregate(c4)</span><br><span class="line">FROM</span><br><span class="line">    table_name</span><br><span class="line">GROUP BY</span><br><span class="line">    ROLLUP (c1, c2, c3);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>也可以进行部分汇总以减少生成的小计的数量。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">    c1,</span><br><span class="line">    c2,</span><br><span class="line">    c3,</span><br><span class="line">    aggregate(c4)</span><br><span class="line">FROM</span><br><span class="line">    table_name</span><br><span class="line">GROUP BY</span><br><span class="line">    c1, </span><br><span class="line">    ROLLUP (c2, c3);</span><br></pre></td></tr></table></figure>
+<h3 id="ROLLUP子句示例1"><a href="#ROLLUP子句示例1" class="headerlink" title="ROLLUP子句示例1"></a>ROLLUP子句示例1</h3><blockquote>
+<p>以下查询使用ROLLUP子句找到按品牌（小计）以及所有品牌和细分市场（合计）出售的产品数量。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    brand,</span><br><span class="line">    segment,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    ROLLUP (brand, segment)</span><br><span class="line">ORDER BY</span><br><span class="line">    brand,</span><br><span class="line">    segment;</span><br><span class="line"> brand | segment | sum</span><br><span class="line">-------+---------+-----</span><br><span class="line"> ABC   | Basic   | 200</span><br><span class="line"> ABC   | Premium | 100</span><br><span class="line"> ABC   |         | 300</span><br><span class="line"> XYZ   | Basic   | 300</span><br><span class="line"> XYZ   | Premium | 100</span><br><span class="line"> XYZ   |         | 400</span><br><span class="line">       |         | 700</span><br><span class="line">(7 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>从输出中可以看到，第三行显示了ABC品牌的产品销售数量，第六行显示了XYZ品牌的产品销售数量。最后一行显示总计，该总计显示所有品牌和细分市场售出的产品总数。在此示例中，层次结构为brand &gt; segment。</p>
+</blockquote>
+<h3 id="ROLLUP子句示例2"><a href="#ROLLUP子句示例2" class="headerlink" title="ROLLUP子句示例2"></a>ROLLUP子句示例2</h3><blockquote>
+<p>如果更改品牌和细分的顺序，结果将有所不同，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    segment,</span><br><span class="line">    brand,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    ROLLUP (segment, brand)</span><br><span class="line">ORDER BY</span><br><span class="line">    segment,</span><br><span class="line">    brand;</span><br><span class="line"> segment | brand | sum</span><br><span class="line">---------+-------+-----</span><br><span class="line"> Basic   | ABC   | 200</span><br><span class="line"> Basic   | XYZ   | 300</span><br><span class="line"> Basic   |       | 500</span><br><span class="line"> Premium | ABC   | 100</span><br><span class="line"> Premium | XYZ   | 100</span><br><span class="line"> Premium |       | 200</span><br><span class="line">         |       | 700</span><br><span class="line">(7 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在这种情况下，层次结构是segment &gt; brand。</p>
+</blockquote>
+<h3 id="ROLLUP子句示例3"><a href="#ROLLUP子句示例3" class="headerlink" title="ROLLUP子句示例3"></a>ROLLUP子句示例3</h3><blockquote>
+<p>部分汇总</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    segment,</span><br><span class="line">    brand,</span><br><span class="line">    SUM (quantity)</span><br><span class="line">FROM</span><br><span class="line">    sales</span><br><span class="line">GROUP BY</span><br><span class="line">    segment,</span><br><span class="line">    ROLLUP (brand)</span><br><span class="line">ORDER BY</span><br><span class="line">    segment,</span><br><span class="line">    brand;</span><br><span class="line"> segment | brand | sum</span><br><span class="line">---------+-------+-----</span><br><span class="line"> Basic   | ABC   | 200</span><br><span class="line"> Basic   | XYZ   | 300</span><br><span class="line"> Basic   |       | 500</span><br><span class="line"> Premium | ABC   | 100</span><br><span class="line"> Premium | XYZ   | 100</span><br><span class="line"> Premium |       | 200</span><br><span class="line">(6 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="ROLLUP子句示例4"><a href="#ROLLUP子句示例4" class="headerlink" title="ROLLUP子句示例4"></a>ROLLUP子句示例4</h3><blockquote>
+<p>以下语句使用ROLLUP查找每天，每月和每年的租金数量:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    EXTRACT (YEAR FROM rental_date) y,</span><br><span class="line">    EXTRACT (MONTH FROM rental_date) M,</span><br><span class="line">    EXTRACT (DAY FROM rental_date) d,</span><br><span class="line">    COUNT (rental_id)</span><br><span class="line">FROM</span><br><span class="line">    rental</span><br><span class="line">GROUP BY</span><br><span class="line">    ROLLUP (</span><br><span class="line">        EXTRACT (YEAR FROM rental_date),</span><br><span class="line">        EXTRACT (MONTH FROM rental_date),</span><br><span class="line">        EXTRACT (DAY FROM rental_date)</span><br><span class="line">    );</span><br><span class="line">  y   |  m   |  d   | count</span><br><span class="line">------+------+------+-------</span><br><span class="line">      |      |      | 16044</span><br><span class="line"> 2005 |    6 |   15 |   348</span><br><span class="line"> 2005 |    6 |   20 |   331</span><br><span class="line"> 2005 |    7 |   11 |   461</span><br><span class="line"> 2005 |    7 |    5 |    27</span><br><span class="line"> 2005 |    5 |   24 |     8</span><br><span class="line"> 2005 |    7 |   29 |   641</span><br><span class="line"> 2005 |    8 |   23 |   598</span><br><span class="line"> 2005 |    7 |    6 |   504</span><br><span class="line"> 2005 |    8 |    1 |   671</span><br><span class="line"> 2005 |    7 |   27 |   649</span><br><span class="line"> 2006 |    2 |   14 |   182</span><br><span class="line"> 2005 |    6 |   21 |   275</span><br><span class="line"> 2005 |    6 |   19 |   348</span><br><span class="line"> 2005 |    6 |   14 |    16</span><br><span class="line"> 2005 |    6 |   16 |   324</span><br><span class="line"> 2005 |    6 |   18 |   344</span><br><span class="line"> 2005 |    5 |   25 |   137</span><br><span class="line"> 2005 |    7 |    8 |   512</span><br><span class="line"> 2005 |    5 |   26 |   174</span><br><span class="line"> 2005 |    5 |   29 |   154</span><br><span class="line"> 2005 |    6 |   17 |   325</span><br><span class="line"> 2005 |    5 |   31 |   163</span><br><span class="line"> 2005 |    7 |    7 |   461</span><br><span class="line"> 2005 |    8 |   21 |   659</span><br><span class="line"> 2005 |    5 |   28 |   196</span><br><span class="line"> 2005 |    5 |   30 |   158</span><br><span class="line"> 2005 |    7 |   26 |    33</span><br><span class="line"> 2005 |    8 |    2 |   643</span><br><span class="line"> 2005 |    7 |   12 |   495</span><br><span class="line"> 2005 |    7 |   30 |   634</span><br><span class="line"> 2005 |    7 |   31 |   679</span><br><span class="line"> 2005 |    8 |   22 |   626</span><br><span class="line"> 2005 |    8 |   17 |   593</span><br><span class="line"> 2005 |    8 |   19 |   628</span><br><span class="line"> 2005 |    8 |   20 |   624</span><br><span class="line"> 2005 |    8 |   18 |   621</span><br><span class="line"> 2005 |    8 |   16 |    23</span><br><span class="line"> 2005 |    7 |    9 |   513</span><br><span class="line"> 2005 |    7 |   10 |   480</span><br><span class="line"> 2005 |    7 |   28 |   620</span><br><span class="line"> 2005 |    5 |   27 |   166</span><br><span class="line"> 2006 |    2 |      |   182</span><br><span class="line"> 2005 |    5 |      |  1156</span><br><span class="line"> 2005 |    8 |      |  5686</span><br><span class="line"> 2005 |    6 |      |  2311</span><br><span class="line"> 2005 |    7 |      |  6709</span><br><span class="line"> 2005 |      |      | 15862</span><br><span class="line"> 2006 |      |      |   182</span><br><span class="line">(49 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h2><h3 id="子查询示例1"><a href="#子查询示例1" class="headerlink" title="子查询示例1"></a>子查询示例1</h3><blockquote>
+<p>假设我们要查找出租率高于平均出租率的电影。我们可以分两步来做:</p>
+<ul>
+<li>通过使用SELECT语句和平均函数(AVG)查找平均租金。</li>
+</ul>
+<ul>
+<li>在第二条SELECT语句中使用第一个查询的结果来查找所需的电影。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>查询平均租金</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   AVG (rental_rate)</span><br><span class="line">FROM</span><br><span class="line">   film;</span><br><span class="line">        avg</span><br><span class="line">--------------------</span><br><span class="line"> 2.9800000000000000</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>获取出租率高于平均出租率的电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   film_id,</span><br><span class="line">   title,</span><br><span class="line">   rental_rate</span><br><span class="line">FROM</span><br><span class="line">   film</span><br><span class="line">WHERE</span><br><span class="line">   rental_rate &gt; 2.98;</span><br><span class="line"> film_id |            title            | rental_rate </span><br><span class="line">---------+-----------------------------+-------------</span><br><span class="line">     133 | Chamber Italian             |        4.99</span><br><span class="line">     384 | Grosse Wonderful            |        4.99</span><br><span class="line">       8 | Airport Pollock             |        4.99</span><br><span class="line">      98 | Bright Encounters           |        4.99</span><br><span class="line">       2 | Ace Goldfinger              |        4.99</span><br><span class="line">       3 | Adaptation Holes            |        2.99</span><br><span class="line">       4 | Affair Prejudice            |        2.99</span><br><span class="line">       5 | African Egg                 |        2.99</span><br><span class="line">       6 | Agent Truman                |        2.99</span><br><span class="line">       7 | Airplane Sierra             |        4.99</span><br><span class="line">       9 | Alabama Devil               |        2.99</span><br><span class="line">      10 | Aladdin Calendar            |        4.99</span><br><span class="line">      13 | Ali Forever                 |        4.99</span><br><span class="line">      15 | Alien Center                |        2.99</span><br><span class="line">      16 | Alley Evolution             |        2.99</span><br><span class="line">      20 | Amelie Hellfighters         |        4.99</span><br><span class="line">      21 | American Circus             |        4.99</span><br><span class="line">      22 | Amistad Midsummer           |        2.99</span><br><span class="line">      24 | Analyze Hoosiers            |        2.99</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<h3 id="子查询示例2"><a href="#子查询示例2" class="headerlink" title="子查询示例2"></a>子查询示例2</h3><blockquote>
+<p>子查询是嵌套在另一个查询（例如SELECT，INSERT，DELETE和UPDATE）中的查询。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   film_id,</span><br><span class="line">   title,</span><br><span class="line">   rental_rate</span><br><span class="line">FROM</span><br><span class="line">   film</span><br><span class="line">WHERE</span><br><span class="line">   rental_rate &gt; (</span><br><span class="line">      SELECT</span><br><span class="line">         AVG (rental_rate)</span><br><span class="line">      FROM</span><br><span class="line">         film</span><br><span class="line">   );</span><br><span class="line"> film_id |            title            | rental_rate </span><br><span class="line">---------+-----------------------------+-------------</span><br><span class="line">     133 | Chamber Italian             |        4.99</span><br><span class="line">     384 | Grosse Wonderful            |        4.99</span><br><span class="line">       8 | Airport Pollock             |        4.99</span><br><span class="line">      98 | Bright Encounters           |        4.99</span><br><span class="line">       2 | Ace Goldfinger              |        4.99</span><br><span class="line">       3 | Adaptation Holes            |        2.99</span><br><span class="line">       4 | Affair Prejudice            |        2.99</span><br><span class="line">       5 | African Egg                 |        2.99</span><br><span class="line">       6 | Agent Truman                |        2.99</span><br><span class="line">       7 | Airplane Sierra             |        4.99</span><br><span class="line">       9 | Alabama Devil               |        2.99</span><br><span class="line">      10 | Aladdin Calendar            |        4.99</span><br><span class="line">      13 | Ali Forever                 |        4.99</span><br><span class="line">      15 | Alien Center                |        2.99</span><br><span class="line">      16 | Alley Evolution             |        2.99</span><br><span class="line">      20 | Amelie Hellfighters         |        4.99</span><br><span class="line">      21 | American Circus             |        4.99</span><br><span class="line">      22 | Amistad Midsummer           |        2.99</span><br><span class="line">      24 | Analyze Hoosiers            |        2.99</span><br><span class="line">--More--</span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line">&gt; 方括号内的查询称为子查询或内部查询。包含子查询的查询称为外部查询。</span><br><span class="line"></span><br><span class="line">&gt; PostgreSQL按照以下顺序执行包含子查询的查询:</span><br><span class="line">+ 首先，执行子查询。</span><br><span class="line">- 其次，获取结果并将其传递给外部查询。</span><br><span class="line">+ 第三，执行外部查询。</span><br><span class="line"></span><br><span class="line"><span class="comment">### 带有IN运算符的子查询</span></span><br><span class="line"></span><br><span class="line">&gt; 子查询可以返回零或更多行。若要使用此子查询，请在WHERE子句中使用IN运算符。</span><br><span class="line"></span><br><span class="line">&gt; 获取日期在2005-05-29和2005-05-30之间的电影</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   inventory.film_id</span><br><span class="line">FROM</span><br><span class="line">   rental</span><br><span class="line">INNER JOIN inventory ON inventory.inventory_id = rental.inventory_id</span><br><span class="line">WHERE</span><br><span class="line">   return_date BETWEEN <span class="string">'2005-05-29'</span></span><br><span class="line">AND <span class="string">'2005-05-30'</span>;</span><br><span class="line"> film_id </span><br><span class="line">---------</span><br><span class="line">      15</span><br><span class="line">      19</span><br><span class="line">      45</span><br><span class="line">      50</span><br><span class="line">      52</span><br><span class="line">      54</span><br><span class="line">      68</span><br><span class="line">      73</span><br><span class="line">      83</span><br><span class="line">      89</span><br><span class="line">     103</span><br><span class="line">     120</span><br><span class="line">     130</span><br><span class="line">     138</span><br><span class="line">     139</span><br><span class="line">     164</span><br><span class="line">     179</span><br><span class="line">     200</span><br><span class="line">     226</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用子查询</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   film_id,</span><br><span class="line">   title</span><br><span class="line">FROM</span><br><span class="line">   film</span><br><span class="line">WHERE</span><br><span class="line">   film_id IN (</span><br><span class="line">      SELECT</span><br><span class="line">         inventory.film_id</span><br><span class="line">      FROM</span><br><span class="line">         rental</span><br><span class="line">      INNER JOIN inventory ON inventory.inventory_id = rental.inventory_id</span><br><span class="line">      WHERE</span><br><span class="line">         return_date BETWEEN <span class="string">'2005-05-29'</span></span><br><span class="line">      AND <span class="string">'2005-05-30'</span></span><br><span class="line">   );</span><br><span class="line"> film_id |         title         </span><br><span class="line">---------+-----------------------</span><br><span class="line">     307 | Fellowship Autumn</span><br><span class="line">     255 | Driving Polish</span><br><span class="line">     388 | Gunfight Moon</span><br><span class="line">     130 | Celebrity Horn</span><br><span class="line">     563 | Massacre Usual</span><br><span class="line">     397 | Hanky October</span><br><span class="line">     898 | Tourist Pelican</span><br><span class="line">     228 | Detective Vision</span><br><span class="line">     347 | Games Bowfinger</span><br><span class="line">    1000 | Zorro Ark</span><br><span class="line">     624 | Nightmare Chill</span><br><span class="line">     179 | Conquerer Nuts</span><br><span class="line">      54 | Banger Pinocchio</span><br><span class="line">     684 | Pizza Jumanji</span><br><span class="line">     267 | Eagles Panky</span><br><span class="line">      68 | Betrayed Rear</span><br><span class="line">     868 | Superfly Trip</span><br><span class="line">     138 | Chariots Conspiracy</span><br><span class="line">     418 | Hobbit Alien</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<h3 id="使用EXISTS运算符的子查询"><a href="#使用EXISTS运算符的子查询" class="headerlink" title="使用EXISTS运算符的子查询"></a>使用EXISTS运算符的子查询</h3><blockquote>
+<p>以下表达式说明了如何在EXISTS运算符中使用子查询:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXISTS subquery</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>子查询可以是EXISTS运算符的输入。如果子查询返回任何行，则EXISTS运算符返回true。如果子查询不返回任何行，则EXISTS运算符的结果为false。</p>
+</blockquote>
+<blockquote>
+<p>EXISTS运算符只关心子查询返回的行数，而不关心行的内容，因此，EXISTS运算符的通用编码约定如下:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXISTS (SELECT 1 FROM tbl WHERE condition);</span><br></pre></td></tr></table></figure>
+<h4 id="EXISTS运算符的示例"><a href="#EXISTS运算符的示例" class="headerlink" title="EXISTS运算符的示例"></a>EXISTS运算符的示例</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   first_name,</span><br><span class="line">   last_name</span><br><span class="line">FROM</span><br><span class="line">   customer</span><br><span class="line">WHERE</span><br><span class="line">   EXISTS (</span><br><span class="line">      SELECT</span><br><span class="line">         1</span><br><span class="line">      FROM</span><br><span class="line">         payment</span><br><span class="line">      WHERE</span><br><span class="line">         payment.customer_id = customer.customer_id</span><br><span class="line">   );</span><br><span class="line"> first_name  |  last_name   </span><br><span class="line">-------------+--------------</span><br><span class="line"> Jared       | Ely</span><br><span class="line"> Mary        | Smith</span><br><span class="line"> Patricia    | Johnson</span><br><span class="line"> Linda       | Williams</span><br><span class="line"> Barbara     | Jones</span><br><span class="line"> Elizabeth   | Brown</span><br><span class="line"> Jennifer    | Davis</span><br><span class="line"> Maria       | Miller</span><br><span class="line"> Susan       | Wilson</span><br><span class="line"> Margaret    | Moore</span><br><span class="line"> Dorothy     | Taylor</span><br><span class="line"> Lisa        | Anderson</span><br><span class="line"> Nancy       | Thomas</span><br><span class="line"> Karen       | Jackson</span><br><span class="line"> Betty       | White</span><br><span class="line"> Helen       | Harris</span><br><span class="line"> Sandra      | Martin</span><br><span class="line"> Donna       | Thompson</span><br><span class="line"> Carol       | Garcia</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<h2 id="ANY运算符"><a href="#ANY运算符" class="headerlink" title="ANY运算符"></a>ANY运算符</h2><blockquote>
+<p>ANY运算符将值与子查询返回的一组值进行比较。</p>
+</blockquote>
+<h3 id="ANY运算符的语法"><a href="#ANY运算符的语法" class="headerlink" title="ANY运算符的语法"></a>ANY运算符的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">expresion operator ANY(subquery)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用如上语法:</p>
+<ul>
+<li>子查询必须仅返回一列。</li>
+</ul>
+<ul>
+<li>ANY运算符之前必须是以下比较运算符之一=、&gt;、&gt;=、&lt;、&lt;=和&lt;&gt;，如果子查询的任何值满足条件，则ANY运算符将返回true，否则返回false。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>请注意，SOME是ANY的同义词，这意味着可以在任何SQL语句中将SOME替换为ANY。</p>
+</blockquote>
+<h3 id="ANY运算符示例1"><a href="#ANY运算符示例1" class="headerlink" title="ANY运算符示例1"></a>ANY运算符示例1</h3><blockquote>
+<p>按电影类别分组的电影的最大长度</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    MAX( length )</span><br><span class="line">FROM</span><br><span class="line">    film</span><br><span class="line">INNER JOIN film_category</span><br><span class="line">        USING(film_id)</span><br><span class="line">GROUP BY</span><br><span class="line">    category_id;</span><br><span class="line"> max</span><br><span class="line">-----</span><br><span class="line"> 184</span><br><span class="line"> 185</span><br><span class="line"> 178</span><br><span class="line"> 185</span><br><span class="line"> 181</span><br><span class="line"> 183</span><br><span class="line"> 184</span><br><span class="line"> 185</span><br><span class="line"> 185</span><br><span class="line"> 185</span><br><span class="line"> 185</span><br><span class="line"> 184</span><br><span class="line"> 183</span><br><span class="line"> 185</span><br><span class="line"> 184</span><br><span class="line"> 181</span><br><span class="line">(16 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>将查询用作子查询，查找长度大于或等于任何电影类别的最大长度的电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT title</span></span><br><span class="line">FROM film</span><br><span class="line">WHERE length &gt;= ANY(</span><br><span class="line">    SELECT MAX( length )</span><br><span class="line">    FROM film</span><br><span class="line">    INNER JOIN film_category USING(film_id)</span><br><span class="line">    GROUP BY  category_id );</span><br><span class="line">         title          </span><br><span class="line">------------------------</span><br><span class="line"> Alley Evolution</span><br><span class="line"> Analyze Hoosiers</span><br><span class="line"> Anonymous Human</span><br><span class="line"> Baked Cleopatra</span><br><span class="line"> Casualties Encino</span><br><span class="line"> Born Spinal</span><br><span class="line"> Catch Amistad</span><br><span class="line"> Cause Date</span><br><span class="line"> Chicago North</span><br><span class="line"> Confidential Interview</span><br><span class="line"> Conspiracy Spirit</span><br><span class="line"> Control Anthem</span><br><span class="line"> Crystal Breaking</span><br><span class="line"> Darn Forrester</span><br><span class="line"> Drop Waterfront</span><br><span class="line"> Express Lonely</span><br><span class="line"> Flight Lies</span><br><span class="line"> Frontier Cabin</span><br><span class="line"> Fury Murder</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>对于每个电影类别，子查询都会找到最大长度。外部查询会查看所有这些值，并确定哪些电影的长度大于或等于任何电影类别的最大长度。</p>
+</blockquote>
+<blockquote>
+<p>请注意，如果子查询不返回任何行，则整个查询将返回空结果集。</p>
+</blockquote>
+<h3 id="ANY与IN"><a href="#ANY与IN" class="headerlink" title="ANY与IN"></a>ANY与IN</h3><blockquote>
+<p>= ANY等效于IN运算符。</p>
+</blockquote>
+<h3 id="ANY运算符示例2"><a href="#ANY运算符示例2" class="headerlink" title="ANY运算符示例2"></a>ANY运算符示例2</h3><blockquote>
+<p>获取类别为动作或戏剧的电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    title,</span><br><span class="line">    category_id</span><br><span class="line">FROM</span><br><span class="line">    film</span><br><span class="line">INNER JOIN film_category</span><br><span class="line">        USING(film_id)</span><br><span class="line">WHERE</span><br><span class="line">    category_id = ANY(</span><br><span class="line">        SELECT</span><br><span class="line">            category_id</span><br><span class="line">        FROM</span><br><span class="line">            category</span><br><span class="line">        WHERE</span><br><span class="line">            NAME = <span class="string">'Action'</span></span><br><span class="line">            OR NAME = <span class="string">'Drama'</span></span><br><span class="line">    );</span><br><span class="line">          title          | category_id </span><br><span class="line">-------------------------+-------------</span><br><span class="line"> Amadeus Holy            |           1</span><br><span class="line"> American Circus         |           1</span><br><span class="line"> Antitrust Tomatoes      |           1</span><br><span class="line"> Apollo Teen             |           7</span><br><span class="line"> Ark Ridgemont           |           1</span><br><span class="line"> Barefoot Manchurian     |           1</span><br><span class="line"> Beauty Grease           |           7</span><br><span class="line"> Beethoven Exorcist      |           7</span><br><span class="line"> Berets Agent            |           1</span><br><span class="line"> Blade Polish            |           7</span><br><span class="line"> Bride Intrigue          |           1</span><br><span class="line"> Bright Encounters       |           7</span><br><span class="line"> Bull Shawshank          |           1</span><br><span class="line"> Bunch Minds             |           7</span><br><span class="line"> Caddyshack Jedi         |           1</span><br><span class="line"> Campus Remember         |           1</span><br><span class="line"> Casualties Encino       |           1</span><br><span class="line"> Celebrity Horn          |           1</span><br><span class="line"> Chill Luck              |           7</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>以下语句使用产生相同结果的IN运算符</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    title,</span><br><span class="line">    category_id</span><br><span class="line">FROM</span><br><span class="line">    film</span><br><span class="line">INNER JOIN film_category</span><br><span class="line">        USING(film_id)</span><br><span class="line">WHERE</span><br><span class="line">    category_id IN(</span><br><span class="line">        SELECT</span><br><span class="line">            category_id</span><br><span class="line">        FROM</span><br><span class="line">            category</span><br><span class="line">        WHERE</span><br><span class="line">            NAME = <span class="string">'Action'</span></span><br><span class="line">            OR NAME = <span class="string">'Drama'</span></span><br><span class="line">    );</span><br><span class="line">          title          | category_id </span><br><span class="line">-------------------------+-------------</span><br><span class="line"> Amadeus Holy            |           1</span><br><span class="line"> American Circus         |           1</span><br><span class="line"> Antitrust Tomatoes      |           1</span><br><span class="line"> Apollo Teen             |           7</span><br><span class="line"> Ark Ridgemont           |           1</span><br><span class="line"> Barefoot Manchurian     |           1</span><br><span class="line"> Beauty Grease           |           7</span><br><span class="line"> Beethoven Exorcist      |           7</span><br><span class="line"> Berets Agent            |           1</span><br><span class="line"> Blade Polish            |           7</span><br><span class="line"> Bride Intrigue          |           1</span><br><span class="line"> Bright Encounters       |           7</span><br><span class="line"> Bull Shawshank          |           1</span><br><span class="line"> Bunch Minds             |           7</span><br><span class="line"> Caddyshack Jedi         |           1</span><br><span class="line"> Campus Remember         |           1</span><br><span class="line"> Casualties Encino       |           1</span><br><span class="line"> Celebrity Horn          |           1</span><br><span class="line"> Chill Luck              |           7</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，&lt;&gt; ANY运算符不同于NOT IN。下面的表达式:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x &lt;&gt; ANY (a,b,c)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>相当于</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x &lt;&gt; a OR &lt;&gt; b OR x &lt;&gt; c</span><br></pre></td></tr></table></figure>
+<h2 id="ALL运算符"><a href="#ALL运算符" class="headerlink" title="ALL运算符"></a>ALL运算符</h2><blockquote>
+<p>ALL运算符允许通过将值与子查询返回的值列表进行比较来查询数据。</p>
+</blockquote>
+<h3 id="ALL运算符的语法"><a href="#ALL运算符的语法" class="headerlink" title="ALL运算符的语法"></a>ALL运算符的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">comparison_operator ALL (subquery)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用如上语法:</p>
+<ul>
+<li>ALL运算符的前面必须是比较运算符，例如等于（=），不等于（！=），大于（&gt;），大于或等于（&gt; =），小于（&lt;）以及小于或 等于（&lt;=）。</li>
+</ul>
+<ul>
+<li>ALL运算符后必须跟一个子查询，该子查询也必须用括号括起来。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>假设子查询返回一些行，则ALL运算符的工作方式如下:</p>
+<ul>
+<li>column_name &gt; ALL（子查询），如果值大于子查询返回的最大值，则表达式的计算结果为true。</li>
+</ul>
+<ul>
+<li>column_name &gt;= ALL（子查询）如果值大于或等于子查询返回的最大值，则表达式的计算结果为true。</li>
+</ul>
+<ul>
+<li>column_name &lt; ALL（子查询）如果值小于子查询返回的最小值，则表达式的计算结果为true。</li>
+</ul>
+<ul>
+<li>column_name &lt;= ALL（子查询）如果值小于或等于子查询返回的最小值，则表达式的计算结果为true。</li>
+</ul>
+<ul>
+<li>column_name = ALL（子查询）如果值等于子查询返回的任何值，则表达式的计算结果为true。</li>
+</ul>
+<ul>
+<li>column_name != ALL（子查询）如果值不等于子查询返回的任何值，则表达式的计算结果为true。<br>如果子查询不返回任何行，则ALL运算符始终求值为true。</li>
+</ul>
+</blockquote>
+<h3 id="ALL运算符示例"><a href="#ALL运算符示例" class="headerlink" title="ALL运算符示例"></a>ALL运算符示例</h3><blockquote>
+<p>查询按电影等级分组的所有电影的平均长度</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    rating,ROUND(AVG(length), 2) avg_length</span><br><span class="line">FROM</span><br><span class="line">    film</span><br><span class="line">GROUP BY</span><br><span class="line">    rating</span><br><span class="line">ORDER BY</span><br><span class="line">    avg_length DESC;</span><br><span class="line"> rating | avg_length</span><br><span class="line">--------+------------</span><br><span class="line"> PG-13  |     120.44</span><br><span class="line"> R      |     118.66</span><br><span class="line"> NC-17  |     113.23</span><br><span class="line"> PG     |     112.01</span><br><span class="line"> G      |     111.05</span><br><span class="line">(5 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用ALL和大于运算符(&gt;)查找所有长度大于上述平均长度列表的电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    film_id,</span><br><span class="line">    title,</span><br><span class="line">    rating,</span><br><span class="line">    length</span><br><span class="line">FROM</span><br><span class="line">    film</span><br><span class="line">WHERE</span><br><span class="line">    length &gt; ALL (</span><br><span class="line">            SELECT</span><br><span class="line">                ROUND(AVG (length),2)</span><br><span class="line">            FROM</span><br><span class="line">                film</span><br><span class="line">            GROUP BY</span><br><span class="line">                rating</span><br><span class="line">    )</span><br><span class="line">ORDER BY</span><br><span class="line">    length;</span><br><span class="line"> film_id |            title            | rating | length </span><br><span class="line">---------+-----------------------------+--------+--------</span><br><span class="line">     207 | Dangerous Uptown            | PG     |    121</span><br><span class="line">      86 | Boogie Amelie               | R      |    121</span><br><span class="line">     403 | Harry Idaho                 | PG-13  |    121</span><br><span class="line">      93 | Brannigan Sunrise           | PG     |    121</span><br><span class="line">     704 | Pure Runner                 | NC-17  |    121</span><br><span class="line">      37 | Arizona Bang                | PG     |    121</span><br><span class="line">     658 | Paris Weekend               | PG-13  |    121</span><br><span class="line">     490 | Jumanji Blade               | G      |    121</span><br><span class="line">      68 | Betrayed Rear               | NC-17  |    122</span><br><span class="line">     218 | Deceiver Betrayed           | NC-17  |    122</span><br><span class="line">     239 | Dogma Family                | G      |    122</span><br><span class="line">     452 | Illusion Amelie             | R      |    122</span><br><span class="line">     175 | Confused Candles            | PG-13  |    122</span><br><span class="line">     297 | Extraordinary Conquerer     | G      |    122</span><br><span class="line">     142 | Chicken Hellfighters        | PG     |    122</span><br><span class="line">     576 | Mighty Luck                 | PG     |    122</span><br><span class="line">     934 | Vanilla Day                 | NC-17  |    122</span><br><span class="line">      58 | Beach Heartbreakers         | G      |    122</span><br><span class="line">     436 | Hours Rage                  | NC-17  |    122</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>从输出中可以清楚地看到，查询将返回所有长度大于子查询返回的平均长度列表中最大值的影片。</p>
+</blockquote>
+<h2 id="EXISTS运算符"><a href="#EXISTS运算符" class="headerlink" title="EXISTS运算符"></a>EXISTS运算符</h2><blockquote>
+<p>EXISTS运算符用于测试子查询中是否存在行。</p>
+</blockquote>
+<h3 id="EXISTS运算符的语法"><a href="#EXISTS运算符的语法" class="headerlink" title="EXISTS运算符的语法"></a>EXISTS运算符的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXISTS (subquery)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>EXISTS通常与相关子查询一起使用。EXISTS接受作为子查询的参数。</p>
+</blockquote>
+<blockquote>
+<p>如果子查询返回至少一行，则EXISTS的结果为true。如果子查询不返回任何行，则EXISTS的结果为false。</p>
+</blockquote>
+<blockquote>
+<p>EXISTS的结果取决于子查询是否返回任何行，而不取决于行的内容。因此，出现在子查询的SELECT子句上的列并不重要。</p>
+</blockquote>
+<blockquote>
+<p>因此，常见的编码约定是以以下形式编写EXISTS:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SELECT </span><br><span class="line">    column_1 </span><br><span class="line">FROM </span><br><span class="line">    table_1</span><br><span class="line">    WHERE </span><br><span class="line">    EXISTS( SELECT </span><br><span class="line">                1 </span><br><span class="line">            FROM </span><br><span class="line">                table_2 </span><br><span class="line">            WHERE </span><br><span class="line">                column_2 = table_1.column_1);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，如果子查询返回NULL，则EXISTS的结果为true。</p>
+</blockquote>
+<h3 id="EXISTS运算符示例"><a href="#EXISTS运算符示例" class="headerlink" title="EXISTS运算符示例"></a>EXISTS运算符示例</h3><blockquote>
+<p>查找至少付款金额大于11的客户</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT first_name,</span></span><br><span class="line">       last_name</span><br><span class="line">FROM customer c</span><br><span class="line">WHERE EXISTS</span><br><span class="line">    (SELECT 1</span><br><span class="line">     FROM payment p</span><br><span class="line">     WHERE p.customer_id = c.customer_id</span><br><span class="line">       AND amount &gt; 11 )</span><br><span class="line">ORDER BY first_name,</span><br><span class="line">         last_name;</span><br><span class="line"> first_name | last_name</span><br><span class="line">------------+-----------</span><br><span class="line"> Karen      | Jackson</span><br><span class="line"> Kent       | Arsenault</span><br><span class="line"> Nicholas   | Barfield</span><br><span class="line"> Rosemary   | Schmidt</span><br><span class="line"> Tanya      | Gilbert</span><br><span class="line"> Terrance   | Roush</span><br><span class="line"> Vanessa    | Sims</span><br><span class="line"> Victoria   | Gibson</span><br><span class="line">(8 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中，对于客户表中的每个客户，子查询将检查付款表以查找该客户是否至少进行了一次付款（p.customer_id = c.customer_id）并且金额大于11（amount &gt; 11）。</p>
+</blockquote>
+<h3 id="NOT-EXISTS运算符示例"><a href="#NOT-EXISTS运算符示例" class="headerlink" title="NOT EXISTS运算符示例"></a>NOT EXISTS运算符示例</h3><blockquote>
+<p>NOT EXISTS与EXISTS相反，这意味着如果子查询不返回任何行，则NOT EXISTS返回true。如果子查询返回任何行，则NOT EXISTS返回false。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT first_name,</span></span><br><span class="line">       last_name</span><br><span class="line">FROM customer c</span><br><span class="line">WHERE NOT EXISTS</span><br><span class="line">    (SELECT 1</span><br><span class="line">     FROM payment p</span><br><span class="line">     WHERE p.customer_id = c.customer_id</span><br><span class="line">       AND amount &gt; 11 )</span><br><span class="line">ORDER BY first_name,</span><br><span class="line">         last_name;</span><br><span class="line"> first_name  |  last_name   </span><br><span class="line">-------------+--------------</span><br><span class="line"> Aaron       | Selby</span><br><span class="line"> Adam        | Gooch</span><br><span class="line"> Adrian      | Clary</span><br><span class="line"> Agnes       | Bishop</span><br><span class="line"> Alan        | Kahn</span><br><span class="line"> Albert      | Crouse</span><br><span class="line"> Alberto     | Henning</span><br><span class="line"> Alex        | Gresham</span><br><span class="line"> Alexander   | Fennell</span><br><span class="line"> Alfred      | Casillas</span><br><span class="line"> Alfredo     | Mcadams</span><br><span class="line"> Alice       | Stewart</span><br><span class="line"> Alicia      | Mills</span><br><span class="line"> Allan       | Cornish</span><br><span class="line"> Allen       | Butterfield</span><br><span class="line"> Allison     | Stanley</span><br><span class="line"> Alma        | Austin</span><br><span class="line"> Alvin       | Deloach</span><br><span class="line"> Amanda      | Carter</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<h3 id="EXISTS-和-NULL示例"><a href="#EXISTS-和-NULL示例" class="headerlink" title="EXISTS 和 NULL示例"></a>EXISTS 和 NULL示例</h3><blockquote>
+<p>如果子查询返回NULL，则EXISTS返回true。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   first_name,</span><br><span class="line">   last_name</span><br><span class="line">FROM</span><br><span class="line">   customer</span><br><span class="line">WHERE</span><br><span class="line">   EXISTS( SELECT NULL )</span><br><span class="line">ORDER BY</span><br><span class="line">   first_name,</span><br><span class="line">   last_name;</span><br><span class="line"> first_name  |  last_name   </span><br><span class="line">-------------+--------------</span><br><span class="line"> Aaron       | Selby</span><br><span class="line"> Adam        | Gooch</span><br><span class="line"> Adrian      | Clary</span><br><span class="line"> Agnes       | Bishop</span><br><span class="line"> Alan        | Kahn</span><br><span class="line"> Albert      | Crouse</span><br><span class="line"> Alberto     | Henning</span><br><span class="line"> Alex        | Gresham</span><br><span class="line"> Alexander   | Fennell</span><br><span class="line"> Alfred      | Casillas</span><br><span class="line"> Alfredo     | Mcadams</span><br><span class="line"> Alice       | Stewart</span><br><span class="line"> Alicia      | Mills</span><br><span class="line"> Allan       | Cornish</span><br><span class="line"> Allen       | Butterfield</span><br><span class="line"> Allison     | Stanley</span><br><span class="line"> Alma        | Austin</span><br><span class="line"> Alvin       | Deloach</span><br><span class="line"> Amanda      | Carter</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中，子查询返回NULL，因此，该查询返回了customer表中的所有行。</p>
+</blockquote>
+<h2 id="CTE-公用表表达式"><a href="#CTE-公用表表达式" class="headerlink" title="CTE(公用表表达式)"></a>CTE(公用表表达式)</h2><blockquote>
+<p>公用表表达式是一个临时结果集，您可以在另一个SQL语句（包括SELECT，INSERT，UPDATE或DELETE）中进行引用。</p>
+</blockquote>
+<blockquote>
+<p>公用表表达式是临时的，因为它们仅在查询执行期间存在。</p>
+</blockquote>
+<h3 id="创建CTE的语法"><a href="#创建CTE的语法" class="headerlink" title="创建CTE的语法"></a>创建CTE的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">WITH cte_name (column_list) AS (</span><br><span class="line">    CTE_query_definition </span><br><span class="line">)</span><br><span class="line">statement;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用如上语法:</p>
+<ul>
+<li>首先，指定CTE的名称，后跟一个可选的列列表。</li>
+</ul>
+<ul>
+<li>其次，在WITH子句的主体内，指定一个返回结果集的查询。如果您未在CTE名称后明确指定列列表，则CTE_query_definition的选择列表将成为CTE的列列表。</li>
+</ul>
+<ul>
+<li>第三，像语句中的表或视图一样使用CTE，它可以是SELECT，INSERT，UPDATE或DELETE。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>常用表表达式或CTE通常用于简化PostgreSQL中的复杂联接和子查询。</p>
+</blockquote>
+<h3 id="CTE示例1"><a href="#CTE示例1" class="headerlink" title="CTE示例1"></a>CTE示例1</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># WITH cte_film AS (</span></span><br><span class="line">    SELECT </span><br><span class="line">        film_id, </span><br><span class="line">        title,</span><br><span class="line">        (CASE </span><br><span class="line">            WHEN length &lt; 30 THEN <span class="string">'Short'</span></span><br><span class="line">            WHEN length &gt;= 30 AND length &lt; 90 THEN <span class="string">'Medium'</span></span><br><span class="line">            WHEN length &gt; 90 THEN <span class="string">'Long'</span></span><br><span class="line">        END) length    </span><br><span class="line">    FROM</span><br><span class="line">        film</span><br><span class="line">)</span><br><span class="line">SELECT</span><br><span class="line">    film_id,</span><br><span class="line">    title,</span><br><span class="line">    length</span><br><span class="line">FROM </span><br><span class="line">    cte_film</span><br><span class="line">WHERE</span><br><span class="line">    length = <span class="string">'Long'</span></span><br><span class="line">ORDER BY </span><br><span class="line">    title; </span><br><span class="line"> film_id |            title            | length </span><br><span class="line">---------+-----------------------------+--------</span><br><span class="line">       4 | Affair Prejudice            | Long</span><br><span class="line">       5 | African Egg                 | Long</span><br><span class="line">       6 | Agent Truman                | Long</span><br><span class="line">       9 | Alabama Devil               | Long</span><br><span class="line">      11 | Alamo Videotape             | Long</span><br><span class="line">      12 | Alaska Phantom              | Long</span><br><span class="line">      14 | Alice Fantasia              | Long</span><br><span class="line">      13 | Ali Forever                 | Long</span><br><span class="line">      16 | Alley Evolution             | Long</span><br><span class="line">      19 | Amadeus Holy                | Long</span><br><span class="line">      21 | American Circus             | Long</span><br><span class="line">      23 | Anaconda Confessions        | Long</span><br><span class="line">      24 | Analyze Hoosiers            | Long</span><br><span class="line">      27 | Anonymous Human             | Long</span><br><span class="line">      28 | Anthem Luke                 | Long</span><br><span class="line">      29 | Antitrust Tomatoes          | Long</span><br><span class="line">      31 | Apache Divine               | Long</span><br><span class="line">      32 | Apocalypse Flamingos        | Long</span><br><span class="line">      33 | Apollo Teen                 | Long</span><br><span class="line">--More--</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中，我们首先使用WITH子句定义了一个公用表表达式cte_film，如下所示:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">WITH cte_film AS (</span><br><span class="line">    SELECT </span><br><span class="line">        film_id, </span><br><span class="line">        title,</span><br><span class="line">        (CASE </span><br><span class="line">            WHEN length &lt; 30 </span><br><span class="line">                THEN <span class="string">'Short'</span></span><br><span class="line">            WHEN length &gt;= 30 AND length &lt; 90 </span><br><span class="line">                THEN <span class="string">'Medium'</span></span><br><span class="line">            WHEN length &gt; 90 </span><br><span class="line">                THEN <span class="string">'Long'</span></span><br><span class="line">        END) length    </span><br><span class="line">    FROM</span><br><span class="line">        film</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>公用表表达式包含两个部分:</p>
+<ul>
+<li>第一部分定义CTE的名称，即cte_film。</li>
+</ul>
+<ul>
+<li>第二部分定义一个SELECT语句，该语句用行填充表达式。</li>
+</ul>
+<ul>
+<li>然后，在SELECT语句中使用cte_film CTE仅返回长度为“Long”的电影。</li>
+</ul>
+</blockquote>
+<h3 id="CTE示例2"><a href="#CTE示例2" class="headerlink" title="CTE示例2"></a>CTE示例2</h3><blockquote>
+<p>将CTE与rental、staff表联接</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># WITH cte_rental AS (</span></span><br><span class="line">    SELECT staff_id,</span><br><span class="line">        COUNT(rental_id) rental_count</span><br><span class="line">    FROM   rental</span><br><span class="line">    GROUP  BY staff_id</span><br><span class="line">)</span><br><span class="line">SELECT s.staff_id,</span><br><span class="line">    first_name,</span><br><span class="line">    last_name,</span><br><span class="line">    rental_count</span><br><span class="line">FROM staff s</span><br><span class="line">    INNER JOIN cte_rental USING (staff_id); </span><br><span class="line"> staff_id | first_name | last_name | rental_count</span><br><span class="line">----------+------------+-----------+--------------</span><br><span class="line">        1 | Mike       | Hillyer   |         8040</span><br><span class="line">        2 | Jon        | Stephens  |         8004</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中:</p>
+<ul>
+<li>首先，CTE返回一个结果集，其中包含员工ID和租金数量。</li>
+</ul>
+<ul>
+<li>然后，使用staff_id列将人员表与CTE相连。</li>
+</ul>
+</blockquote>
+<h3 id="CTE示例3"><a href="#CTE示例3" class="headerlink" title="CTE示例3"></a>CTE示例3</h3><blockquote>
+<p>将CTE与RANK()窗口函数一起使用</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># WITH cte_film AS  (</span></span><br><span class="line">    SELECT film_id,</span><br><span class="line">        title,</span><br><span class="line">        rating,</span><br><span class="line">        length,</span><br><span class="line">        RANK() OVER (</span><br><span class="line">            PARTITION BY rating</span><br><span class="line">            ORDER BY length DESC) </span><br><span class="line">        length_rank</span><br><span class="line">    FROM </span><br><span class="line">        film</span><br><span class="line">)</span><br><span class="line">SELECT *</span><br><span class="line">FROM cte_film</span><br><span class="line">WHERE length_rank = 1;</span><br><span class="line"> film_id |       title        | rating | length | length_rank</span><br><span class="line">---------+--------------------+--------+--------+-------------</span><br><span class="line">     182 | Control Anthem     | G      |    185 |           1</span><br><span class="line">     212 | Darn Forrester     | G      |    185 |           1</span><br><span class="line">     609 | Muscle Bright      | G      |    185 |           1</span><br><span class="line">     991 | Worst Banger       | PG     |    185 |           1</span><br><span class="line">     141 | Chicago North      | PG-13  |    185 |           1</span><br><span class="line">     349 | Gangs Pride        | PG-13  |    185 |           1</span><br><span class="line">     690 | Pond Seattle       | PG-13  |    185 |           1</span><br><span class="line">     817 | Soldiers Evolution | R      |    185 |           1</span><br><span class="line">     426 | Home Pity          | R      |    185 |           1</span><br><span class="line">     872 | Sweet Brotherhood  | R      |    185 |           1</span><br><span class="line">     821 | Sorority Queen     | NC-17  |    184 |           1</span><br><span class="line">     499 | King Evolution     | NC-17  |    184 |           1</span><br><span class="line">     820 | Sons Interview     | NC-17  |    184 |           1</span><br><span class="line">     198 | Crystal Breaking   | NC-17  |    184 |           1</span><br><span class="line">(14 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中:</p>
+<ul>
+<li>首先，我们定义了一个CTE，该CTE会根据每个电影评分的长度返回电影排名。</li>
+</ul>
+<ul>
+<li>其次，我们只选择长度排名为一的电影。</li>
+</ul>
+</blockquote>
+<h2 id="使用CTE进行递归查询"><a href="#使用CTE进行递归查询" class="headerlink" title="使用CTE进行递归查询"></a>使用CTE进行递归查询</h2><blockquote>
+<p>PostgreSQL提供了WITH语句，使您可以构造用于查询的辅助语句。这些语句通常称为通用表表达式或CTE。CTE类似于仅在查询执行期间存在的临时表。</p>
+</blockquote>
+<blockquote>
+<p>递归查询是引用递归CTE的查询。递归查询在许多情况下非常有用，例如用于查询层次结构数据（例如组织结构，物料清单等）。</p>
+</blockquote>
+<h3 id="递归CTE的语法"><a href="#递归CTE的语法" class="headerlink" title="递归CTE的语法"></a>递归CTE的语法</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">WITH RECURSIVE cte_name(</span><br><span class="line">    CTE_query_definition -- non-recursive term</span><br><span class="line">    UNION [ALL]</span><br><span class="line">    CTE_query definion  -- recursive term</span><br><span class="line">) SELECT * FROM cte_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>递归CTE具有三个要素:</p>
+<ul>
+<li>非递归术语:非递归术语是CTE查询定义，形成CTE结构的基本结果集。</li>
+</ul>
+<ul>
+<li>递归术语:递归术语是使用UNION或UNION ALL运算符将一个或多个CTE查询定义与非递归术语结合在一起。 递归术语引用CTE名称本身。</li>
+</ul>
+<ul>
+<li>终止检查:如果上一次迭代没有返回任何行，则递归停止。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>PostgreSQL按以下顺序执行递归CTE:</p>
+<ul>
+<li>执行非递归项以创建基本结果集（R0）。</li>
+</ul>
+<ul>
+<li>以Ri作为输入执行递归项，以返回结果集Ri + 1作为输出。</li>
+</ul>
+<ul>
+<li>重复步骤2，直到返回空集。 （终止检查）</li>
+</ul>
+<ul>
+<li>返回最终结果集，该结果集是结果集R0，R1，…，Rn的UNION或UNION ALL。</li>
+</ul>
+</blockquote>
+<h3 id="递归查询示例"><a href="#递归查询示例" class="headerlink" title="递归查询示例"></a>递归查询示例</h3><blockquote>
+<p>创建一个新表来演示PostgreSQL递归查询。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE test5 (</span></span><br><span class="line">   employee_id serial PRIMARY KEY,</span><br><span class="line">   full_name VARCHAR NOT NULL,</span><br><span class="line">   manager_id INT</span><br><span class="line">);</span><br><span class="line">INSERT INTO test5 (</span><br><span class="line">   employee_id,</span><br><span class="line">   full_name,</span><br><span class="line">   manager_id</span><br><span class="line">)</span><br><span class="line">VALUES</span><br><span class="line">   (1, <span class="string">'Michael North'</span>, NULL),</span><br><span class="line">   (2, <span class="string">'Megan Berry'</span>, 1),</span><br><span class="line">   (3, <span class="string">'Sarah Berry'</span>, 1),</span><br><span class="line">   (4, <span class="string">'Zoe Black'</span>, 1),</span><br><span class="line">   (5, <span class="string">'Tim James'</span>, 1),</span><br><span class="line">   (6, <span class="string">'Bella Tucker'</span>, 2),</span><br><span class="line">   (7, <span class="string">'Ryan Metcalfe'</span>, 2),</span><br><span class="line">   (8, <span class="string">'Max Mills'</span>, 2),</span><br><span class="line">   (9, <span class="string">'Benjamin Glover'</span>, 2),</span><br><span class="line">   (10, <span class="string">'Carolyn Henderson'</span>, 3),</span><br><span class="line">   (11, <span class="string">'Nicola Kelly'</span>, 3),</span><br><span class="line">   (12, <span class="string">'Alexandra Climo'</span>, 3),</span><br><span class="line">   (13, <span class="string">'Dominic King'</span>, 3),</span><br><span class="line">   (14, <span class="string">'Leonard Gray'</span>, 4),</span><br><span class="line">   (15, <span class="string">'Eric Rampling'</span>, 4),</span><br><span class="line">   (16, <span class="string">'Piers Paige'</span>, 7),</span><br><span class="line">   (17, <span class="string">'Ryan Henderson'</span>, 7),</span><br><span class="line">   (18, <span class="string">'Frank Tucker'</span>, 8),</span><br><span class="line">   (19, <span class="string">'Nathan Ferguson'</span>, 8),</span><br><span class="line">   (20, <span class="string">'Kevin Rampling'</span>, 8);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line">INSERT 0 20</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该表由三列组成:employee_id, manager_id和full name。manager_id列指定员工的经理ID。</p>
+</blockquote>
+<blockquote>
+<p>查询ID为2的经理的所有下属</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># WITH RECURSIVE subordinates AS (</span></span><br><span class="line">   SELECT</span><br><span class="line">      employee_id,</span><br><span class="line">      manager_id,</span><br><span class="line">      full_name</span><br><span class="line">   FROM</span><br><span class="line">      test5</span><br><span class="line">   WHERE</span><br><span class="line">      employee_id = 2</span><br><span class="line">   UNION</span><br><span class="line">      SELECT</span><br><span class="line">         t.employee_id,</span><br><span class="line">         t.manager_id,</span><br><span class="line">         t.full_name</span><br><span class="line">      FROM</span><br><span class="line">         test5 t</span><br><span class="line">      INNER JOIN subordinates s ON s.employee_id = t.manager_id</span><br><span class="line">) SELECT</span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   subordinates;</span><br><span class="line"> employee_id | manager_id |    full_name</span><br><span class="line">-------------+------------+-----------------</span><br><span class="line">           2 |          1 | Megan Berry</span><br><span class="line">           6 |          2 | Bella Tucker</span><br><span class="line">           7 |          2 | Ryan Metcalfe</span><br><span class="line">           8 |          2 | Max Mills</span><br><span class="line">           9 |          2 | Benjamin Glover</span><br><span class="line">          16 |          7 | Piers Paige</span><br><span class="line">          17 |          7 | Ryan Henderson</span><br><span class="line">          18 |          8 | Frank Tucker</span><br><span class="line">          19 |          8 | Nathan Ferguson</span><br><span class="line">          20 |          8 | Kevin Rampling</span><br><span class="line">(10 rows)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>递归CTE，subordinates，定义一个非递归项和一个递归项。</li>
+</ul>
+<ul>
+<li>非递归项返回ID为2的雇员的基本结果集R0。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">employee_id | manager_id |  full_name</span><br><span class="line">-------------+------------+-------------</span><br><span class="line">           2 |          1 | Megan Berry</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>递归项返回雇员ID 2的直接下属。这是雇员表和下属CTE之间联接的结果。递归项的第一次迭代将返回以下结果集：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> employee_id | manager_id |    full_name</span><br><span class="line">-------------+------------+-----------------</span><br><span class="line">           6 |          2 | Bella Tucker</span><br><span class="line">           7 |          2 | Ryan Metcalfe</span><br><span class="line">           8 |          2 | Max Mills</span><br><span class="line">           9 |          2 | Benjamin Glover</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>PostgreSQL重复执行递归项。递归成员的第二次迭代将上面步骤中的结果集用作输入值，并返回以下结果集:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> employee_id | manager_id |    full_name</span><br><span class="line">-------------+------------+-----------------</span><br><span class="line">          16 |          7 | Piers Paige</span><br><span class="line">          17 |          7 | Ryan Henderson</span><br><span class="line">          18 |          8 | Frank Tucker</span><br><span class="line">          19 |          8 | Nathan Ferguson</span><br><span class="line">          20 |          8 | Kevin Rampling</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第三次迭代返回空结果集，因为没有员工向ID为16、17、18、19和20的员工报告。</p>
+</blockquote>
+<blockquote>
+<p>PostgreSQL返回最终结果集，该最终结果集是由非递归和递归项生成的第一次和第二次迭代中所有结果集的并集。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> employee_id | manager_id |    full_name</span><br><span class="line">-------------+------------+-----------------</span><br><span class="line">           2 |          1 | Megan Berry</span><br><span class="line">           6 |          2 | Bella Tucker</span><br><span class="line">           7 |          2 | Ryan Metcalfe</span><br><span class="line">           8 |          2 | Max Mills</span><br><span class="line">           9 |          2 | Benjamin Glover</span><br><span class="line">          16 |          7 | Piers Paige</span><br><span class="line">          17 |          7 | Ryan Henderson</span><br><span class="line">          18 |          8 | Frank Tucker</span><br><span class="line">          19 |          8 | Nathan Ferguson</span><br><span class="line">          20 |          8 | Kevin Rampling</span><br><span class="line">(10 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="PostgreSQL-CTE的优势"><a href="#PostgreSQL-CTE的优势" class="headerlink" title="PostgreSQL CTE的优势"></a>PostgreSQL CTE的优势</h2><blockquote>
+<p>以下是使用公用表表达式或CTE的一些优点:</p>
+<ul>
+<li>提高复杂查询的可读性。可使用CTE以更有条理和可读性的方式组织复杂的查询。</li>
+</ul>
+<ul>
+<li>能够创建递归查询。递归查询是引用自己的查询。当您要查询层次结构数据（例如组织结构图或物料清单）时，递归查询会派上用场。</li>
+<li>与窗口功能结合使用。您可以将CTE与窗口函数结合使用来创建初始结果集，并使用另一个select语句进一步处理该结果集。</li>
+</ul>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/pg6/" rel="next" title="PostgreSQL之分组与集合">
+                <i class="fa fa-chevron-left"></i> PostgreSQL之分组与集合
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/pg8/" rel="prev" title="PostgreSQL之数据处理">
+                PostgreSQL之数据处理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#GROUPING-SETS-分组集"><span class="nav-number">1.</span> <span class="nav-text">GROUPING SETS(分组集)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建样例表"><span class="nav-number">1.1.</span> <span class="nav-text">创建样例表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUPING-SETS分组集示例1"><span class="nav-number">1.2.</span> <span class="nav-text">GROUPING SETS分组集示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUPING-SETS分组集示例2"><span class="nav-number">1.3.</span> <span class="nav-text">GROUPING SETS分组集示例2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUPING-SETS分组集示例3"><span class="nav-number">1.4.</span> <span class="nav-text">GROUPING SETS分组集示例3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUPING-SETS分组集示例4"><span class="nav-number">1.5.</span> <span class="nav-text">GROUPING SETS分组集示例4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUPING-SETS分组集示例5"><span class="nav-number">1.6.</span> <span class="nav-text">GROUPING SETS分组集示例5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUPING-SETS的语法"><span class="nav-number">1.7.</span> <span class="nav-text">GROUPING SETS的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GROUPING-SETS分组集示例6"><span class="nav-number">1.8.</span> <span class="nav-text">GROUPING SETS分组集示例6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分组功能"><span class="nav-number">1.9.</span> <span class="nav-text">分组功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CUBE"><span class="nav-number">2.</span> <span class="nav-text">CUBE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CUBE子句的语法"><span class="nav-number">2.1.</span> <span class="nav-text">CUBE子句的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUBE子句示例1"><span class="nav-number">2.2.</span> <span class="nav-text">CUBE子句示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUBE子句示例2"><span class="nav-number">2.3.</span> <span class="nav-text">CUBE子句示例2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ROLLUP-汇总"><span class="nav-number">3.</span> <span class="nav-text">ROLLUP(汇总)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLLUP的语法"><span class="nav-number">3.1.</span> <span class="nav-text">ROLLUP的语法:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLLUP子句示例1"><span class="nav-number">3.2.</span> <span class="nav-text">ROLLUP子句示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLLUP子句示例2"><span class="nav-number">3.3.</span> <span class="nav-text">ROLLUP子句示例2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLLUP子句示例3"><span class="nav-number">3.4.</span> <span class="nav-text">ROLLUP子句示例3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLLUP子句示例4"><span class="nav-number">3.5.</span> <span class="nav-text">ROLLUP子句示例4</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#子查询"><span class="nav-number">4.</span> <span class="nav-text">子查询</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#子查询示例1"><span class="nav-number">4.1.</span> <span class="nav-text">子查询示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#子查询示例2"><span class="nav-number">4.2.</span> <span class="nav-text">子查询示例2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用EXISTS运算符的子查询"><span class="nav-number">4.3.</span> <span class="nav-text">使用EXISTS运算符的子查询</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#EXISTS运算符的示例"><span class="nav-number">4.3.1.</span> <span class="nav-text">EXISTS运算符的示例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ANY运算符"><span class="nav-number">5.</span> <span class="nav-text">ANY运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ANY运算符的语法"><span class="nav-number">5.1.</span> <span class="nav-text">ANY运算符的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ANY运算符示例1"><span class="nav-number">5.2.</span> <span class="nav-text">ANY运算符示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ANY与IN"><span class="nav-number">5.3.</span> <span class="nav-text">ANY与IN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ANY运算符示例2"><span class="nav-number">5.4.</span> <span class="nav-text">ANY运算符示例2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ALL运算符"><span class="nav-number">6.</span> <span class="nav-text">ALL运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ALL运算符的语法"><span class="nav-number">6.1.</span> <span class="nav-text">ALL运算符的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ALL运算符示例"><span class="nav-number">6.2.</span> <span class="nav-text">ALL运算符示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXISTS运算符"><span class="nav-number">7.</span> <span class="nav-text">EXISTS运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#EXISTS运算符的语法"><span class="nav-number">7.1.</span> <span class="nav-text">EXISTS运算符的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXISTS运算符示例"><span class="nav-number">7.2.</span> <span class="nav-text">EXISTS运算符示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NOT-EXISTS运算符示例"><span class="nav-number">7.3.</span> <span class="nav-text">NOT EXISTS运算符示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXISTS-和-NULL示例"><span class="nav-number">7.4.</span> <span class="nav-text">EXISTS 和 NULL示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CTE-公用表表达式"><span class="nav-number">8.</span> <span class="nav-text">CTE(公用表表达式)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建CTE的语法"><span class="nav-number">8.1.</span> <span class="nav-text">创建CTE的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTE示例1"><span class="nav-number">8.2.</span> <span class="nav-text">CTE示例1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTE示例2"><span class="nav-number">8.3.</span> <span class="nav-text">CTE示例2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTE示例3"><span class="nav-number">8.4.</span> <span class="nav-text">CTE示例3</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用CTE进行递归查询"><span class="nav-number">9.</span> <span class="nav-text">使用CTE进行递归查询</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#递归CTE的语法"><span class="nav-number">9.1.</span> <span class="nav-text">递归CTE的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#递归查询示例"><span class="nav-number">9.2.</span> <span class="nav-text">递归查询示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PostgreSQL-CTE的优势"><span class="nav-number">10.</span> <span class="nav-text">PostgreSQL CTE的优势</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">732k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">20:20</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>

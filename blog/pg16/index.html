@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="PostgreSQL管理角色管理 PostgreSQL使用角色概念来管理数据库访问权限。角色可以是用户或组，具体取决于您如何设置角色。具有登录权限的角色称为用户。角色可以是称为组的其他角色的成员。  创建PostgreSQL角色 要创建新角色，请使用CREATE ROLE语句，如下所示：  1CREATE ROLE role_name;  要获取集群中所有可用的角色，请从pg_roles系统目录中">
+<meta name="keywords" content="pg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL之管理">
+<meta property="og:url" content="zhijiansd.github.io/blog/pg16/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="PostgreSQL管理角色管理 PostgreSQL使用角色概念来管理数据库访问权限。角色可以是用户或组，具体取决于您如何设置角色。具有登录权限的角色称为用户。角色可以是称为组的其他角色的成员。  创建PostgreSQL角色 要创建新角色，请使用CREATE ROLE语句，如下所示：  1CREATE ROLE role_name;  要获取集群中所有可用的角色，请从pg_roles系统目录中">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-20T05:30:23.256Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL之管理">
+<meta name="twitter:description" content="PostgreSQL管理角色管理 PostgreSQL使用角色概念来管理数据库访问权限。角色可以是用户或组，具体取决于您如何设置角色。具有登录权限的角色称为用户。角色可以是称为组的其他角色的成员。  创建PostgreSQL角色 要创建新角色，请使用CREATE ROLE语句，如下所示：  1CREATE ROLE role_name;  要获取集群中所有可用的角色，请从pg_roles系统目录中">
+
+
+
+
+
+
+  <link rel="canonical" href="zhijiansd.github.io/blog/pg16/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>PostgreSQL之管理 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="zhijiansd.github.io/blog/pg16/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PostgreSQL之管理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-20 13:28:16 / 修改时间：13:30:23" itemprop="dateCreated datePublished" datetime="2020-05-20T13:28:16+08:00">2020-05-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/postresql/" itemprop="url" rel="index"><span itemprop="name">postresql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/pg16/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/pg16/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">37k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">1:02</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="PostgreSQL管理"><a href="#PostgreSQL管理" class="headerlink" title="PostgreSQL管理"></a>PostgreSQL管理</h2><h3 id="角色管理"><a href="#角色管理" class="headerlink" title="角色管理"></a>角色管理</h3><blockquote>
+<p>PostgreSQL使用角色概念来管理数据库访问权限。角色可以是用户或组，具体取决于您如何设置角色。具有登录权限的角色称为用户。角色可以是称为组的其他角色的成员。</p>
+</blockquote>
+<h4 id="创建PostgreSQL角色"><a href="#创建PostgreSQL角色" class="headerlink" title="创建PostgreSQL角色"></a>创建PostgreSQL角色</h4><blockquote>
+<p>要创建新角色，请使用CREATE ROLE语句，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE ROLE role_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要获取集群中所有可用的角色，请从pg_roles系统目录中查询，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   rolname</span><br><span class="line">FROM</span><br><span class="line">   pg_roles;</span><br><span class="line">          rolname</span><br><span class="line">---------------------------</span><br><span class="line"> pg_monitor</span><br><span class="line"> pg_read_all_settings</span><br><span class="line"> pg_read_all_stats</span><br><span class="line"> pg_stat_scan_tables</span><br><span class="line"> pg_read_server_files</span><br><span class="line"> pg_write_server_files</span><br><span class="line"> pg_execute_server_program</span><br><span class="line"> pg_signal_backend</span><br><span class="line"> <span class="built_in">test</span></span><br><span class="line"> root</span><br><span class="line"> postgres</span><br><span class="line"> hr</span><br><span class="line"> zhi</span><br><span class="line">(13 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果使用psql工具，则可以使用\du命令列出所有现有角色:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \du</span><br><span class="line">                                        角色列表</span><br><span class="line"> 角色名称 |                    属性                    |            成员属于             </span><br><span class="line">----------+--------------------------------------------+---------------------------------</span><br><span class="line"> hr       | 无法登录                                  +| &#123;&#125;</span><br><span class="line">          | 密码有效直至infinity                       | </span><br><span class="line"> postgres | 超级用户, 建立角色, 建立 DB, 复制, 绕过RLS | &#123;&#125;</span><br><span class="line"> root     |                                            | &#123;&#125;</span><br><span class="line"> <span class="built_in">test</span>     |                                            | &#123;pg_read_server_files,postgres&#125;</span><br><span class="line"> zhi      |                                            | &#123;&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="角色属性"><a href="#角色属性" class="headerlink" title="角色属性"></a>角色属性</h4><blockquote>
+<p>数据库角色的属性定义了角色的特权，包括登录，超级用户，数据库创建，角色创建，密码等。</p>
+</blockquote>
+<blockquote>
+<p>创建具有登录特权、密码和有效日期的角色：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE ROLE wzj WITH PASSWORD 'pgsql2020' VALID UNTIL '2020-01-01';</span></span><br><span class="line">CREATE ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>创建具有超级用户状态的角色，这意味着该角色可以绕过所有授权检查：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE ROLE bigwzj SUPERUSER;</span></span><br><span class="line">CREATE ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，您必须是超级用户才能创建另一个超级用户。</p>
+</blockquote>
+<blockquote>
+<p>如果希望角色具有数据库创建特权，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE ROLE admin CREATEDB;</span></span><br><span class="line">CREATE ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用以下语句创建具有创建特权的角色：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE ROLE security CREATEROLE;</span></span><br><span class="line">CREATE ROLE</span><br></pre></td></tr></table></figure>
+<h4 id="角色成员"><a href="#角色成员" class="headerlink" title="角色成员"></a>角色成员</h4><blockquote>
+<p>将角色作为一个组进行管理比较容易，这样就可以从整个组中授予或撤消特权。在PostgreSQL中，创建一个代表组的角色，然后将组角色的成员资格授予各个用户角色。按照惯例，组角色没有LOGIN特权。</p>
+</blockquote>
+<blockquote>
+<p>要创建组角色，请使用CREATE ROLE语句，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE ROLE group_role;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>例如，以下语句创建flywzj组角色：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE ROLE flywzj;</span></span><br><span class="line">CREATE ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用GRANT语句将用户角色添加到组角色中：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRANT group_role to user_role;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>例如，要将用户角色zhi添加到flywzj组角色，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># GRANT flywzj TO zhi;</span></span><br><span class="line">GRANT ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要从组角色中删除用户角色，请使用REVOKE语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">REVOKE group_role FROM user_role;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>例如，要从flywzj组角色中删除zhi用户角色，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># REVOKE flywzj FROM zhi;</span></span><br><span class="line">REVOKE ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，PostgreSQL不允许进行角色嵌套，诸如其中一个角色是另一个角色的成员这样的情况。</p>
+</blockquote>
+<h4 id="组和用户角色继承"><a href="#组和用户角色继承" class="headerlink" title="组和用户角色继承"></a>组和用户角色继承</h4><blockquote>
+<p>用户角色可以通过以下方式使用组角色的特权：</p>
+<ul>
+<li>首先，用户角色可以使用SET ROLE语句临时成为组角色，这意味着用户角色使用组角色的特权而不是原始特权。此外，在会话中创建的任何数据库对象均由组角色而不是用户角色拥有。</li>
+</ul>
+<ul>
+<li>其次，具有INHERIT属性的用户角色将自动拥有其所属成员的组角色的特权，包括由组角色继承的所有特权。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>请参见以下示例：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE ROLE doe LOGIN INHERIT;</span></span><br><span class="line">CREATE ROLE sales NOINHERIT;</span><br><span class="line">CREATE ROLE marketing NOINHERIT;</span><br><span class="line">GRANT sales to doe;</span><br><span class="line">GRANT marketing to sales;</span><br><span class="line">CREATE ROLE</span><br><span class="line"></span><br><span class="line">CREATE ROLE</span><br><span class="line"></span><br><span class="line">CREATE ROLE</span><br><span class="line"></span><br><span class="line">GRANT ROLE</span><br><span class="line"></span><br><span class="line">GRANT ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果以doe身份连接到PostgreSQL，您将拥有doe特权以及授予sales的特权，因为doe用户角色具有INHERIT属性。但是，您没有marketing特权，因为为sales用户角色定义了NOINHERIT属性。</p>
+</blockquote>
+<blockquote>
+<p>执行以下语句后：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SET ROLE sales;</span></span><br><span class="line">SET</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>将只拥有授予sales的特权，而没有授予doe的特权。</p>
+</blockquote>
+<blockquote>
+<p>并且执行以下语句后：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SET ROLE marketing;</span></span><br><span class="line">SET</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>仅具有授予marketing的特权，而没有授予admin和doe的特权。</p>
+</blockquote>
+<blockquote>
+<p>要恢复原始特权，可以使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># RESET ROLE;</span></span><br><span class="line">RESET</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，只有数据库对象的特权才是可继承的。LOGIN、SUPERUSER、CREATEROLE和CREATEDB是不能作为普通特权继承的特殊角色。</p>
+</blockquote>
+<h4 id="删除角色"><a href="#删除角色" class="headerlink" title="删除角色"></a>删除角色</h4><blockquote>
+<p>可以使用该DROP ROLE语句删除组角色或用户角色:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP ROLE role_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在删除角色之前，必须重新分配或删除其拥有的所有对象并撤消其特权。</p>
+</blockquote>
+<blockquote>
+<p>如果删除组角色，PostgreSQL将自动撤消组中的所有成员资格。该组的用户角色不受影响。</p>
+</blockquote>
+<h4 id="列出用户"><a href="#列出用户" class="headerlink" title="列出用户"></a>列出用户</h4><blockquote>
+<p>要列出PostgreSQL数据库服务器中的所有用户帐户，请使用psql命令\du，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \du postgres</span><br><span class="line">                             角色列表</span><br><span class="line"> 角色名称 |                    属性                    | 成员属于 </span><br><span class="line">----------+--------------------------------------------+----------</span><br><span class="line"> postgres | 超级用户, 建立角色, 建立 DB, 复制, 绕过RLS | &#123;&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要显示更多信息，可以使用\du +命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=&gt; \du+ postgres</span><br><span class="line">                                角色列表</span><br><span class="line"> 角色名称 |                    属性                    | 成员属于 | 描述 </span><br><span class="line">----------+--------------------------------------------+----------+------</span><br><span class="line"> postgres | 超级用户, 建立角色, 建立 DB, 复制, 绕过RLS | &#123;&#125;       |</span><br></pre></td></tr></table></figure>
+<h3 id="备份和还原数据库"><a href="#备份和还原数据库" class="headerlink" title="备份和还原数据库"></a>备份和还原数据库</h3><blockquote>
+<p>备份数据库是数据库管理中最关键的任务之一。在备份数据库之前，应考虑以下几点：</p>
+<ul>
+<li>全部/部分数据库</li>
+</ul>
+<ul>
+<li>数据和结构，或仅结构</li>
+</ul>
+<ul>
+<li>时间点恢复</li>
+</ul>
+<ul>
+<li>恢复性能<br>PostgreSQL提供pg_dump和pg_dumpall工具来轻松有效地备份数据库。</li>
+</ul>
+</blockquote>
+<h4 id="备份数据库"><a href="#备份数据库" class="headerlink" title="备份数据库"></a>备份数据库</h4><blockquote>
+<p>要备份数据库，可以使用pg_dump工具。pg_dump将所有数据库对象的内容转储到单个文件中。</p>
+</blockquote>
+<blockquote>
+<p>执行pg_dump程序，并使用以下选项将test数据库备份到root文件夹并命名为test.tar文件:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pg_dump -U postgres -W -F t test &gt; /root/test.tar</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>-U ：指定要连接到PostgreSQL数据库服务器的用户。 </li>
+</ul>
+<ul>
+<li>-W：强制pg_dump在连接到PostgreSQL数据库服务器之前提示输入密码。按下回车键后，pg_dump将提示输入postgres用户的密码。</li>
+<li>-F：指定输出文件格式，可以是以下之一：(c：自定义格式文件格式；d：目录格式存档；t：tar以及默认的p：纯文本SQL脚本文件)</li>
+</ul>
+<h4 id="备份所有数据库"><a href="#备份所有数据库" class="headerlink" title="备份所有数据库"></a>备份所有数据库</h4><blockquote>
+<p>要备份所有数据库，可以依次运行上面的单个pg_dump命令，如果要加快备份过程，则可以并行运行:</p>
+<ul>
+<li>首先，在psql中，使用命令\list列出集群中所有可用的数据库</li>
+</ul>
+<ul>
+<li>其次，使用上面所述的pg_dump程序备份每个单独的数据库。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>除pg_dump程序外，PostgreSQL还提供了pg_dumpall工具，该工具可一次备份所有数据库。但是，由于以下原因，不建议使用此工具：</p>
+<ul>
+<li>pg_dumpall程序将所有数据库一个接一个地导出到一个脚本文件中，这使您无法执行并行还原。如果以这种方式备份所有数据库，则还原过程将花费更多时间。</li>
+</ul>
+<ul>
+<li>转储所有数据库所需的时间比每个数据库要长，因此您不知道每个数据库的哪个转储与特定时间点有关。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>如果您有充分的理由使用pg_dumpall来备份所有数据库，则使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pg_dumpall -U postgres &gt; /root/all.sql</span><br></pre></td></tr></table></figure>
+<h4 id="备份数据库对象"><a href="#备份数据库对象" class="headerlink" title="备份数据库对象"></a>备份数据库对象</h4><blockquote>
+<p>有时，只想备份数据库对象，以便只能还原架构。这在测试阶段很有用，您不希望在测试期间填充旧的测试数据。</p>
+</blockquote>
+<blockquote>
+<p>要备份所有数据库中的所有对象，包括角色、表空间、数据库、架构、表、索引、触发器、函数、约束、视图、所有权和特权，请使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pg_dumpall -U postgres --schema-only  &gt; /root/schema.sql</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果只想备份角色，请使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pg_dumpall -U postgres --roles-only  &gt; /root/roles.sql</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要备份表空间，请使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pg_dumpall -U postgres --tablespaces-only  &gt; /root/tp.sql</span></span><br></pre></td></tr></table></figure>
+<h4 id="恢复数据库"><a href="#恢复数据库" class="headerlink" title="恢复数据库"></a>恢复数据库</h4><blockquote>
+<p>在还原数据库之前，需要终止与该数据库的所有连接并准备备份文件。在PostgreSQL中，可以通过两种方式还原数据库：</p>
+<ul>
+<li>使用psql还原由pg_dump和pg_dumpall工具生成的普通SQL脚本文件</li>
+</ul>
+<ul>
+<li>使用pg_restore还原pg_dump工具创建的tar文件和目录格式</li>
+</ul>
+</blockquote>
+<h5 id="使用psql还原数据库"><a href="#使用psql还原数据库" class="headerlink" title="使用psql还原数据库"></a>使用psql还原数据库</h5><blockquote>
+<p>使用psql实用程序，可以还原pg_dump，pg_dumpall或任何其他工具生成的兼容的SQL脚本备份文件。通过使用psql工具，必须执行整个脚本。</p>
+</blockquote>
+<blockquote>
+<p>要还原完整备份并忽略还原过程中发生的任何错误，请使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql -U username -f backupfile.sql</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要停止还原数据库以防发生错误，请使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql -U username --<span class="built_in">set</span> ON_ERROR_STOP=on -f backupfile</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果是在特定数据库中备份特定数据库对象，则可以使用以下命令还原它们：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql -U username -d database_name -f objects.sql</span><br></pre></td></tr></table></figure>
+<h5 id="使用pg-restore还原数据库"><a href="#使用pg-restore还原数据库" class="headerlink" title="使用pg_restore还原数据库"></a>使用pg_restore还原数据库</h5><blockquote>
+<p>除了psqltool之外，还可以使用pg_restore程序来还原由pg_dump或pg_dump工具备份的数据库。使用pg_restore程序，可以使用多种还原数据库选项，例如：</p>
+<ul>
+<li>pg_restore允许使用-j选项执行并行还原，以指定要还原的线程数。每个线程同时还原一个单独的表，从而极大地加快了处理速度。当前，pg_restore仅对自定义文件格式支持此选项。</li>
+</ul>
+<ul>
+<li>pg_restore可以在包含完整数据库的备份文件中还原特定的数据库对象。</li>
+</ul>
+<ul>
+<li>pg_restore可以采用旧版本备份的数据库，并以新版本还原它。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>创建示例数据库</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE DATABASE newtest;</span></span><br><span class="line">CREATE DATABASE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用之前以pg_dump工具生成的tar文件格式恢复test数据库</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pg_restore --dbname=newtest --verbose /root/test.tar</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果还原数据库，该数据库与您备份的数据库相同，则可以使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pg_restore --dbname=test --create --verbose /root/test.tar</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>创建新示例数据库</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE DATABASE test_tp;</span></span><br><span class="line">CREATE DATABASE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用以下命令从test.tar备份文件中还原表结构：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pg_restore --dbname=test_tp --section=pre-data /root/test.tar</span></span><br></pre></td></tr></table></figure>
+<h3 id="表空间管理"><a href="#表空间管理" class="headerlink" title="表空间管理"></a>表空间管理</h3><blockquote>
+<p>表空间是PostgreSQL在磁盘上的一个位置，PostgreSQL在其中存储包含数据库对象（例如索引和表）的数据文件。PostgreSQL使用表空间将逻辑名映射到磁盘上的物理位置。</p>
+</blockquote>
+<blockquote>
+<p>初始化数据库集群时，将自动创建两个表空间：</p>
+<ul>
+<li>pg_default表空间存储所有用户数据。是template1和template0数据库的默认表空间（因此，也将是其他数据库的默认表空间，除非被CREATE DATABASE中的TABLESPACE子句覆盖）。</li>
+</ul>
+<ul>
+<li>pg_global表空间存储所有全局数据。用于共享系统目录。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>使用表空间，可以控制PostgreSQL的磁盘布局。使用表空间有两个主要优点：</p>
+<ul>
+<li>首先，如果初始化集群的分区空间不足，则可以在其他分区上创建新的表空间并使用它，直到重新配置系统为止。</li>
+</ul>
+<ul>
+<li>其次，可以使用数据库对象使用情况的统计信息来优化数据库的性能。例如，可以将频繁访问索引或表放置在执行速度非常快的设备（例如固态设备）上，然后将包含存档数据的表放到速度较慢的设备上很少使用。</li>
+</ul>
+</blockquote>
+<h4 id="CREATE-TABLESPACE语句"><a href="#CREATE-TABLESPACE语句" class="headerlink" title="CREATE TABLESPACE语句"></a>CREATE TABLESPACE语句</h4><blockquote>
+<p>要创建新表空间，请使用CREATE TABLESPACE语句，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLESPACE tablespace_name</span><br><span class="line">OWNER user_name</span><br><span class="line">LOCATION directory_path;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>表空间的名称不应以pg_开头，因为这些名称是为系统表空间保留的。</p>
+</blockquote>
+<blockquote>
+<p>默认情况下，执行CREATE TABLESPACE的用户是表空间的所有者。该语句还允许将表空间的所有权分配给OWNER子句中指定的另一个用户。</p>
+</blockquote>
+<blockquote>
+<p>directory_path是用于表空间的空目录的绝对路径。PostgreSQL系统用户必须拥有该目录才能在其中读取和写入数据。</p>
+</blockquote>
+<blockquote>
+<p>创建表空间后，可以在CREATE DATABASE、CREATE TABLE和CREATEINDEX语句中进行指定，以将对象的数据文件存储在表空间中。</p>
+</blockquote>
+<h4 id="创建表空间示例"><a href="#创建表空间示例" class="headerlink" title="创建表空间示例"></a>创建表空间示例</h4><blockquote>
+<p>创建名为newtest的新表空间，该表空间的物理位置为/data/newtest。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mkdir /data/newtest</span></span><br><span class="line"><span class="comment"># chown postgres:postgres /data/newtest/</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE TABLESPACE newtest LOCATION '/data/newtest';</span></span><br><span class="line">CREATE TABLESPACE</span><br></pre></td></tr></table></figure>
+<h4 id="ALTER-TABLESPACE语句"><a href="#ALTER-TABLESPACE语句" class="headerlink" title="ALTER TABLESPACE语句"></a>ALTER TABLESPACE语句</h4><blockquote>
+<p>创建表空间后，可以使用ALTER TABLESPACE更改其定义，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLESPACE action;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>PostgreSQL提供了一些操作，例如重命名表空间名称，更改所有者和设置表空间的参数。要更改表空间的名称，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLESPACE tablespace_name RENAME TO new_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要更改表空间的所有者，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLESPACE tablespace_name OWNER TO new_owner;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>还可以更改表空间的参数，包括seq_page_cost和random_page_cost，这些参数指定从表空间中的表读取页面的开销。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLESPACE tablespace_name SET parameter = value;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要执行ALTER TABLESPACE语句，您必须是表空间的超级用户或所有者。注意，ALTER TABLESPACE语句是PostgreSQL扩展。</p>
+</blockquote>
+<h4 id="ALTER-TABLESPACE示例"><a href="#ALTER-TABLESPACE示例" class="headerlink" title="ALTER TABLESPACE示例"></a>ALTER TABLESPACE示例</h4><blockquote>
+<p>将newtest表空间重命名为ntest：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># ALTER TABLESPACE newtest RENAME TO ntest;</span></span><br><span class="line">ALTER TABLESPACE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>将ntest的所有者更改为zhi</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># ALTER TABLESPACE ntest OWNER to zhi;</span></span><br><span class="line">ALTER TABLESPACE</span><br></pre></td></tr></table></figure>
+<h4 id="DROP-TABLESPACE语句"><a href="#DROP-TABLESPACE语句" class="headerlink" title="DROP TABLESPACE语句"></a>DROP TABLESPACE语句</h4><blockquote>
+<p>要删除表空间，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLESPACE IF EXISTS tablespace_name;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>您需要在DROP TABLESPACE子句之后指定表空间的名称。IF EXISTS可以避免删除不存在的表空间的错误。只有表空间所有者或超级用户可以删除表空间。在删除表空间之前，请确保其为空，这意味着其中没有数据库对象。</p>
+</blockquote>
+<h4 id="DROP-TABLESPACE示例"><a href="#DROP-TABLESPACE示例" class="headerlink" title="DROP TABLESPACE示例"></a>DROP TABLESPACE示例</h4><blockquote>
+<p>首先，创建一个名为demo的表空间，将其映射到/data/demo目录:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE TABLESPACE demo LOCATION '/data/demo';</span></span><br><span class="line">CREATE TABLESPACE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其次，创建一个名为demodb的新数据库并将其表空间设置为demo:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE DATABASE demodb TABLESPACE = demo;</span></span><br><span class="line">CREATE DATABASE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第三，在demodb中创建一个名为test的新表，并将其表空间设置为demo：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># CREATE TABLE test (</span></span><br><span class="line">   ID serial PRIMARY KEY,</span><br><span class="line">   title VARCHAR (255) NOT NULL</span><br><span class="line">) TABLESPACE demo;</span><br><span class="line">CREATE TABLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用以下查询来获取demon表空间中的所有对象：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT</span></span><br><span class="line">   ts.spcname,</span><br><span class="line">   cl.relname</span><br><span class="line">FROM</span><br><span class="line">   pg_class cl</span><br><span class="line">JOIN pg_tablespace ts ON cl.reltablespace = ts.oid</span><br><span class="line">WHERE</span><br><span class="line">   ts.spcname = <span class="string">'demo'</span>;</span><br><span class="line"> spcname | relname</span><br><span class="line">---------+---------</span><br><span class="line"> demo    | <span class="built_in">test</span></span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第四，尝试删除demo表空间：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># DROP TABLESPACE demo;</span></span><br><span class="line">错误:  表空间 <span class="string">"demo"</span> 不是空的</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第五，使用ALTER TABLE语句将数据库移至另一个表空间，例如pg_default(也可以通过先删除数据库和表再删除表空间)：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ALTER DATABASE demodb</span><br><span class="line">SET TABLESPACE = pg_default;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>第六，再次删除表空间:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># DROP TABLESPACE demo;</span></span><br><span class="line">DROP TABLESPACE</span><br></pre></td></tr></table></figure>
+<h2 id="实用PG"><a href="#实用PG" class="headerlink" title="实用PG"></a>实用PG</h2><h3 id="重设密码"><a href="#重设密码" class="headerlink" title="重设密码"></a>重设密码</h3><blockquote>
+<p>PostgreSQL使用存储在数据库数据目录中的pg_hba.conf配置文件来控制客户端认证。HBA表示基于主机的身份验证。要重置postgres用户的密码，需要修改此配置文件中的一些参数。</p>
+</blockquote>
+<ul>
+<li>步骤1.通过将pg_dba.conf文件复制到其他位置来进行备份，或者只是将其重命名为pg_dba_bk.conf</li>
+</ul>
+<ul>
+<li>步骤2.通过在注释行之后的第一行添加以下行来编辑pg_dba.conf文件。注释行以＃号开头。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># "local" is for Unix domain socket connections only</span></span><br><span class="line"><span class="built_in">local</span>   all             all                                     trust</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>重新启动PostgreSQL服务器:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart postgresql-12</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>连接到PostgreSQL数据库服务器并更改postgres用户密码:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># psql -U postgres</span></span><br><span class="line">psql (12.1)</span><br><span class="line">输入 <span class="string">"help"</span> 来获取帮助信息.</span><br><span class="line"></span><br><span class="line">postgres=<span class="comment"># ALTER USER postgres with password 'very_secure_password';</span></span><br><span class="line">ALTER ROLE</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>恢复pg_db.conf文件并重新启动服务器，然后使用新密码连接到PostgreSQL数据库服务器</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart postgresql-12</span><br></pre></td></tr></table></figure>
+<h3 id="psql命令"><a href="#psql命令" class="headerlink" title="psql命令"></a>psql命令</h3><h4 id="连接到数据库"><a href="#连接到数据库" class="headerlink" title="连接到数据库"></a>连接到数据库</h4><blockquote>
+<p>以下命令连接到特定用户下的数据库，按下Enter键后，PostgreSQL将询问用户密码:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql -d database -U user -W</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>例如，以test用户连接到test数据库</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># psql -d test -U test -W</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要连接到位于另一主机上的数据库，请按如下所示添加-h选项：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql -h host -d database -U user -W</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要使用SSL模式进行连接，只需按以下命令所示进行指定：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql -U user -h host <span class="string">"dbname=db sslmode=require"</span></span><br></pre></td></tr></table></figure>
+<h4 id="切换到新数据库"><a href="#切换到新数据库" class="headerlink" title="切换到新数据库"></a>切换到新数据库</h4><blockquote>
+<p>连接到数据库后，可以在用户指定的用户下将连接切换到新数据库，先前的连接将关闭，如果省略user参数，则假定为当前用户。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\c dbname username</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>以下命令以postgres用户身份连接到postgres数据库：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># \c postgres postgres</span></span><br><span class="line">用户 postgres 的口令：</span><br><span class="line">您现在已经连接到数据库 <span class="string">"postgres"</span>,用户 <span class="string">"postgres"</span>.</span><br></pre></td></tr></table></figure>
+<h4 id="列出可用数据库"><a href="#列出可用数据库" class="headerlink" title="列出可用数据库"></a>列出可用数据库</h4><blockquote>
+<p>要列出当前PostgreSQL数据库服务器中的所有数据库，请使用\l命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \l</span></span><br><span class="line">                                     数据库列表</span><br><span class="line">   名称    |  拥有者  | 字元编码 |  校对规则   |    Ctype    |       存取权限        </span><br><span class="line">-----------+----------+----------+-------------+-------------+-----------------------</span><br><span class="line"> postgres  | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | </span><br><span class="line"> template0 | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =c/postgres          +</span><br><span class="line">           |          |          |             |             | postgres=CTc/postgres</span><br><span class="line"> template1 | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =c/postgres          +</span><br><span class="line">           |          |          |             |             | postgres=CTc/postgres</span><br><span class="line"> <span class="built_in">test</span>      | <span class="built_in">test</span>     | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =Tc/<span class="built_in">test</span>             +</span><br><span class="line">           |          |          |             |             | <span class="built_in">test</span>=CTc/<span class="built_in">test</span></span><br><span class="line">(4 行记录)</span><br></pre></td></tr></table></figure>
+<h4 id="列出可用表"><a href="#列出可用表" class="headerlink" title="列出可用表"></a>列出可用表</h4><blockquote>
+<p>要列出当前数据库中的所有表，请使用\dt命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \dt</span></span><br><span class="line">                关联列表</span><br><span class="line"> 架构模式 |   名称   |  类型  |  拥有者  </span><br><span class="line">----------+----------+--------+----------</span><br><span class="line"> public   | books    | 数据表 | postgres</span><br><span class="line"> public   | contacts | 数据表 | postgres</span><br><span class="line">(2 行记录)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>请注意，此命令显示当前连接的数据库中的唯一表。</p>
+</blockquote>
+<h4 id="获取表信息"><a href="#获取表信息" class="headerlink" title="获取表信息"></a>获取表信息</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \d books</span></span><br><span class="line">                                  数据表 <span class="string">"public.books"</span></span><br><span class="line"> 栏位  |          类型          | 校对规则 |  可空的  |               预设                </span><br><span class="line">-------+------------------------+----------+----------+-----------------------------------</span><br><span class="line"> id    | <span class="built_in">integer</span>                |          | not null | nextval(<span class="string">'books_id_seq'</span>::regclass)</span><br><span class="line"> title | character varying(255) |          |          | </span><br><span class="line"> attr  | hstore                 |          |          | </span><br><span class="line">索引：</span><br><span class="line">    <span class="string">"books_pkey"</span> PRIMARY KEY, btree (id)</span><br></pre></td></tr></table></figure>
+<h4 id="列出可用的架构"><a href="#列出可用的架构" class="headerlink" title="列出可用的架构"></a>列出可用的架构</h4><blockquote>
+<p>要列出当前连接的数据库的所有架构，请使用\dn命令:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \dn</span></span><br><span class="line">   架构模式列表</span><br><span class="line">  名称  |  拥有者  </span><br><span class="line">--------+----------</span><br><span class="line"> public | postgres</span><br><span class="line">(1 行记录)</span><br></pre></td></tr></table></figure>
+<h4 id="列出可用功能"><a href="#列出可用功能" class="headerlink" title="列出可用功能"></a>列出可用功能</h4><blockquote>
+<p>要列出当前数据库中的可用功能，请使用\df命令:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \df</span></span><br><span class="line">                                                      函数列表</span><br><span class="line"> 架构模式 |           名称           | 结果数据类型 |                      参数数据类型                       | 类型 </span><br><span class="line">----------+--------------------------+--------------+---------------------------------------------------------+------</span><br><span class="line"> public   | akeys                    | text[]       | hstore                                                  | 函数</span><br><span class="line"> public   | avals                    | text[]       | hstore                                                  | 函数</span><br><span class="line"> public   | defined                  | boolean      | hstore, text                                            | 函数</span><br><span class="line"> public   | delete                   | hstore       | hstore, hstore                                          | 函数</span><br><span class="line"> public   | delete                   | hstore       | hstore, text                                            | 函数</span><br><span class="line"> public   | delete                   | hstore       | hstore, text[]                                          | 函数</span><br><span class="line"> public   | each                     | SETOF record | hs hstore, OUT key text, OUT value text                 | 函数</span><br><span class="line"> public   | exist                    | boolean      | hstore, text                                            | 函数</span><br><span class="line"> public   | exists_all               | boolean      | hstore, text[]                                          | 函数</span><br><span class="line"> public   | exists_any               | boolean      | hstore, text[]                                          | 函数</span><br><span class="line"> public   | fetchval                 | text         | hstore, text                                            | 函数</span><br><span class="line"> public   | ghstore_compress         | internal     | internal                                                | 函数</span><br><span class="line"> public   | ghstore_consistent       | boolean      | internal, hstore, smallint, oid, internal               | 函数</span><br><span class="line"> public   | ghstore_decompress       | internal     | internal                                                | 函数</span><br><span class="line"> public   | ghstore_in               | ghstore      | cstring                                                 | 函数</span><br><span class="line"> public   | ghstore_out              | cstring      | ghstore                                                 | 函数</span><br><span class="line"> public   | ghstore_penalty          | internal     | internal, internal, internal                            | 函数</span><br><span class="line"> public   | ghstore_picksplit        | internal     | internal, internal                                      | 函数</span><br><span class="line"> public   | ghstore_same             | internal     | ghstore, ghstore, internal                              | 函数</span><br><span class="line"> public   | ghstore_union            | ghstore      | internal, internal                                      | 函数</span><br><span class="line"> public   | gin_consistent_hstore    | boolean      | internal, smallint, hstore, <span class="built_in">integer</span>, internal, internal | 函数</span><br><span class="line"> public   | gin_extract_hstore       | internal     | hstore, internal                                        | 函数</span><br><span class="line"> public   | gin_extract_hstore_query | internal     | hstore, internal, smallint, internal, internal          | 函数</span><br><span class="line"> public   | hs_concat                | hstore       | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hs_contained             | boolean      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hs_contains              | boolean      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hstore                   | hstore       | record                                                  | 函数</span><br><span class="line"> public   | hstore                   | hstore       | text[]                                                  | 函数</span><br><span class="line"> public   | hstore                   | hstore       | text, text                                              | 函数</span><br><span class="line"> public   | hstore                   | hstore       | text[], text[]                                          | 函数</span><br><span class="line"> public   | hstore_cmp               | <span class="built_in">integer</span>      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hstore_eq                | boolean      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hstore_ge                | boolean      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hstore_gt                | boolean      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hstore_hash              | <span class="built_in">integer</span>      | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_hash_extended     | bigint       | hstore, bigint                                          | 函数</span><br><span class="line"> public   | hstore_in                | hstore       | cstring                                                 | 函数</span><br><span class="line"> public   | hstore_le                | boolean      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hstore_lt                | boolean      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hstore_ne                | boolean      | hstore, hstore                                          | 函数</span><br><span class="line"> public   | hstore_out               | cstring      | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_recv              | hstore       | internal                                                | 函数</span><br><span class="line"> public   | hstore_send              | bytea        | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_to_array          | text[]       | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_to_json           | json         | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_to_json_loose     | json         | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_to_jsonb          | jsonb        | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_to_jsonb_loose    | jsonb        | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_to_matrix         | text[]       | hstore                                                  | 函数</span><br><span class="line"> public   | hstore_version_diag      | <span class="built_in">integer</span>      | hstore                                                  | 函数</span><br><span class="line"> public   | isdefined                | boolean      | hstore, text                                            | 函数</span><br><span class="line"> public   | isexists                 | boolean      | hstore, text                                            | 函数</span><br><span class="line"> public   | populate_record          | anyelement   | anyelement, hstore                                      | 函数</span><br><span class="line"> public   | skeys                    | SETOF text   | hstore                                                  | 函数</span><br><span class="line"> public   | slice                    | hstore       | hstore, text[]                                          | 函数</span><br><span class="line"> public   | slice_array              | text[]       | hstore, text[]                                          | 函数</span><br><span class="line"> public   | svals                    | SETOF text   | hstore                                                  | 函数</span><br><span class="line"> public   | tconvert                 | hstore       | text, text                                              | 函数</span><br><span class="line">(58 行记录)</span><br></pre></td></tr></table></figure>
+<h4 id="列出可用的视图"><a href="#列出可用的视图" class="headerlink" title="列出可用的视图"></a>列出可用的视图</h4><blockquote>
+<p>要列出当前数据库中的可用视图，请使用\dv命令:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># \dv</span></span><br><span class="line">                        关联列表</span><br><span class="line"> 架构模式 |            名称            | 类型 |  拥有者  </span><br><span class="line">----------+----------------------------+------+----------</span><br><span class="line"> public   | actor_info                 | 视图 | postgres</span><br><span class="line"> public   | city_a                     | 视图 | <span class="built_in">test</span></span><br><span class="line"> public   | city_a_usa                 | 视图 | <span class="built_in">test</span></span><br><span class="line"> public   | count                      | 视图 | <span class="built_in">test</span></span><br><span class="line"> public   | cust_data                  | 视图 | <span class="built_in">test</span></span><br><span class="line"> public   | customer_list              | 视图 | postgres</span><br><span class="line"> public   | film_list                  | 视图 | postgres</span><br><span class="line"> public   | nicer_but_slower_film_list | 视图 | postgres</span><br><span class="line"> public   | sales_by_film_category     | 视图 | postgres</span><br><span class="line"> public   | sales_by_store             | 视图 | postgres</span><br><span class="line"> public   | staff_list                 | 视图 | postgres</span><br><span class="line"> public   | usa_city                   | 视图 | <span class="built_in">test</span></span><br><span class="line">(12 行记录)</span><br></pre></td></tr></table></figure>
+<h4 id="列出用户及其角色"><a href="#列出用户及其角色" class="headerlink" title="列出用户及其角色"></a>列出用户及其角色</h4><blockquote>
+<p>要列出所有用户及其分配角色，请使用\du命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \du</span></span><br><span class="line">                                        角色列表</span><br><span class="line"> 角色名称 |                    属性                    |            成员属于             </span><br><span class="line">----------+--------------------------------------------+---------------------------------</span><br><span class="line"> postgres | 超级用户, 建立角色, 建立 DB, 复制, 绕过RLS | &#123;&#125;</span><br><span class="line"> root     |                                            | &#123;&#125;</span><br><span class="line"> <span class="built_in">test</span>     |                                            | &#123;pg_read_server_files,postgres&#125;</span><br><span class="line"> wzj      | 无法登录                                  +| &#123;zhi&#125;</span><br><span class="line">          | 密码有效直至2020-01-01 00:00:00+08         | </span><br><span class="line"> zhi      |                                            | &#123;&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="执行上一个命令"><a href="#执行上一个命令" class="headerlink" title="执行上一个命令"></a>执行上一个命令</h4><blockquote>
+<p>查看数据库版本:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT version();</span></span><br><span class="line">                                                 version                                                 </span><br><span class="line">---------------------------------------------------------------------------------------------------------</span><br><span class="line"> PostgreSQL 12.1 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39), 64-bit</span><br><span class="line">(1 行记录)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用\g命令执行上一个命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \g</span></span><br><span class="line">                                                 version                                                 </span><br><span class="line">---------------------------------------------------------------------------------------------------------</span><br><span class="line"> PostgreSQL 12.1 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39), 64-bit</span><br><span class="line">(1 行记录)</span><br></pre></td></tr></table></figure>
+<h4 id="命令历史"><a href="#命令历史" class="headerlink" title="命令历史"></a>命令历史</h4><blockquote>
+<p>要显示命令历史记录，请使用\s命令:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \s</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要将命令历史记录保存到文件，则需要按照\s命令指定文件名，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\s filename</span><br></pre></td></tr></table></figure>
+<h4 id="从文件执行psql命令"><a href="#从文件执行psql命令" class="headerlink" title="从文件执行psql命令"></a>从文件执行psql命令</h4><blockquote>
+<p>如果要从文件执行psql命令，请使用\i命令，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\i filename</span><br></pre></td></tr></table></figure>
+<h4 id="获取有关psql命令的帮助"><a href="#获取有关psql命令的帮助" class="headerlink" title="获取有关psql命令的帮助"></a>获取有关psql命令的帮助</h4><blockquote>
+<p>要知道所有可用的psql命令，请使用\？命令:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\?</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要获得有关特定PostgreSQL语句的帮助，请使用\h命令。例如，如果想了解有关ALTER TABLE语句的详细信息，请使用以下命令：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \h ALTER TABLE</span></span><br></pre></td></tr></table></figure>
+<h4 id="打开查询执行时间"><a href="#打开查询执行时间" class="headerlink" title="打开查询执行时间"></a>打开查询执行时间</h4><blockquote>
+<p>要打开查询执行时间，请使用\timing命令:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># \timing</span></span><br><span class="line">启用计时功能.</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># select count(*) from film;</span></span><br><span class="line"> count </span><br><span class="line">-------</span><br><span class="line">  1000</span><br><span class="line">(1 行记录)</span><br><span class="line"></span><br><span class="line">时间：2.967 ms</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>可使用相同的命令\timing将其关闭:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># \timing</span></span><br><span class="line">停止计时功能.</span><br></pre></td></tr></table></figure>
+<h4 id="开关输出选项"><a href="#开关输出选项" class="headerlink" title="开关输出选项"></a>开关输出选项</h4><blockquote>
+<p>psql支持某些类型的输出格式，并允您自定义输出格式的动态格式:</p>
+<ul>
+<li>\a 命令从对齐的列输出切换为非对齐的列输出。</li>
+</ul>
+<ul>
+<li>\H 命令将输出格式化为HTML格式。</li>
+</ul>
+</blockquote>
+<h4 id="退出psql"><a href="#退出psql" class="headerlink" title="退出psql"></a>退出psql</h4><blockquote>
+<p>要退出psql，请使用\q命令，然后按Enter键退出psql:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\q</span><br></pre></td></tr></table></figure>
+<h3 id="PostgreSQL描述表"><a href="#PostgreSQL描述表" class="headerlink" title="PostgreSQL描述表"></a>PostgreSQL描述表</h3><blockquote>
+<p>如果使用MySQL，则使用DESCRIBE语句在特定表的列上查找信息。PostgreSQL不提供DESCRIBE 语句。但是，可以通过两种方法查询有关表列的信息:</p>
+</blockquote>
+<h4 id="使用psql的DESCRIBE-TABLE"><a href="#使用psql的DESCRIBE-TABLE" class="headerlink" title="使用psql的DESCRIBE TABLE"></a>使用psql的DESCRIBE TABLE</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># \d city</span></span><br><span class="line">                                          数据表 <span class="string">"public.city"</span></span><br><span class="line">    栏位     |            类型             | 校对规则 |  可空的  |                 预设                  </span><br><span class="line">-------------+-----------------------------+----------+----------+---------------------------------------</span><br><span class="line"> city_id     | <span class="built_in">integer</span>                     |          | not null | nextval(<span class="string">'city_city_id_seq'</span>::regclass)</span><br><span class="line"> city        | character varying(50)       |          | not null | </span><br><span class="line"> country_id  | smallint                    |          | not null | </span><br><span class="line"> last_update | timestamp without time zone |          | not null | now()</span><br><span class="line">索引：</span><br><span class="line">    <span class="string">"city_pkey"</span> PRIMARY KEY, btree (city_id)</span><br><span class="line">    <span class="string">"idx_fk_country_id"</span> btree (country_id)</span><br><span class="line">外部键(FK)限制：</span><br><span class="line">    <span class="string">"fk_city"</span> FOREIGN KEY (country_id) REFERENCES country(country_id)</span><br><span class="line">由引用：</span><br><span class="line">    TABLE <span class="string">"address"</span> CONSTRAINT <span class="string">"fk_address_city"</span> FOREIGN KEY (city_id) REFERENCES city(city_id)</span><br><span class="line">触发器：</span><br><span class="line">    last_updated BEFORE UPDATE ON city FOR EACH ROW EXECUTE FUNCTION last_updated()</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># \d+ city</span></span><br><span class="line">                                                         数据表 <span class="string">"public.city"</span></span><br><span class="line">    栏位     |            类型             | 校对规则 |  可空的  |                 预设                  |   存储   | 统计目标 | 描述 </span><br><span class="line">-------------+-----------------------------+----------+----------+---------------------------------------+----------+----------+------</span><br><span class="line"> city_id     | <span class="built_in">integer</span>                     |          | not null | nextval(<span class="string">'city_city_id_seq'</span>::regclass) | plain    |          | </span><br><span class="line"> city        | character varying(50)       |          | not null |                                       | extended |          | </span><br><span class="line"> country_id  | smallint                    |          | not null |                                       | plain    |          | </span><br><span class="line"> last_update | timestamp without time zone |          | not null | now()                                 | plain    |          | </span><br><span class="line">索引：</span><br><span class="line">    <span class="string">"city_pkey"</span> PRIMARY KEY, btree (city_id)</span><br><span class="line">    <span class="string">"idx_fk_country_id"</span> btree (country_id)</span><br><span class="line">外部键(FK)限制：</span><br><span class="line">    <span class="string">"fk_city"</span> FOREIGN KEY (country_id) REFERENCES country(country_id)</span><br><span class="line">由引用：</span><br><span class="line">    TABLE <span class="string">"address"</span> CONSTRAINT <span class="string">"fk_address_city"</span> FOREIGN KEY (city_id) REFERENCES city(city_id)</span><br><span class="line">触发器：</span><br><span class="line">    last_updated BEFORE UPDATE ON city FOR EACH ROW EXECUTE FUNCTION last_updated()</span><br><span class="line">访问方法 heap</span><br></pre></td></tr></table></figure>
+<h4 id="使用information-schema的DESCRIBE-TABLE"><a href="#使用information-schema的DESCRIBE-TABLE" class="headerlink" title="使用information_schema的DESCRIBE TABLE"></a>使用information_schema的DESCRIBE TABLE</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   COLUMN_NAME</span><br><span class="line">FROM</span><br><span class="line">   information_schema.COLUMNS</span><br><span class="line">WHERE</span><br><span class="line">   TABLE_NAME = <span class="string">'city'</span>;</span><br><span class="line"> column_name</span><br><span class="line">-------------</span><br><span class="line"> city_id</span><br><span class="line"> city</span><br><span class="line"> country_id</span><br><span class="line"> last_update</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="查看数据库"><a href="#查看数据库" class="headerlink" title="查看数据库"></a>查看数据库</h3><blockquote>
+<p>在MySQL中，可以使用SHOW DATABASES语句显示数据库服务器中的所有数据库。PostgreSQL不直接提供此语句，而是提供了两种显示数据库的方式。</p>
+</blockquote>
+<h4 id="使用psql工具列出数据库"><a href="#使用psql工具列出数据库" class="headerlink" title="使用psql工具列出数据库"></a>使用psql工具列出数据库</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># \l</span></span><br><span class="line">                                     数据库列表</span><br><span class="line">   名称    |  拥有者  | 字元编码 |  校对规则   |    Ctype    |       存取权限        </span><br><span class="line">-----------+----------+----------+-------------+-------------+-----------------------</span><br><span class="line"> postgres  | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | </span><br><span class="line"> template0 | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =c/postgres          +</span><br><span class="line">           |          |          |             |             | postgres=CTc/postgres</span><br><span class="line"> template1 | postgres | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =c/postgres          +</span><br><span class="line">           |          |          |             |             | postgres=CTc/postgres</span><br><span class="line"> <span class="built_in">test</span>      | <span class="built_in">test</span>     | UTF8     | zh_CN.UTF-8 | zh_CN.UTF-8 | =Tc/<span class="built_in">test</span>             +</span><br><span class="line">           |          |          |             |             | <span class="built_in">test</span>=CTc/<span class="built_in">test</span></span><br><span class="line">(4 行记录)</span><br></pre></td></tr></table></figure>
+<h4 id="使用SELECT语句列出数据库"><a href="#使用SELECT语句列出数据库" class="headerlink" title="使用SELECT语句列出数据库"></a>使用SELECT语句列出数据库</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   datname</span><br><span class="line">FROM</span><br><span class="line">   pg_database;</span><br><span class="line">  datname</span><br><span class="line">-----------</span><br><span class="line"> postgres</span><br><span class="line"> template1</span><br><span class="line"> template0</span><br><span class="line"> <span class="built_in">test</span></span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="查看表"><a href="#查看表" class="headerlink" title="查看表"></a>查看表</h3><blockquote>
+<p>在MySQL中，可以使用SHOW TABLES语句显示数据库服务器中的所有表。PostgreSQL不直接提供此语句，而是提供了两种显示表的方式。</p>
+</blockquote>
+<h4 id="使用psql显示表"><a href="#使用psql显示表" class="headerlink" title="使用psql显示表"></a>使用psql显示表</h4><blockquote>
+<p>如果使用的是psql，则可以使用以下命令显示当前数据库中的表:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># \dt</span></span><br><span class="line">                关联列表</span><br><span class="line"> 架构模式 |   名称   |  类型  |  拥有者  </span><br><span class="line">----------+----------+--------+----------</span><br><span class="line"> public   | books    | 数据表 | postgres</span><br><span class="line"> public   | contacts | 数据表 | postgres</span><br><span class="line">(2 行记录)</span><br></pre></td></tr></table></figure>
+<h4 id="使用pg-catalog模式显示表"><a href="#使用pg-catalog模式显示表" class="headerlink" title="使用pg_catalog模式显示表"></a>使用pg_catalog模式显示表</h4><blockquote>
+<p>在PostgreSQL中显示表的另一种方法是使用SELECT语句从PostgreSQL目录中查询数据，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">postgres=<span class="comment"># SELECT</span></span><br><span class="line">   *</span><br><span class="line">FROM</span><br><span class="line">   pg_catalog.pg_tables</span><br><span class="line">WHERE</span><br><span class="line">   schemaname != <span class="string">'pg_catalog'</span></span><br><span class="line">AND schemaname != <span class="string">'information_schema'</span>;</span><br><span class="line"> schemaname | tablename | tableowner | tablespace | hasindexes | hasrules | hastriggers | rowsecurity</span><br><span class="line">------------+-----------+------------+------------+------------+----------+-------------+-------------</span><br><span class="line"> public     | contacts  | postgres   |            | t          | f        | f           | f</span><br><span class="line"> public     | books     | postgres   |            | t          | f        | f           | f</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="比较两个表中的数据"><a href="#比较两个表中的数据" class="headerlink" title="比较两个表中的数据"></a>比较两个表中的数据</h2><h3 id="使用EXCEPT和UNION运算符比较两个表"><a href="#使用EXCEPT和UNION运算符比较两个表" class="headerlink" title="使用EXCEPT和UNION运算符比较两个表"></a>使用EXCEPT和UNION运算符比较两个表</h3><blockquote>
+<p>首先，创建两个具有相同结构和数据的表:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE foo (</span></span><br><span class="line">   ID INT PRIMARY KEY,</span><br><span class="line">   NAME VARCHAR (50)</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO foo (ID, NAME)</span></span><br><span class="line">VALUES</span><br><span class="line">   (1, <span class="string">'a'</span>),</span><br><span class="line">   (2, <span class="string">'b'</span>);</span><br><span class="line">INSERT 0 2</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE bar (</span></span><br><span class="line">   ID INT PRIMARY KEY,</span><br><span class="line">   NAME VARCHAR (50)</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO bar (ID, NAME)</span></span><br><span class="line">VALUES</span><br><span class="line">   (1, <span class="string">'a'</span>),</span><br><span class="line">   (2, <span class="string">'b'</span>);</span><br><span class="line">INSERT 0 2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>接下来，更新表bar中的一行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># UPDATE bar</span></span><br><span class="line">SET name = <span class="string">'c'</span></span><br><span class="line">WHERE</span><br><span class="line">   id = 2;</span><br><span class="line">UPDATE 1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>然后，要查找foo表而不是bar表中的行，我们使用以下查询：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   ID,</span><br><span class="line">   NAME,</span><br><span class="line">   <span class="string">'not in bar'</span> AS note</span><br><span class="line">FROM</span><br><span class="line">   foo</span><br><span class="line">EXCEPT</span><br><span class="line">   SELECT</span><br><span class="line">      ID,</span><br><span class="line">      NAME,</span><br><span class="line">      <span class="string">'not in bar'</span> AS note</span><br><span class="line">   FROM</span><br><span class="line">      bar;</span><br><span class="line"> id | name |    note</span><br><span class="line">----+------+------------</span><br><span class="line">  2 | b    | not <span class="keyword">in</span> bar</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>我们使用EXCEPT运算符返回foo表中的行，而不返回bar表中的行。如下使用相同语法查找bar表中而不是foo表中的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   ID,</span><br><span class="line">   NAME,</span><br><span class="line">   <span class="string">'not in foo'</span> AS note</span><br><span class="line">FROM</span><br><span class="line">   bar</span><br><span class="line">EXCEPT</span><br><span class="line">   SELECT</span><br><span class="line">      ID,</span><br><span class="line">      NAME,</span><br><span class="line">      <span class="string">'not in foo'</span> AS note</span><br><span class="line">   FROM</span><br><span class="line">      foo;</span><br><span class="line"> id | name |    note</span><br><span class="line">----+------+------------</span><br><span class="line">  2 | c    | not <span class="keyword">in</span> foo</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用OUTER JOIN比较两个表</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">   id,</span><br><span class="line">   name</span><br><span class="line">FROM</span><br><span class="line">   foo</span><br><span class="line">FULL OUTER JOIN bar USING (id, name)</span><br><span class="line">WHERE</span><br><span class="line">   foo.id IS NULL</span><br><span class="line">OR bar.id IS NULL;</span><br><span class="line"> id | name</span><br><span class="line">----+------</span><br><span class="line">  2 | b</span><br><span class="line">  2 | c</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<h3 id="删除重复的行"><a href="#删除重复的行" class="headerlink" title="删除重复的行"></a>删除重复的行</h3><blockquote>
+<p>创建示例表</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE TABLE sg(</span></span><br><span class="line">    id SERIAL PRIMARY KEY,</span><br><span class="line">    fruit VARCHAR(50) NOT NULL</span><br><span class="line">);</span><br><span class="line">CREATE TABLE</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># INSERT INTO sg(fruit) values('apple');</span></span><br><span class="line">INSERT INTO sg(fruit) values(<span class="string">'apple'</span>);</span><br><span class="line"> </span><br><span class="line">INSERT INTO sg(fruit) values(<span class="string">'orange'</span>);</span><br><span class="line">INSERT INTO sg(fruit) values(<span class="string">'orange'</span>);</span><br><span class="line">INSERT INTO sg(fruit) values(<span class="string">'orange'</span>);</span><br><span class="line"> </span><br><span class="line">INSERT INTO sg(fruit) values(<span class="string">'banana'</span>);</span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line">INSERT 0 1</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    id,</span><br><span class="line">    fruit</span><br><span class="line">FROM</span><br><span class="line">    sg;</span><br><span class="line"> id | fruit</span><br><span class="line">----+--------</span><br><span class="line">  1 | apple</span><br><span class="line">  2 | apple</span><br><span class="line">  3 | orange</span><br><span class="line">  4 | orange</span><br><span class="line">  5 | orange</span><br><span class="line">  6 | banana</span><br><span class="line">(6 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果表中的行很少，则可以立即看到哪些行重复。但是，大表并非如此。找到重复的行，可使用以下语句： </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    fruit,</span><br><span class="line">    COUNT( fruit )</span><br><span class="line">FROM</span><br><span class="line">    sg</span><br><span class="line">GROUP BY</span><br><span class="line">    fruit</span><br><span class="line">HAVING</span><br><span class="line">    COUNT( fruit )&gt; 1</span><br><span class="line">ORDER BY</span><br><span class="line">    fruit;</span><br><span class="line"> fruit  | count</span><br><span class="line">--------+-------</span><br><span class="line"> apple  |     2</span><br><span class="line"> orange |     3</span><br><span class="line">(2 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用DELETE USING语句删除重复的行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE</span></span><br><span class="line">FROM</span><br><span class="line">    sg  a</span><br><span class="line">        USING sg b</span><br><span class="line">WHERE</span><br><span class="line">    a.id &lt; b.id</span><br><span class="line">    AND a.fruit = b.fruit;</span><br><span class="line">DELETE 3</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此示例中，我们将sg表与其自身相连，并检查了fruit 列中两个不同的行（a.id &lt;b.id）是否具有相同的值。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    id,</span><br><span class="line">    fruit</span><br><span class="line">FROM</span><br><span class="line">    sg;</span><br><span class="line"> id | fruit</span><br><span class="line">----+--------</span><br><span class="line">  2 | apple</span><br><span class="line">  5 | orange</span><br><span class="line">  6 | banana</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该语句删除了ID最少的重复行，并保留了ID最高的行。如果要保留具有最低id的重复行，则只需在WHERE子句中翻转运算符即可：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE</span></span><br><span class="line">FROM</span><br><span class="line">    sg  a</span><br><span class="line">        USING sg b</span><br><span class="line">WHERE</span><br><span class="line">    a.id &gt; b.id</span><br><span class="line">    AND a.fruit = b.fruit;</span><br></pre></td></tr></table></figure>
+<h3 id="使用子查询删除重复的行"><a href="#使用子查询删除重复的行" class="headerlink" title="使用子查询删除重复的行"></a>使用子查询删除重复的行</h3><blockquote>
+<p>以下语句使用suquery删除重复的行，并保留具有最低ID的行:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># DELETE FROM sg</span></span><br><span class="line">WHERE id IN</span><br><span class="line">    (SELECT id</span><br><span class="line">    FROM</span><br><span class="line">        (SELECT id,</span><br><span class="line">         ROW_NUMBER() OVER( PARTITION BY fruit</span><br><span class="line">        ORDER BY  id ) AS row_num</span><br><span class="line">        FROM sg ) t</span><br><span class="line">        WHERE t.row_num &gt; 1 );</span><br><span class="line">DELETE 3</span><br><span class="line"></span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT</span></span><br><span class="line">    id,</span><br><span class="line">    fruit</span><br><span class="line">FROM</span><br><span class="line">    sg;</span><br><span class="line"> id | fruit</span><br><span class="line">----+--------</span><br><span class="line">  1 | apple</span><br><span class="line">  3 | orange</span><br><span class="line">  6 | banana</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在此的示例子查询返回重复的行，重复组中的第一行除外。并且外部DELETE语句删除了子查询返回的重复行。</p>
+</blockquote>
+<blockquote>
+<p>如果要保留具有最高ID的重复行，只需在子查询中更改顺序：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM sg</span><br><span class="line">WHERE id IN</span><br><span class="line">    (SELECT id</span><br><span class="line">    FROM</span><br><span class="line">        (SELECT id,</span><br><span class="line">         ROW_NUMBER() OVER( PARTITION BY fruit</span><br><span class="line">        ORDER BY  id DESC ) AS row_num</span><br><span class="line">        FROM sg ) t</span><br><span class="line">        WHERE t.row_num &gt; 1 );</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要基于多个列的值删除重复项，则以下是查询模板：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM table_name</span><br><span class="line">WHERE id IN</span><br><span class="line">    (SELECT id</span><br><span class="line">    FROM</span><br><span class="line">        (SELECT id,</span><br><span class="line">         ROW_NUMBER() OVER( PARTITION BY column_1,</span><br><span class="line">         column_2</span><br><span class="line">        ORDER BY  id ) AS row_num</span><br><span class="line">        FROM table_name ) t</span><br><span class="line">        WHERE t.row_num &gt; 1 );</span><br><span class="line">```        </span><br><span class="line"></span><br><span class="line">+ 在这种情况下，该语句将删除column_1和column_2列中所有具有重复值的行。</span><br><span class="line"></span><br><span class="line"><span class="comment">## 生成特定范围内的随机数</span></span><br><span class="line">&gt; PostgreSQL提供了random()函数，该函数返回0到1之间的随机数。以下语句返回0到1之间的随机数:</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT random();</span></span><br><span class="line">       random</span><br><span class="line">---------------------</span><br><span class="line"> 0.38380355708888203</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要生成1到10之间的随机数，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT random() * 9 + 1 AS RAND_1_10;</span></span><br><span class="line">     rand_1_10</span><br><span class="line">-------------------</span><br><span class="line"> 8.934232181654593</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要将随机数生成为整数，请按以下方式将floor()函数应用于表达式：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT floor(random() * 10 + 1)::int;</span></span><br><span class="line"> floor</span><br><span class="line">-------</span><br><span class="line">     7</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>通常，要生成两个整数l和h之间的随机数，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT floor(random() * (h<span class="_">-l</span>+1) + l)::int;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如下函数返回两个数字l和h之间的随机数：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># CREATE OR REPLACE FUNCTION random_between(low INT ,high INT)</span></span><br><span class="line">   RETURNS INT AS</span><br><span class="line">$$</span><br><span class="line">BEGIN</span><br><span class="line">   RETURN floor(random()* (high-low + 1) + low);</span><br><span class="line">END;</span><br><span class="line">$$ language <span class="string">'plpgsql'</span> STRICT;</span><br><span class="line">CREATE FUNCTION</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>调用random_between()函数并返回1到100之间的随机数:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT random_between(1,100);</span></span><br><span class="line"> random_between</span><br><span class="line">----------------</span><br><span class="line">              9</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果要获取两个整数之间的多个随机数，请使用以下语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># SELECT random_between(1,100)</span></span><br><span class="line">FROM generate_series(1,5);</span><br><span class="line"> random_between</span><br><span class="line">----------------</span><br><span class="line">             65</span><br><span class="line">             75</span><br><span class="line">             20</span><br><span class="line">             59</span><br><span class="line">             46</span><br><span class="line">(5 rows)</span><br></pre></td></tr></table></figure>
+<h2 id="EXPLAIN语句"><a href="#EXPLAIN语句" class="headerlink" title="EXPLAIN语句"></a>EXPLAIN语句</h2><blockquote>
+<p>EXPLAIN语句返回PostgreSQL计划程序为给定语句生成的执行计划。</p>
+</blockquote>
+<blockquote>
+<p>EXPLAIN函数显示如何通过索引扫描或顺序扫描等方式扫描语句中涉及的表，并且如果使用多个表，将使用哪种连接算法。</p>
+</blockquote>
+<blockquote>
+<p>下面显示了EXPLAIN语句的语法：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN [ ( option [, ...] ) ] sql_statement;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其中option可以是以下之一：</p>
+<ul>
+<li>ANALYZE [ boolean ]</li>
+</ul>
+<ul>
+<li>VERBOSE [ boolean ]</li>
+</ul>
+<ul>
+<li>COSTS [ boolean ]</li>
+</ul>
+<ul>
+<li>BUFFERS [ boolean ]</li>
+</ul>
+<ul>
+<li>TIMING [ boolean ]  </li>
+</ul>
+<ul>
+<li>SUMMARY [ boolean ]</li>
+</ul>
+<ul>
+<li>FORMAT { TEXT | XML | JSON | YAML }</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>布尔值指定是打开还是关闭选定的选项。可以使用TRUE，ON或1启用该选项，并使用FALSE，OFF或0禁用该选项。如果省略布尔值，则默认为ON。</p>
+</blockquote>
+<h3 id="ANALYZE"><a href="#ANALYZE" class="headerlink" title="ANALYZE"></a>ANALYZE</h3><blockquote>
+<p>ANALYZE选项使sql_statement首先执行，然后在返回的信息中执行实际的运行时统计信息，包括在每个计划节点内花费的总经过时间以及它实际返回的行数。</p>
+</blockquote>
+<blockquote>
+<p>ANALYZE语句实际上执行SQL语句并丢弃输出信息，因此，如果要分析任何INSERT，UPDATE或DELETE之类的更新语句而不影响数据，则应将EXPLAIN ANALYZE包装在事务中，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BEGIN;</span><br><span class="line">    EXPLAIN ANALYZE sql_statement;</span><br><span class="line">ROLLBACK;</span><br></pre></td></tr></table></figure>
+<h3 id="VERBOSE"><a href="#VERBOSE" class="headerlink" title="VERBOSE"></a>VERBOSE</h3><blockquote>
+<p>VERBOSE参数显示有关计划的其他信息。默认情况下，此参数设置为FALSE。</p>
+</blockquote>
+<h3 id="COSTS"><a href="#COSTS" class="headerlink" title="COSTS"></a>COSTS</h3><blockquote>
+<p>COSTS选项包括每个计划节点的估计启动成本和总成本，以及查询计划中估计的行数和估计的每行宽度。COSTS默认为TRUE。</p>
+</blockquote>
+<h3 id="BUFFERS"><a href="#BUFFERS" class="headerlink" title="BUFFERS"></a>BUFFERS</h3><blockquote>
+<p>此参数将信息添加到缓冲区使用情况。只有在启用ANALYZE的情况下才能使用BUFFERS。默认情况下，BUFFERS参数设置为FALSE。</p>
+</blockquote>
+<h3 id="TIMING"><a href="#TIMING" class="headerlink" title="TIMING"></a>TIMING</h3><blockquote>
+<p>此参数包括实际的启动时间以及在输出中每个节点上花费的时间。TIMING默认为TRUE，并且仅在启用ANALYZE时才可以使用。</p>
+</blockquote>
+<h3 id="SUMMARY"><a href="#SUMMARY" class="headerlink" title="SUMMARY"></a>SUMMARY</h3><blockquote>
+<p>Summary参数在查询计划之后添加摘要信息，例如总时间。请注意，使用ANALYZE选项时，默认情况下包括摘要信息。</p>
+</blockquote>
+<h3 id="FORMAT"><a href="#FORMAT" class="headerlink" title="FORMAT"></a>FORMAT</h3><blockquote>
+<p>指定查询计划的输出格式，例如TEXT、XML、JSON和YAML。默认情况下，此参数设置为TEXT。</p>
+</blockquote>
+<h3 id="EXPLAIN示例"><a href="#EXPLAIN示例" class="headerlink" title="EXPLAIN示例"></a>EXPLAIN示例</h3><blockquote>
+<p>显示在film表上进行简单查询的计划：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># EXPLAIN SELECT * FROM film;</span></span><br><span class="line">                        QUERY PLAN</span><br><span class="line">----------------------------------------------------------</span><br><span class="line"> Seq Scan on film  (cost=0.00..64.00 rows=1000 width=384)</span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>按特定的film_id返回电影</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># EXPLAIN SELECT * FROM film WHERE film_id = 100;</span></span><br><span class="line">                               QUERY PLAN</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line"> Index Scan using film_pkey on film  (cost=0.28..8.29 rows=1 width=384)</span><br><span class="line">   Index Cond: (film_id = 100)</span><br><span class="line">(2 rows)</span><br><span class="line"></span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+<ul>
+<li>由于film_id已建立索引，因此该语句返回了另一个计划。在输出中，计划人员使用索引扫描而不是film表上的顺序扫描。</li>
+</ul>
+<blockquote>
+<p>为了降低成本，可以使用COSTS选项：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># EXPLAIN (COSTS FALSE) SELECT</span></span><br><span class="line">    *</span><br><span class="line">FROM</span><br><span class="line">    film</span><br><span class="line">WHERE</span><br><span class="line">    film_id = 100;</span><br><span class="line">             QUERY PLAN</span><br><span class="line">------------------------------------</span><br><span class="line"> Index Scan using film_pkey on film</span><br><span class="line">   Index Cond: (film_id = 100)</span><br><span class="line">(2 rows)</span><br><span class="line"></span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>为连接多个表的语句返回计划：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># EXPLAIN</span></span><br><span class="line">SELECT</span><br><span class="line">    f.film_id,</span><br><span class="line">    title,</span><br><span class="line">    name category_name</span><br><span class="line">FROM</span><br><span class="line">    film f</span><br><span class="line">    INNER JOIN film_category <span class="built_in">fc</span></span><br><span class="line">        ON fc.film_id = f.film_id</span><br><span class="line">    INNER JOIN category c</span><br><span class="line">        ON c.category_id = fc.category_id</span><br><span class="line">ORDER BY</span><br><span class="line">    title;</span><br><span class="line">                                      QUERY PLAN</span><br><span class="line">--------------------------------------------------------------------------------------</span><br><span class="line"> Sort  (cost=149.64..152.14 rows=1000 width=87)</span><br><span class="line">   Sort Key: f.title</span><br><span class="line">   -&gt;  Hash Join  (cost=77.86..99.81 rows=1000 width=87)</span><br><span class="line">         Hash Cond: (fc.category_id = c.category_id)</span><br><span class="line">         -&gt;  Hash Join  (cost=76.50..95.14 rows=1000 width=21)</span><br><span class="line">               Hash Cond: (fc.film_id = f.film_id)</span><br><span class="line">               -&gt;  Seq Scan on film_category <span class="built_in">fc</span>  (cost=0.00..16.00 rows=1000 width=4)</span><br><span class="line">               -&gt;  Hash  (cost=64.00..64.00 rows=1000 width=19)</span><br><span class="line">                     -&gt;  Seq Scan on film f  (cost=0.00..64.00 rows=1000 width=19)</span><br><span class="line">         -&gt;  Hash  (cost=1.16..1.16 rows=16 width=72)</span><br><span class="line">               -&gt;  Seq Scan on category c  (cost=0.00..1.16 rows=16 width=72)</span><br><span class="line">(11 rows)</span><br><span class="line"></span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要将实际的运行时统计信息添加到输出中，使用ANALYZE选项执行该语句：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>=<span class="comment"># EXPLAIN ANALYZE</span></span><br><span class="line">    SELECT</span><br><span class="line">        f.film_id,</span><br><span class="line">        title,</span><br><span class="line">        name category_name</span><br><span class="line">    FROM</span><br><span class="line">        film f</span><br><span class="line">        INNER JOIN film_category <span class="built_in">fc</span></span><br><span class="line">            ON fc.film_id = f.film_id</span><br><span class="line">        INNER JOIN category c</span><br><span class="line">            ON c.category_id = fc.category_id</span><br><span class="line">    ORDER BY</span><br><span class="line">        title;</span><br><span class="line">                                                            QUERY PLAN</span><br><span class="line">-----------------------------------------------------------------------------------------------------------------------------------</span><br><span class="line"> Sort  (cost=149.64..152.14 rows=1000 width=87) (actual time=11.511..11.644 rows=1000 loops=1)</span><br><span class="line">   Sort Key: f.title</span><br><span class="line">   Sort Method: quicksort  Memory: 103kB</span><br><span class="line">   -&gt;  Hash Join  (cost=77.86..99.81 rows=1000 width=87) (actual time=3.611..5.815 rows=1000 loops=1)</span><br><span class="line">         Hash Cond: (fc.category_id = c.category_id)</span><br><span class="line">         -&gt;  Hash Join  (cost=76.50..95.14 rows=1000 width=21) (actual time=3.206..4.777 rows=1000 loops=1)</span><br><span class="line">               Hash Cond: (fc.film_id = f.film_id)</span><br><span class="line">               -&gt;  Seq Scan on film_category <span class="built_in">fc</span>  (cost=0.00..16.00 rows=1000 width=4) (actual time=0.029..0.719 rows=1000 loops=1)</span><br><span class="line">               -&gt;  Hash  (cost=64.00..64.00 rows=1000 width=19) (actual time=3.132..3.133 rows=1000 loops=1)</span><br><span class="line">                     Buckets: 1024  Batches: 1  Memory Usage: 59kB</span><br><span class="line">                     -&gt;  Seq Scan on film f  (cost=0.00..64.00 rows=1000 width=19) (actual time=0.037..2.185 rows=1000 loops=1)</span><br><span class="line">         -&gt;  Hash  (cost=1.16..1.16 rows=16 width=72) (actual time=0.263..0.263 rows=16 loops=1)</span><br><span class="line">               Buckets: 1024  Batches: 1  Memory Usage: 9kB</span><br><span class="line">               -&gt;  Seq Scan on category c  (cost=0.00..1.16 rows=16 width=72) (actual time=0.231..0.238 rows=16 loops=1)</span><br><span class="line"> Planning Time: 1.419 ms</span><br><span class="line"> Execution Time: 11.909 ms</span><br><span class="line">(16 rows)</span><br><span class="line"></span><br><span class="line">EXPLAIN</span><br></pre></td></tr></table></figure>
+<h2 id="PostgreSQL与MySQL"><a href="#PostgreSQL与MySQL" class="headerlink" title="PostgreSQL与MySQL"></a>PostgreSQL与MySQL</h2><table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:right">PostgreSQL</th>
+<th style="text-align:center">MySQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">被称为</td>
+<td style="text-align:right">世界上最先进的开源数据库</td>
+<td style="text-align:center">世界上最受欢迎的开源数据库</td>
+</tr>
+<tr>
+<td style="text-align:left">发展历程</td>
+<td style="text-align:right">开源项目</td>
+<td style="text-align:center">开源产品</td>
+</tr>
+<tr>
+<td style="text-align:left">许可</td>
+<td style="text-align:right">MIT-style许可</td>
+<td style="text-align:center">GNU通用公共许可</td>
+</tr>
+<tr>
+<td style="text-align:left">编程语言</td>
+<td style="text-align:right">C</td>
+<td style="text-align:center">C/C++</td>
+</tr>
+<tr>
+<td style="text-align:left">GUI工具</td>
+<td style="text-align:right">PgAdmin</td>
+<td style="text-align:center">MySQL Workbench</td>
+</tr>
+<tr>
+<td style="text-align:left">事务管理</td>
+<td style="text-align:right">允许</td>
+<td style="text-align:center">允许</td>
+</tr>
+<tr>
+<td style="text-align:left">存储引擎</td>
+<td style="text-align:right">单存储引擎</td>
+<td style="text-align:center">多个存储引擎，如InnoDB和MyISAM</td>
+</tr>
+<tr>
+<td style="text-align:left">全文搜索</td>
+<td style="text-align:right">允许</td>
+<td style="text-align:center">允许</td>
+</tr>
+<tr>
+<td style="text-align:left">删除临时表</td>
+<td style="text-align:right">DROP TABLE语句中没有TEMP或TEMPORARY关键字</td>
+<td style="text-align:center">MySQL在DROP TABLE语句中支持TEMP或TEMPORARY关键字，该语句仅允许您删除临时表</td>
+</tr>
+<tr>
+<td style="text-align:left">DROP TABLE</td>
+<td style="text-align:right">支持CASCADE选项以删除表相关对象，例如表，视图等</td>
+<td style="text-align:center">不支持CASCADE选项</td>
+</tr>
+<tr>
+<td style="text-align:left">TRUNCATE TABLE</td>
+<td style="text-align:right">PostgreSQL TRUNCATE TABLE支持更多功能，例如CASCADE，RESTART IDENTITY，CONTINUE IDENTITY，事务安全等。</td>
+<td style="text-align:center">MySQL TRUNCATE TABLE不支持CASCADE和事务安全，即数据一旦删除，便无法回滚。</td>
+</tr>
+<tr>
+<td style="text-align:left">自动递增</td>
+<td style="text-align:right">SERIAL</td>
+<td style="text-align:center">AUTO_INCREMENT</td>
+</tr>
+<tr>
+<td style="text-align:left">分析功能</td>
+<td style="text-align:right">有</td>
+<td style="text-align:center">没有</td>
+</tr>
+<tr>
+<td style="text-align:left">数据类型</td>
+<td style="text-align:right">支持许多高级类型，如数组、hstore和用户定义的类型</td>
+<td style="text-align:center">SQL标准类型</td>
+</tr>
+<tr>
+<td style="text-align:left">无符号整形</td>
+<td style="text-align:right">不支持</td>
+<td style="text-align:center">支持</td>
+</tr>
+<tr>
+<td style="text-align:left">布尔型</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">在内部将TINYINT(1)用于布尔值</td>
+</tr>
+<tr>
+<td style="text-align:left">IP地址数据类型</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">设置列的默认值</td>
+<td style="text-align:right">支持常量和函数调用</td>
+<td style="text-align:center">对于TIMESTAMP或DATETIME列，必须为常数或CURRENT_TIMESTAMP</td>
+</tr>
+<tr>
+<td style="text-align:left">公用表表达式</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">支持</td>
+</tr>
+<tr>
+<td style="text-align:left">EXPLAIN输出</td>
+<td style="text-align:right">详细</td>
+<td style="text-align:center">详细</td>
+</tr>
+<tr>
+<td style="text-align:left">实体化视图</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">检查约束</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">MySQL忽略CHECK约束</td>
+</tr>
+<tr>
+<td style="text-align:left">表继承</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">存储过程的编程语言</td>
+<td style="text-align:right">Ruby、Perl、Python、TCL、PL/pgSQL、SQL、JavaScript等</td>
+<td style="text-align:center">数据库标准SQL2003相关存储过程语法</td>
+</tr>
+<tr>
+<td style="text-align:left">FULL OUTER JOIN</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">INTERSECT</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">EXCEPT</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">部分索引</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">位图索引</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">表达式索引</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">覆盖索引</td>
+<td style="text-align:right">支持</td>
+<td style="text-align:center">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">触发器</td>
+<td style="text-align:right">支持可以在大多数命令类型上触发的触发器，但在全局范围内影响数据库的触发器除外，例如角色和表空间</td>
+<td style="text-align:center">仅限于某些命令</td>
+</tr>
+<tr>
+<td style="text-align:left">分区</td>
+<td style="text-align:right">RANGE, LIST</td>
+<td style="text-align:center">RANGE、LIST、HASH、KEY和组合分区，结合使用RANGE或LIST与HASH或KEY子分区</td>
+</tr>
+<tr>
+<td style="text-align:left">任务时间表</td>
+<td style="text-align:right">pgAgent</td>
+<td style="text-align:center">Scheduled event</td>
+</tr>
+<tr>
+<td style="text-align:left">连接可扩展性</td>
+<td style="text-align:right">每个新连接都是一个OS进程</td>
+<td style="text-align:center">每个新连接都是一个OS线程</td>
+</tr>
+</tbody>
+</table>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pg/" rel="tag"><i class="fa fa-tag"></i> pg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/pg15/" rel="next" title="PostgreSQL之索引">
+                <i class="fa fa-chevron-left"></i> PostgreSQL之索引
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/pg17/" rel="prev" title="PostgreSQL之函数">
+                PostgreSQL之函数 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PostgreSQL管理"><span class="nav-number">1.</span> <span class="nav-text">PostgreSQL管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#角色管理"><span class="nav-number">1.1.</span> <span class="nav-text">角色管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建PostgreSQL角色"><span class="nav-number">1.1.1.</span> <span class="nav-text">创建PostgreSQL角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#角色属性"><span class="nav-number">1.1.2.</span> <span class="nav-text">角色属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#角色成员"><span class="nav-number">1.1.3.</span> <span class="nav-text">角色成员</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组和用户角色继承"><span class="nav-number">1.1.4.</span> <span class="nav-text">组和用户角色继承</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除角色"><span class="nav-number">1.1.5.</span> <span class="nav-text">删除角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列出用户"><span class="nav-number">1.1.6.</span> <span class="nav-text">列出用户</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份和还原数据库"><span class="nav-number">1.2.</span> <span class="nav-text">备份和还原数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#备份数据库"><span class="nav-number">1.2.1.</span> <span class="nav-text">备份数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#备份所有数据库"><span class="nav-number">1.2.2.</span> <span class="nav-text">备份所有数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#备份数据库对象"><span class="nav-number">1.2.3.</span> <span class="nav-text">备份数据库对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#恢复数据库"><span class="nav-number">1.2.4.</span> <span class="nav-text">恢复数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#使用psql还原数据库"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">使用psql还原数据库</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用pg-restore还原数据库"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">使用pg_restore还原数据库</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#表空间管理"><span class="nav-number">1.3.</span> <span class="nav-text">表空间管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CREATE-TABLESPACE语句"><span class="nav-number">1.3.1.</span> <span class="nav-text">CREATE TABLESPACE语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建表空间示例"><span class="nav-number">1.3.2.</span> <span class="nav-text">创建表空间示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ALTER-TABLESPACE语句"><span class="nav-number">1.3.3.</span> <span class="nav-text">ALTER TABLESPACE语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ALTER-TABLESPACE示例"><span class="nav-number">1.3.4.</span> <span class="nav-text">ALTER TABLESPACE示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DROP-TABLESPACE语句"><span class="nav-number">1.3.5.</span> <span class="nav-text">DROP TABLESPACE语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DROP-TABLESPACE示例"><span class="nav-number">1.3.6.</span> <span class="nav-text">DROP TABLESPACE示例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实用PG"><span class="nav-number">2.</span> <span class="nav-text">实用PG</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#重设密码"><span class="nav-number">2.1.</span> <span class="nav-text">重设密码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#psql命令"><span class="nav-number">2.2.</span> <span class="nav-text">psql命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#连接到数据库"><span class="nav-number">2.2.1.</span> <span class="nav-text">连接到数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#切换到新数据库"><span class="nav-number">2.2.2.</span> <span class="nav-text">切换到新数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列出可用数据库"><span class="nav-number">2.2.3.</span> <span class="nav-text">列出可用数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列出可用表"><span class="nav-number">2.2.4.</span> <span class="nav-text">列出可用表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取表信息"><span class="nav-number">2.2.5.</span> <span class="nav-text">获取表信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列出可用的架构"><span class="nav-number">2.2.6.</span> <span class="nav-text">列出可用的架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列出可用功能"><span class="nav-number">2.2.7.</span> <span class="nav-text">列出可用功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列出可用的视图"><span class="nav-number">2.2.8.</span> <span class="nav-text">列出可用的视图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列出用户及其角色"><span class="nav-number">2.2.9.</span> <span class="nav-text">列出用户及其角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#执行上一个命令"><span class="nav-number">2.2.10.</span> <span class="nav-text">执行上一个命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#命令历史"><span class="nav-number">2.2.11.</span> <span class="nav-text">命令历史</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从文件执行psql命令"><span class="nav-number">2.2.12.</span> <span class="nav-text">从文件执行psql命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取有关psql命令的帮助"><span class="nav-number">2.2.13.</span> <span class="nav-text">获取有关psql命令的帮助</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#打开查询执行时间"><span class="nav-number">2.2.14.</span> <span class="nav-text">打开查询执行时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#开关输出选项"><span class="nav-number">2.2.15.</span> <span class="nav-text">开关输出选项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#退出psql"><span class="nav-number">2.2.16.</span> <span class="nav-text">退出psql</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PostgreSQL描述表"><span class="nav-number">2.3.</span> <span class="nav-text">PostgreSQL描述表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用psql的DESCRIBE-TABLE"><span class="nav-number">2.3.1.</span> <span class="nav-text">使用psql的DESCRIBE TABLE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用information-schema的DESCRIBE-TABLE"><span class="nav-number">2.3.2.</span> <span class="nav-text">使用information_schema的DESCRIBE TABLE</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看数据库"><span class="nav-number">2.4.</span> <span class="nav-text">查看数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用psql工具列出数据库"><span class="nav-number">2.4.1.</span> <span class="nav-text">使用psql工具列出数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用SELECT语句列出数据库"><span class="nav-number">2.4.2.</span> <span class="nav-text">使用SELECT语句列出数据库</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看表"><span class="nav-number">2.5.</span> <span class="nav-text">查看表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用psql显示表"><span class="nav-number">2.5.1.</span> <span class="nav-text">使用psql显示表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用pg-catalog模式显示表"><span class="nav-number">2.5.2.</span> <span class="nav-text">使用pg_catalog模式显示表</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#比较两个表中的数据"><span class="nav-number">3.</span> <span class="nav-text">比较两个表中的数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用EXCEPT和UNION运算符比较两个表"><span class="nav-number">3.1.</span> <span class="nav-text">使用EXCEPT和UNION运算符比较两个表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除重复的行"><span class="nav-number">3.2.</span> <span class="nav-text">删除重复的行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用子查询删除重复的行"><span class="nav-number">3.3.</span> <span class="nav-text">使用子查询删除重复的行</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXPLAIN语句"><span class="nav-number">4.</span> <span class="nav-text">EXPLAIN语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ANALYZE"><span class="nav-number">4.1.</span> <span class="nav-text">ANALYZE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VERBOSE"><span class="nav-number">4.2.</span> <span class="nav-text">VERBOSE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#COSTS"><span class="nav-number">4.3.</span> <span class="nav-text">COSTS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BUFFERS"><span class="nav-number">4.4.</span> <span class="nav-text">BUFFERS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TIMING"><span class="nav-number">4.5.</span> <span class="nav-text">TIMING</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SUMMARY"><span class="nav-number">4.6.</span> <span class="nav-text">SUMMARY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FORMAT"><span class="nav-number">4.7.</span> <span class="nav-text">FORMAT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXPLAIN示例"><span class="nav-number">4.8.</span> <span class="nav-text">EXPLAIN示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PostgreSQL与MySQL"><span class="nav-number">5.</span> <span class="nav-text">PostgreSQL与MySQL</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">732k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">20:20</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
