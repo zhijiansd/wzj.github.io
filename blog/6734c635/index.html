@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在单主模式下部署组复制配置mysql-server.cnf123456789101112131415161718# vim /etc/my.cnf.d/mysql-server.cnf server_id=1gtid_mode=ONenforce_gtid_consistency=ONbinlog_checksum=NONE##加载Group Replication 插件plugin_load_a">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL组复制">
+<meta property="og:url" content="www.wangzhijian.cn/blog/6734c635/index.html">
+<meta property="og:site_name" content="ZhiJian">
+<meta property="og:description" content="在单主模式下部署组复制配置mysql-server.cnf123456789101112131415161718# vim /etc/my.cnf.d/mysql-server.cnf server_id=1gtid_mode=ONenforce_gtid_consistency=ONbinlog_checksum=NONE##加载Group Replication 插件plugin_load_a">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="/mysql-grafana01.png">
+<meta property="og:image" content="/mysql-grafana02.png">
+<meta property="og:image" content="/mysql-grafana03.png">
+<meta property="og:image" content="/mysql-grafana04.png">
+<meta property="og:image" content="/mysql-grafana05.png">
+<meta property="og:updated_time" content="2020-05-21T04:20:15.692Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL组复制">
+<meta name="twitter:description" content="在单主模式下部署组复制配置mysql-server.cnf123456789101112131415161718# vim /etc/my.cnf.d/mysql-server.cnf server_id=1gtid_mode=ONenforce_gtid_consistency=ONbinlog_checksum=NONE##加载Group Replication 插件plugin_load_a">
+<meta name="twitter:image" content="/mysql-grafana01.png">
+
+
+
+
+
+
+  <link rel="canonical" href="www.wangzhijian.cn/blog/6734c635/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MySQL组复制 | ZhiJian</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ZhiJian</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="www.wangzhijian.cn/blog/6734c635/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ZhiJian">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ZhiJian">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL组复制
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-05-21 10:44:29 / 修改时间：12:20:15" itemprop="dateCreated datePublished" datetime="2020-05-21T10:44:29+08:00">2020-05-21</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/6734c635/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/blog/6734c635/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">29k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">49 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="在单主模式下部署组复制"><a href="#在单主模式下部署组复制" class="headerlink" title="在单主模式下部署组复制"></a>在单主模式下部署组复制</h2><h3 id="配置mysql-server-cnf"><a href="#配置mysql-server-cnf" class="headerlink" title="配置mysql-server.cnf"></a>配置mysql-server.cnf</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/my.cnf.d/mysql-server.cnf </span></span><br><span class="line">server_id=1</span><br><span class="line">gtid_mode=ON</span><br><span class="line">enforce_gtid_consistency=ON</span><br><span class="line">binlog_checksum=NONE</span><br><span class="line"></span><br><span class="line"><span class="comment">##加载Group Replication 插件</span></span><br><span class="line">plugin_load_add=<span class="string">'group_replication.so'</span></span><br><span class="line"><span class="comment">##GR名称，格式为UUID格式。可以用SELECT UUID()来生成UUID(uuidgen命令亦可)</span></span><br><span class="line">group_replication_group_name=<span class="string">"fc62a889-749f-11ea-b4ed-000c2927db2b"</span></span><br><span class="line"><span class="comment">##指示插件在服务器启动时不自动启动组复制操作</span></span><br><span class="line">group_replication_start_on_boot=off</span><br><span class="line"><span class="comment">##本地节点IP端口，接受组中其他成员传入连接</span></span><br><span class="line">group_replication_local_address= <span class="string">"mysql1:33061"</span></span><br><span class="line"><span class="comment">##设置组成员的主机名和端口</span></span><br><span class="line">group_replication_group_seeds= <span class="string">"mysql1:33061,mysql2:33061,mysql3:33061"</span></span><br><span class="line"><span class="comment">##指示插件是否引导组，默认OFF</span></span><br><span class="line">group_replication_bootstrap_group=off</span><br></pre></td></tr></table></figure>
+<h3 id="配置或关闭SeLinux"><a href="#配置或关闭SeLinux" class="headerlink" title="配置或关闭SeLinux"></a>配置或关闭SeLinux</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># setenforce 0</span></span><br><span class="line"><span class="comment"># getenforce </span></span><br><span class="line">Permissive</span><br></pre></td></tr></table></figure>
+<h3 id="配置Firewalls"><a href="#配置Firewalls" class="headerlink" title="配置Firewalls"></a>配置Firewalls</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --add-service=mysql --permanent</span><br><span class="line">firewall-cmd --zone=public --add-port=3306/tcp --permanent</span><br><span class="line">firewall-cmd --zone=public --add-port=33061/tcp --permanent</span><br><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+<h3 id="启动MySQL"><a href="#启动MySQL" class="headerlink" title="启动MySQL"></a>启动MySQL</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl start mysqld</span></span><br></pre></td></tr></table></figure>
+<h3 id="引导节点"><a href="#引导节点" class="headerlink" title="引导节点"></a>引导节点</h3><blockquote>
+<p>禁用二进制日志记录以便在每个实例上分别创建复制用户</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SET SQL_LOG_BIN=0;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>创建一个具有REPLICATION SLAVE特权的MySQL用户</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CREATE USER rpl@<span class="string">'%'</span> IDENTIFIED BY <span class="string">'password'</span>;</span><br><span class="line">mysql&gt; GRANT REPLICATION SLAVE ON *.* TO rpl@<span class="string">'%'</span>;</span><br><span class="line">mysql&gt; GRANT BACKUP_ADMIN ON *.* TO rpl@<span class="string">'%'</span>;</span><br><span class="line">mysql&gt; FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>再次启用二进制日志记录</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SET SQL_LOG_BIN=1;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用CHANGE MASTER TO语句将server配置为复制通道,在下次需要从其他成员恢复其状态时,使用group_replication_recovery复制通道的给定凭据</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CHANGE MASTER TO MASTER_USER=<span class="string">'rpl'</span>, MASTER_PASSWORD=<span class="string">'password'</span> FOR CHANNEL <span class="string">'group_replication_recovery'</span>; </span><br><span class="line">Query OK, 0 rows affected, 2 warnings (0.21 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="启动组复制"><a href="#启动组复制" class="headerlink" title="启动组复制"></a>启动组复制</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SET GLOBAL group_replication_bootstrap_group=ON;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; START GROUP_REPLICATION;</span><br><span class="line">Query OK, 0 rows affected (4.21 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SET GLOBAL group_replication_bootstrap_group=OFF;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; select * from performance_schema.replication_group_members ;</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| group_replication_applier | f569f4df-73f0-11ea-b439-000c2965456a | mysql1      |        3306 | ONLINE       | PRIMARY     | 8.0.17         |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mysql&gt; CREATE DATABASE <span class="built_in">test</span>;</span><br><span class="line">Query OK, 1 row affected (0.08 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; USE <span class="built_in">test</span>;</span><br><span class="line">Database changed</span><br><span class="line"></span><br><span class="line">mysql&gt; CREATE TABLE t1 (c1 INT PRIMARY KEY, c2 TEXT NOT NULL);</span><br><span class="line">Query OK, 0 rows affected (0.28 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; INSERT INTO t1 VALUES (1, <span class="string">'Luis'</span>);</span><br><span class="line">Query OK, 1 row affected (0.06 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT * FROM t1;</span><br><span class="line">+----+------+</span><br><span class="line">| c1 | c2   |</span><br><span class="line">+----+------+</span><br><span class="line">|  1 | Luis |</span><br><span class="line">+----+------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW BINLOG EVENTS;</span><br><span class="line">+---------------+------+----------------+-----------+-------------+-------------------------------------------------------------------+</span><br><span class="line">| Log_name      | Pos  | Event_type     | Server_id | End_log_pos | Info                                                              |</span><br><span class="line">+---------------+------+----------------+-----------+-------------+-------------------------------------------------------------------+</span><br><span class="line">| binlog.000001 |    4 | Format_desc    |         1 |         124 | Server ver: 8.0.17, Binlog ver: 4                                 |</span><br><span class="line">| binlog.000001 |  124 | Previous_gtids |         1 |         151 |                                                                   |</span><br><span class="line">| binlog.000001 |  151 | Gtid           |         1 |         233 | SET @@SESSION.GTID_NEXT= <span class="string">'fc62a889-749f-11ea-b4ed-000c2927db2b:1'</span> |</span><br><span class="line">| binlog.000001 |  233 | Query          |         1 |         295 | BEGIN                                                             |</span><br><span class="line">| binlog.000001 |  295 | View_change    |         1 |         394 | view_id=15873835416266418:1                                       |</span><br><span class="line">| binlog.000001 |  394 | Query          |         1 |         462 | COMMIT                                                            |</span><br><span class="line">| binlog.000001 |  462 | Gtid           |         1 |         544 | SET @@SESSION.GTID_NEXT= <span class="string">'fc62a889-749f-11ea-b4ed-000c2927db2b:2'</span> |</span><br><span class="line">| binlog.000001 |  544 | Query          |         1 |         606 | BEGIN                                                             |</span><br><span class="line">| binlog.000001 |  606 | View_change    |         1 |         745 | view_id=15873835416266418:2                                       |</span><br><span class="line">| binlog.000001 |  745 | Query          |         1 |         813 | COMMIT                                                            |</span><br><span class="line">| binlog.000001 |  813 | Gtid           |         1 |         895 | SET @@SESSION.GTID_NEXT= <span class="string">'fc62a889-749f-11ea-b4ed-000c2927db2b:3'</span> |</span><br><span class="line">| binlog.000001 |  895 | Query          |         1 |         957 | BEGIN                                                             |</span><br><span class="line">| binlog.000001 |  957 | View_change    |         1 |        1096 | view_id=15873835416266418:3                                       |</span><br><span class="line">| binlog.000001 | 1096 | Query          |         1 |        1164 | COMMIT                                                            |</span><br><span class="line">+---------------+------+----------------+-----------+-------------+-------------------------------------------------------------------+</span><br><span class="line">14 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="配置其他节点"><a href="#配置其他节点" class="headerlink" title="配置其他节点"></a>配置其他节点</h3><blockquote>
+<p>mysql2配置文件如下:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># egrep -v "^$|^#|^[ ]"  /etc/my.cnf.d/mysql-server.cnf </span></span><br><span class="line">[mysqld]</span><br><span class="line">datadir=/var/lib/mysql</span><br><span class="line">socket=/var/lib/mysql/mysql.sock</span><br><span class="line"><span class="built_in">log</span>-error=/var/<span class="built_in">log</span>/mysql/mysqld.log</span><br><span class="line">pid-file=/run/mysqld/mysqld.pid</span><br><span class="line">server_id=2</span><br><span class="line">gtid_mode=ON</span><br><span class="line">enforce_gtid_consistency=ON</span><br><span class="line">binlog_checksum=NONE</span><br><span class="line">plugin_load_add=<span class="string">'group_replication.so'</span></span><br><span class="line">group_replication_group_name=<span class="string">"fc62a889-749f-11ea-b4ed-000c2927db2b"</span></span><br><span class="line">group_replication_start_on_boot=off</span><br><span class="line">group_replication_local_address= <span class="string">"mysql2:33061"</span></span><br><span class="line">group_replication_group_seeds= <span class="string">"mysql1:33061,mysql2:33061,mysql3:33061"</span></span><br><span class="line">group_replication_bootstrap_group=off</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>mysql3配置文件如下:</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># egrep -v "^$|^#|^[ ]"  /etc/my.cnf.d/mysql-server.cnf </span></span><br><span class="line">[mysqld]</span><br><span class="line">datadir=/var/lib/mysql</span><br><span class="line">socket=/var/lib/mysql/mysql.sock</span><br><span class="line"><span class="built_in">log</span>-error=/var/<span class="built_in">log</span>/mysql/mysqld.log</span><br><span class="line">pid-file=/run/mysqld/mysqld.pid</span><br><span class="line">server_id=3</span><br><span class="line">gtid_mode=ON</span><br><span class="line">enforce_gtid_consistency=ON</span><br><span class="line">binlog_checksum=NONE</span><br><span class="line">plugin_load_add=<span class="string">'group_replication.so'</span></span><br><span class="line">group_replication_group_name=<span class="string">"fc62a889-749f-11ea-b4ed-000c2927db2b"</span></span><br><span class="line">group_replication_start_on_boot=off</span><br><span class="line">group_replication_local_address= <span class="string">"mysql3:33061"</span></span><br><span class="line">group_replication_group_seeds= <span class="string">"mysql1:33061,mysql2:33061,mysql3:33061"</span></span><br><span class="line">group_replication_bootstrap_group=off</span><br></pre></td></tr></table></figure>
+<h3 id="数据库内配置"><a href="#数据库内配置" class="headerlink" title="数据库内配置"></a>数据库内配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SET SQL_LOG_BIN=0;</span><br><span class="line">CREATE USER rpl@<span class="string">'%'</span> IDENTIFIED BY <span class="string">'password'</span>;</span><br><span class="line">GRANT REPLICATION SLAVE ON *.* TO rpl@<span class="string">'%'</span>;</span><br><span class="line">GRANT BACKUP_ADMIN ON *.* TO rpl@<span class="string">'%'</span>;</span><br><span class="line">FLUSH PRIVILEGES;</span><br><span class="line">SET SQL_LOG_BIN=1;</span><br><span class="line">CHANGE MASTER TO MASTER_USER=<span class="string">'rpl'</span>, MASTER_PASSWORD=<span class="string">'password'</span> FOR CHANNEL <span class="string">'group_replication_recovery'</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="启用组复制"><a href="#启用组复制" class="headerlink" title="启用组复制"></a>启用组复制</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; START GROUP_REPLICATION;</span><br><span class="line"></span><br><span class="line">mysql&gt; select * from performance_schema.replication_group_members ;</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| group_replication_applier | 2dc84a07-73f1-11ea-91f3-000c295ca254 | mysql2      |        3306 | ONLINE       | SECONDARY   | 8.0.17         |</span><br><span class="line">| group_replication_applier | adef374d-749f-11ea-8934-000c2927db2b | mysql3      |        3306 | ONLINE       | SECONDARY   | 8.0.17         |</span><br><span class="line">| group_replication_applier | f569f4df-73f0-11ea-b439-000c2965456a | mysql1      |        3306 | ONLINE       | PRIMARY     | 8.0.17         |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW BINLOG EVENTS;</span><br></pre></td></tr></table></figure>
+<h2 id="关于组复制的一些配置"><a href="#关于组复制的一些配置" class="headerlink" title="关于组复制的一些配置"></a>关于组复制的一些配置</h2><h3 id="查看组通信地址"><a href="#查看组通信地址" class="headerlink" title="查看组通信地址"></a>查看组通信地址</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT @@group_replication_local_address;</span><br><span class="line">+-----------------------------------+</span><br><span class="line">| @@group_replication_local_address |</span><br><span class="line">+-----------------------------------+</span><br><span class="line">| mysql1:33061                      |</span><br><span class="line">+-----------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="更改主节点"><a href="#更改主节点" class="headerlink" title="更改主节点"></a>更改主节点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT group_replication_switch_to_multi_primary_mode();</span><br><span class="line">+--------------------------------------------------+</span><br><span class="line">| group_replication_switch_to_multi_primary_mode() |</span><br><span class="line">+--------------------------------------------------+</span><br><span class="line">| Mode switched to multi-primary successfully.     |</span><br><span class="line">+--------------------------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (1.12 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT group_replication_set_as_primary(<span class="string">'2dc84a07-73f1-11ea-91f3-000c295ca254'</span>);</span><br><span class="line">+--------------------------------------------------------------------------+</span><br><span class="line">| group_replication_set_as_primary(<span class="string">'2dc84a07-73f1-11ea-91f3-000c295ca254'</span>) |</span><br><span class="line">+--------------------------------------------------------------------------+</span><br><span class="line">| Primary server switched to: 2dc84a07-73f1-11ea-91f3-000c295ca254         |</span><br><span class="line">+--------------------------------------------------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (1.08 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT * FROM performance_schema.replication_group_members;</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| group_replication_applier | 2dc84a07-73f1-11ea-91f3-000c295ca254 | mysql2      |        3306 | ONLINE       | PRIMARY     | 8.0.17         |</span><br><span class="line">| group_replication_applier | adef374d-749f-11ea-8934-000c2927db2b | mysql3      |        3306 | ONLINE       | SECONDARY   | 8.0.17         |</span><br><span class="line">| group_replication_applier | f569f4df-73f0-11ea-b439-000c2965456a | mysql1      |        3306 | ONLINE       | SECONDARY   | 8.0.17         |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="更改为多主模式"><a href="#更改为多主模式" class="headerlink" title="更改为多主模式"></a>更改为多主模式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT group_replication_switch_to_multi_primary_mode();</span><br><span class="line">+--------------------------------------------------+</span><br><span class="line">| group_replication_switch_to_multi_primary_mode() |</span><br><span class="line">+--------------------------------------------------+</span><br><span class="line">| Mode switched to multi-primary successfully.     |</span><br><span class="line">+--------------------------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (1.12 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT * FROM performance_schema.replication_group_members;</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| group_replication_applier | 2dc84a07-73f1-11ea-91f3-000c295ca254 | mysql2      |        3306 | ONLINE       | PRIMARY     | 8.0.17         |</span><br><span class="line">| group_replication_applier | adef374d-749f-11ea-8934-000c2927db2b | mysql3      |        3306 | ONLINE       | PRIMARY     | 8.0.17         |</span><br><span class="line">| group_replication_applier | f569f4df-73f0-11ea-b439-000c2965456a | mysql1      |        3306 | ONLINE       | PRIMARY     | 8.0.17         |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="更改为单主模式"><a href="#更改为单主模式" class="headerlink" title="更改为单主模式"></a>更改为单主模式</h3><blockquote>
+<p>如不指定MEMBER_ID，则自动选择主节点。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT group_replication_switch_to_single_primary_mode(<span class="string">'f569f4df-73f0-11ea-b439-000c2965456a'</span>);</span><br><span class="line">+-----------------------------------------------------------------------------------------+</span><br><span class="line">| group_replication_switch_to_single_primary_mode(<span class="string">'f569f4df-73f0-11ea-b439-000c2965456a'</span>) |</span><br><span class="line">+-----------------------------------------------------------------------------------------+</span><br><span class="line">| Mode switched to single-primary successfully.                                           |</span><br><span class="line">+-----------------------------------------------------------------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.09 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT * FROM performance_schema.replication_group_members;</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| group_replication_applier | 2dc84a07-73f1-11ea-91f3-000c295ca254 | mysql2      |        3306 | ONLINE       | SECONDARY   | 8.0.17         |</span><br><span class="line">| group_replication_applier | adef374d-749f-11ea-8934-000c2927db2b | mysql3      |        3306 | ONLINE       | SECONDARY   | 8.0.17         |</span><br><span class="line">| group_replication_applier | f569f4df-73f0-11ea-b439-000c2965456a | mysql1      |        3306 | ONLINE       | PRIMARY     | 8.0.17         |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="配置写入并发"><a href="#配置写入并发" class="headerlink" title="配置写入并发"></a>配置写入并发</h3><blockquote>
+<p>默认值10适用于在LAN上运行的组，但是对于在较慢的网络（如WAN）上运行的组，请增加此数字以提高性能。</p>
+</blockquote>
+<blockquote>
+<p>该函数用于在运行时设置组的最大并行可写实例数，值域为10-200。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT group_replication_get_write_concurrency();</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">| group_replication_get_write_concurrency() |</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">| 10                                        |</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT group_replication_set_write_concurrency(20);</span><br><span class="line">+-----------------------------------------------------------------------------------+</span><br><span class="line">| group_replication_set_write_concurrency(20)                                       |</span><br><span class="line">+-----------------------------------------------------------------------------------+</span><br><span class="line">| UDF is asynchronous, check <span class="built_in">log</span> or call group_replication_get_write_concurrency(). |</span><br><span class="line">+-----------------------------------------------------------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT group_replication_get_write_concurrency();</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">| group_replication_get_write_concurrency() |</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">| 20                                        |</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="设置节点延迟退出时间"><a href="#设置节点延迟退出时间" class="headerlink" title="设置节点延迟退出时间"></a>设置节点延迟退出时间</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SET GLOBAL group_replication_unreachable_majority_timeout=600;</span><br><span class="line"></span><br><span class="line">mysql&gt; show global variables like <span class="string">'%group_replication_unreachable_majority_timeout%'</span>;</span><br><span class="line">+------------------------------------------------+-------+</span><br><span class="line">| Variable_name                                  | Value |</span><br><span class="line">+------------------------------------------------+-------+</span><br><span class="line">| group_replication_unreachable_majority_timeout | 600   |</span><br><span class="line">+------------------------------------------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="设置节点尝试重新连接次数"><a href="#设置节点尝试重新连接次数" class="headerlink" title="设置节点尝试重新连接次数"></a>设置节点尝试重新连接次数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SET GLOBAL group_replication_recovery_retry_count= 10;</span><br><span class="line"></span><br><span class="line">mysql&gt; show global variables like <span class="string">'%group_replication_recovery_retry%'</span>;</span><br><span class="line">+----------------------------------------+-------+</span><br><span class="line">| Variable_name                          | Value |</span><br><span class="line">+----------------------------------------+-------+</span><br><span class="line">| group_replication_recovery_retry_count | 10    |</span><br><span class="line">+----------------------------------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.03 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="设置节点尝试重新连接间的间隔时间"><a href="#设置节点尝试重新连接间的间隔时间" class="headerlink" title="设置节点尝试重新连接间的间隔时间"></a>设置节点尝试重新连接间的间隔时间</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SET GLOBAL group_replication_recovery_reconnect_interval= 60;</span><br><span class="line"></span><br><span class="line">mysql&gt; show global variables like <span class="string">'%group_replication_recovery_reconnect%'</span>;</span><br><span class="line">+-----------------------------------------------+-------+</span><br><span class="line">| Variable_name                                 | Value |</span><br><span class="line">+-----------------------------------------------+-------+</span><br><span class="line">| group_replication_recovery_reconnect_interval | 60    |</span><br><span class="line">+-----------------------------------------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="MySQL监控"><a href="#MySQL监控" class="headerlink" title="MySQL监控"></a>MySQL监控</h2><h3 id="解压mysqld-exporter"><a href="#解压mysqld-exporter" class="headerlink" title="解压mysqld-exporter"></a>解压mysqld-exporter</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tar -zxvf mysqld_exporter-0.12.1.linux-amd64.tar.gz </span></span><br><span class="line">mysqld_exporter-0.12.1.linux-amd64/</span><br><span class="line">mysqld_exporter-0.12.1.linux-amd64/NOTICE</span><br><span class="line">mysqld_exporter-0.12.1.linux-amd64/mysqld_exporter</span><br><span class="line">mysqld_exporter-0.12.1.linux-amd64/LICENSE</span><br><span class="line"><span class="comment"># cd mysqld_exporter-0.12.1.linux-amd64/</span></span><br><span class="line"><span class="comment"># cp mysqld_exporter /usr/local/bin/</span></span><br></pre></td></tr></table></figure>
+<h3 id="添加MySQL-exporter账户"><a href="#添加MySQL-exporter账户" class="headerlink" title="添加MySQL_exporter账户"></a>添加MySQL_exporter账户</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE USER <span class="string">'exporter'</span>@<span class="string">'%'</span> IDENTIFIED BY <span class="string">'password'</span> WITH MAX_USER_CONNECTIONS 3;</span><br><span class="line">GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO <span class="string">'exporter'</span>@<span class="string">'%'</span>;</span><br><span class="line">flush privileges;</span><br></pre></td></tr></table></figure>
+<h3 id="创建exporter帐号密码文件"><a href="#创建exporter帐号密码文件" class="headerlink" title="创建exporter帐号密码文件"></a>创建exporter帐号密码文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat &lt;&lt;EOF &gt; /etc/my.cnf.d/exporter.cnf </span></span><br><span class="line">[client]</span><br><span class="line">user=exporter</span><br><span class="line">password=password</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<h3 id="设置启动文件"><a href="#设置启动文件" class="headerlink" title="设置启动文件"></a>设置启动文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /etc/systemd/system/mysql_exporter.service</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=MySQL Exporter</span><br><span class="line">Documentation=https://github.com/prometheus/mysqld_exporter</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/bin/mysqld_exporter \</span><br><span class="line">          --collect.info_schema.tables.databases=<span class="string">"*"</span> \</span><br><span class="line">          --web.listen-address=<span class="string">":9104"</span> \</span><br><span class="line">          --web.telemetry-path=<span class="string">"/metrics"</span> \</span><br><span class="line">          --collect.info_schema.innodb_metrics \</span><br><span class="line">          --collect.global_variables \</span><br><span class="line">          --collect.info_schema.processlist \</span><br><span class="line">          --collect.mysql.user \</span><br><span class="line">          --collect.perf_schema.eventsstatements \</span><br><span class="line">          --collect.binlog_size \</span><br><span class="line">          --config.my-cnf=/etc/my.cnf.d/exporter.cnf</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line"><span class="comment"># systemctl daemon-reload</span></span><br><span class="line"><span class="comment"># systemctl start mysql_exporter</span></span><br></pre></td></tr></table></figure>
+<h3 id="设置防火墙"><a href="#设置防火墙" class="headerlink" title="设置防火墙"></a>设置防火墙</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --zone=public --add-port=9104/tcp --permanent</span><br><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+<h3 id="查看启动状况"><a href="#查看启动状况" class="headerlink" title="查看启动状况"></a>查看启动状况</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_up</span></span><br><span class="line"><span class="comment"># HELP mysql_up Whether the MySQL server is up.</span></span><br><span class="line"><span class="comment"># TYPE mysql_up gauge</span></span><br><span class="line">mysql_up 1</span><br></pre></td></tr></table></figure>
+<h3 id="MySql启动时间"><a href="#MySql启动时间" class="headerlink" title="MySql启动时间"></a>MySql启动时间</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW STATUS LIKE <span class="string">"uptime"</span>;</span><br><span class="line">+---------------+--------+</span><br><span class="line">| Variable_name | Value  |</span><br><span class="line">+---------------+--------+</span><br><span class="line">| Uptime        | 131632 |</span><br><span class="line">+---------------+--------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep uptime</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_uptime untyped</span></span><br><span class="line">mysql_global_status_uptime 131606</span><br><span class="line"><span class="comment"># HELP mysql_global_status_uptime_since_flush_status Generic metric from SHOW GLOBAL STATUS.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_uptime_since_flush_status untyped</span></span><br><span class="line">mysql_global_status_uptime_since_flush_status 131606</span><br></pre></td></tr></table></figure>
+<h3 id="查询吞吐量"><a href="#查询吞吐量" class="headerlink" title="查询吞吐量"></a>查询吞吐量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW GLOBAL STATUS LIKE <span class="string">"Questions"</span>;</span><br><span class="line">+---------------+-------+</span><br><span class="line">| Variable_name | Value |</span><br><span class="line">+---------------+-------+</span><br><span class="line">| Questions     | 185   |</span><br><span class="line">+---------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_questions</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_questions untyped</span></span><br><span class="line">mysql_global_status_questions 195</span><br></pre></td></tr></table></figure>
+<h3 id="查询MySql的查询次数"><a href="#查询MySql的查询次数" class="headerlink" title="查询MySql的查询次数"></a>查询MySql的查询次数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW GLOBAL STATUS LIKE <span class="string">"Com_select"</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="查询MySql的插入次数"><a href="#查询MySql的插入次数" class="headerlink" title="查询MySql的插入次数"></a>查询MySql的插入次数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW GLOBAL STATUS LIKE <span class="string">"Com_insert"</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="查询MySql的更新次数"><a href="#查询MySql的更新次数" class="headerlink" title="查询MySql的更新次数"></a>查询MySql的更新次数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW GLOBAL STATUS LIKE <span class="string">"Com_update"</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="查询MySql的删除次数"><a href="#查询MySql的删除次数" class="headerlink" title="查询MySql的删除次数"></a>查询MySql的删除次数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW GLOBAL STATUS LIKE <span class="string">"Com_delete"</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="查询MySQL的连接数"><a href="#查询MySQL的连接数" class="headerlink" title="查询MySQL的连接数"></a>查询MySQL的连接数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SHOW GLOBAL STATUS LIKE <span class="string">"Connections"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_commands_total</span></span><br></pre></td></tr></table></figure>
+<h3 id="获取当前慢查询设置"><a href="#获取当前慢查询设置" class="headerlink" title="获取当前慢查询设置"></a>获取当前慢查询设置</h3><blockquote>
+<p>默认值为10秒，当查询的执行时间超过long_query_time值后，计数器就会+1。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW VARIABLES LIKE <span class="string">'long_query_time'</span>;</span><br><span class="line">+-----------------+-----------+</span><br><span class="line">| Variable_name   | Value     |</span><br><span class="line">+-----------------+-----------+</span><br><span class="line">| long_query_time | 10.000000 |</span><br><span class="line">+-----------------+-----------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.19 sec)</span><br></pre></td></tr></table></figure>
+<h3 id="获取慢查询的次数"><a href="#获取慢查询的次数" class="headerlink" title="获取慢查询的次数"></a>获取慢查询的次数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW GLOBAL STATUS LIKE <span class="string">"Slow_queries"</span>;</span><br><span class="line">+---------------+-------+</span><br><span class="line">| Variable_name | Value |</span><br><span class="line">+---------------+-------+</span><br><span class="line">| Slow_queries  | 0     |</span><br><span class="line">+---------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_slow_queries</span></span><br><span class="line"><span class="comment"># HELP mysql_global_status_slow_queries Generic metric from SHOW GLOBAL STATUS.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_slow_queries untyped</span></span><br><span class="line">mysql_global_status_slow_queries 0</span><br></pre></td></tr></table></figure>
+<h3 id="查看连接数"><a href="#查看连接数" class="headerlink" title="查看连接数"></a>查看连接数</h3><blockquote>
+<p>默认的连接数限制为151，一旦可用连接耗尽，新的客户端连接就会遭到拒绝</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW VARIABLES LIKE <span class="string">'max_connections'</span>;</span><br><span class="line">+-----------------+-------+</span><br><span class="line">| Variable_name   | Value |</span><br><span class="line">+-----------------+-------+</span><br><span class="line">| max_connections | 151   |</span><br><span class="line">+-----------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_variables_max_connections</span></span><br><span class="line"><span class="comment"># HELP mysql_global_variables_max_connections Generic gauge metric from SHOW GLOBAL VARIABLES.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_variables_max_connections gauge</span></span><br><span class="line">mysql_global_variables_max_connections 151</span><br></pre></td></tr></table></figure>
+<h3 id="查看当前连接数"><a href="#查看当前连接数" class="headerlink" title="查看当前连接数"></a>查看当前连接数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW GLOBAL STATUS LIKE <span class="string">"Threads_connected"</span>;</span><br><span class="line">+-------------------+-------+</span><br><span class="line">| Variable_name     | Value |</span><br><span class="line">+-------------------+-------+</span><br><span class="line">| Threads_connected | 1     |</span><br><span class="line">+-------------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_threads_connected</span></span><br><span class="line"><span class="comment"># HELP mysql_global_status_threads_connected Generic metric from SHOW GLOBAL STATUS.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_threads_connected untyped</span></span><br><span class="line">mysql_global_status_threads_connected 1</span><br></pre></td></tr></table></figure>
+<h3 id="当前活跃连接数-非睡眠状态"><a href="#当前活跃连接数-非睡眠状态" class="headerlink" title="当前活跃连接数(非睡眠状态)"></a>当前活跃连接数(非睡眠状态)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW GLOBAL STATUS LIKE <span class="string">"Threads_running"</span>;</span><br><span class="line">+-----------------+-------+</span><br><span class="line">| Variable_name   | Value |</span><br><span class="line">+-----------------+-------+</span><br><span class="line">| Threads_running | 2     |</span><br><span class="line">+-----------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_threads_running</span></span><br><span class="line"><span class="comment"># HELP mysql_global_status_threads_running Generic metric from SHOW GLOBAL STATUS.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_threads_running untyped</span></span><br><span class="line">mysql_global_status_threads_running 2</span><br></pre></td></tr></table></figure>
+<h3 id="查询MySQL拒绝连接数"><a href="#查询MySQL拒绝连接数" class="headerlink" title="查询MySQL拒绝连接数"></a>查询MySQL拒绝连接数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW GLOBAL STATUS LIKE <span class="string">"Aborted_connects"</span>;</span><br><span class="line">+------------------+-------+</span><br><span class="line">| Variable_name    | Value |</span><br><span class="line">+------------------+-------+</span><br><span class="line">| Aborted_connects | 2     |</span><br><span class="line">+------------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_aborted_connects</span></span><br><span class="line"><span class="comment"># HELP mysql_global_status_aborted_connects Generic metric from SHOW GLOBAL STATUS.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_aborted_connects untyped</span></span><br><span class="line">mysql_global_status_aborted_connects 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_connection_errors_total</span></span><br><span class="line"><span class="comment"># HELP mysql_global_status_connection_errors_total Total number of MySQL connection errors.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_connection_errors_total counter</span></span><br><span class="line">mysql_global_status_connection_errors_total&#123;error=<span class="string">"accept"</span>&#125; 0</span><br><span class="line">mysql_global_status_connection_errors_total&#123;error=<span class="string">"internal"</span>&#125; 0</span><br><span class="line">mysql_global_status_connection_errors_total&#123;error=<span class="string">"max_connections"</span>&#125; 0</span><br><span class="line">mysql_global_status_connection_errors_total&#123;error=<span class="string">"peer_address"</span>&#125; 0</span><br><span class="line">mysql_global_status_connection_errors_total&#123;error=<span class="string">"select"</span>&#125; 0</span><br><span class="line">mysql_global_status_connection_errors_total&#123;error=<span class="string">"tcpwrap"</span>&#125; 0</span><br></pre></td></tr></table></figure>
+<h3 id="查询缓冲池大小-默认为128MB"><a href="#查询缓冲池大小-默认为128MB" class="headerlink" title="查询缓冲池大小(默认为128MB)"></a>查询缓冲池大小(默认为128MB)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show global variables like <span class="string">'innodb_buffer_pool_size'</span>;</span><br><span class="line">+-------------------------+-----------+</span><br><span class="line">| Variable_name           | Value     |</span><br><span class="line">+-------------------------+-----------+</span><br><span class="line">| innodb_buffer_pool_size | 134217728 |</span><br><span class="line">+-------------------------+-----------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_variables_innodb_buffer_pool_size</span></span><br><span class="line"><span class="comment"># HELP mysql_global_variables_innodb_buffer_pool_size Generic gauge metric from SHOW GLOBAL VARIABLES.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_variables_innodb_buffer_pool_size gauge</span></span><br><span class="line">mysql_global_variables_innodb_buffer_pool_size 1.34217728e+08</span><br></pre></td></tr></table></figure>
+<h3 id="从缓冲池读取数据的请求数量"><a href="#从缓冲池读取数据的请求数量" class="headerlink" title="从缓冲池读取数据的请求数量"></a>从缓冲池读取数据的请求数量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW GLOBAL STATUS LIKE <span class="string">"Innodb_buffer_pool_read_requests"</span>;</span><br><span class="line">+----------------------------------+--------+</span><br><span class="line">| Variable_name                    | Value  |</span><br><span class="line">+----------------------------------+--------+</span><br><span class="line">| Innodb_buffer_pool_read_requests | 218830 |</span><br><span class="line">+----------------------------------+--------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_innodb_buffer_pool_read_requests</span></span><br><span class="line"><span class="comment"># HELP mysql_global_status_innodb_buffer_pool_read_requests Generic metric from SHOW GLOBAL STATUS.</span></span><br><span class="line"><span class="comment"># TYPE mysql_global_status_innodb_buffer_pool_read_requests untyped</span></span><br><span class="line">mysql_global_status_innodb_buffer_pool_read_requests 218862</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW GLOBAL STATUS LIKE <span class="string">"Innodb_buffer_pool_reads"</span>;</span><br><span class="line">+--------------------------+-------+</span><br><span class="line">| Variable_name            | Value |</span><br><span class="line">+--------------------------+-------+</span><br><span class="line">| Innodb_buffer_pool_reads | 813   |</span><br><span class="line">+--------------------------+-------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># curl http://mysql:9104/metrics|grep mysql_global_status_innodb_buffer_pool_read_requests</span></span><br></pre></td></tr></table></figure>
+<h3 id="监控图表显示如下"><a href="#监控图表显示如下" class="headerlink" title="监控图表显示如下"></a>监控图表显示如下</h3><blockquote>
+<p>这里就不再详述Prometheus和Grafana的安装配置了。</p>
+</blockquote>
+<p><img src="/mysql-grafana01.png" alt="mysql-grafana01"><br><img src="/mysql-grafana02.png" alt="mysql-grafana02"><br><img src="/mysql-grafana03.png" alt="mysql-grafana03"><br><img src="/mysql-grafana04.png" alt="mysql-grafana04"><br><img src="/mysql-grafana05.png" alt="mysql-grafana05"></p>
+<h2 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h2><h3 id="问题1及解决"><a href="#问题1及解决" class="headerlink" title="问题1及解决"></a>问题1及解决</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tail -n 10 /var/log/mysql/mysqld.log</span></span><br><span class="line">......</span><br><span class="line">[System] [MY-010562] [Repl] Slave I/O thread <span class="keyword">for</span> channel <span class="string">'group_replication_recovery'</span>: connected to master <span class="string">'rpl@sql01:3306'</span>,replication started <span class="keyword">in</span> <span class="built_in">log</span> <span class="string">'FIRST'</span> at position 4</span><br><span class="line">[ERROR] [MY-010584] [Repl] Slave SQL <span class="keyword">for</span> channel <span class="string">'group_replication_recovery'</span>: Error <span class="string">'Can'</span>t create database <span class="string">'test'</span>; database exists<span class="string">' on query. Default database: '</span><span class="built_in">test</span><span class="string">'. Query: '</span>CREATE DATABASE <span class="built_in">test</span><span class="string">', Error_code: MY-001007</span></span><br><span class="line"><span class="string">......</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show master logs;</span><br><span class="line">+---------------+-----------+-----------+</span><br><span class="line">| Log_name      | File_size | Encrypted |</span><br><span class="line">+---------------+-----------+-----------+</span><br><span class="line">| binlog.000001 |      1164 | No        |</span><br><span class="line">+---------------+-----------+-----------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; show binary logs; </span><br><span class="line">+---------------+-----------+-----------+</span><br><span class="line">| Log_name      | File_size | Encrypted |</span><br><span class="line">+---------------+-----------+-----------+</span><br><span class="line">| binlog.000001 |      1164 | No        |</span><br><span class="line">+---------------+-----------+-----------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; select @@read_only;</span><br><span class="line">+-------------+</span><br><span class="line">| @@read_only |</span><br><span class="line">+-------------+</span><br><span class="line">|           1 |</span><br><span class="line">+-------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="built_in">set</span> global read_only=0;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; drop database <span class="built_in">test</span>;</span><br><span class="line">Query OK, 1 row affected (0.34 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; reset master;</span><br><span class="line">Query OK, 0 rows affected (0.22 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; START GROUP_REPLICATION;</span><br><span class="line">Query OK, 0 rows affected (4.75 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT * FROM performance_schema.replication_group_members;</span><br></pre></td></tr></table></figure>
+<h3 id="问题2及解决"><a href="#问题2及解决" class="headerlink" title="问题2及解决"></a>问题2及解决</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from performance_schema.replication_group_members ;</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| group_replication_applier | a886fcfc-84a2-11ea-ba6b-000c29c495b6 | sql03       |        3306 | ERROR        |             | 8.0.17         |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在正常节点查看gtid_executed值</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like <span class="string">'%GTID%'</span> \G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">Variable_name: binlog_gtid_simple_recovery</span><br><span class="line">        Value: ON</span><br><span class="line">*************************** 2. row ***************************</span><br><span class="line">Variable_name: enforce_gtid_consistency</span><br><span class="line">        Value: ON</span><br><span class="line">*************************** 3. row ***************************</span><br><span class="line">Variable_name: group_replication_gtid_assignment_block_size</span><br><span class="line">        Value: 1000000</span><br><span class="line">*************************** 4. row ***************************</span><br><span class="line">Variable_name: gtid_executed</span><br><span class="line">        Value: fc62a889-749f-11ea-b4ed-000c2927db2b:1-16:1000010</span><br><span class="line">*************************** 5. row ***************************</span><br><span class="line">Variable_name: gtid_executed_compression_period</span><br><span class="line">        Value: 1000</span><br><span class="line">*************************** 6. row ***************************</span><br><span class="line">Variable_name: gtid_mode</span><br><span class="line">        Value: ON</span><br><span class="line">*************************** 7. row ***************************</span><br><span class="line">Variable_name: gtid_next</span><br><span class="line">        Value: AUTOMATIC</span><br><span class="line">*************************** 8. row ***************************</span><br><span class="line">Variable_name: gtid_owned</span><br><span class="line">        Value: </span><br><span class="line">*************************** 9. row ***************************</span><br><span class="line">Variable_name: gtid_purged</span><br><span class="line">        Value: </span><br><span class="line">*************************** 10. row ***************************</span><br><span class="line">Variable_name: session_track_gtids</span><br><span class="line">        Value: OFF</span><br><span class="line">10 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在错误节点进行操作</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; stop group_replication;</span><br><span class="line">Query OK, 0 rows affected (1.02 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; reset master;</span><br><span class="line">Query OK, 0 rows affected (0.25 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="built_in">set</span> global gtid_purged=<span class="string">'fc62a889-749f-11ea-b4ed-000c2927db2b:1-16:1000010'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; START GROUP_REPLICATION;</span><br><span class="line">Query OK, 0 rows affected (6.72 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT * FROM performance_schema.replication_group_members;</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">| group_replication_applier | a886fcfc-84a2-11ea-ba6b-000c29c495b6 | sql03       |        3306 | ONLINE       | SECONDARY   | 8.0.17         |</span><br><span class="line">| group_replication_applier | a9783ec4-84a2-11ea-9908-000c29146404 | sql02       |        3306 | ONLINE       | SECONDARY   | 8.0.17         |</span><br><span class="line">| group_replication_applier | ab55ff59-84a2-11ea-85a8-000c29798712 | sql01       |        3306 | ONLINE       | PRIMARY     | 8.0.17         |</span><br><span class="line">+---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+</span><br><span class="line">3 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/weixin.jpg" alt="ZhiJian wechat" style="width: auto; height:250px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的二维码，订阅我的微信公众号！</div>
+</div>
+
+      </div>
+    
+
+    
+       
+    
+    
+
+    
+    
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束,感谢您的阅读-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"><i class="fa fa-tag"></i> mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/pg17/" rel="next" title="PostgreSQL之函数">
+                <i class="fa fa-chevron-left"></i> PostgreSQL之函数
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="ZhiJian">
+            
+              <p class="site-author-name" itemprop="name">ZhiJian</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">44</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/zhijiansd" title="GitHub &rarr; https://github.com/zhijiansd" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:wangzhijiansd@qq.com" title="E-Mail &rarr; mailto:wangzhijiansd@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/zhitalk" title="weixin &rarr; zhitalk"><i class="fa fa-fw fa-weixin"></i>weixin</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.51cto.com/wangzhijian" title="51blog &rarr; http://blog.51cto.com/wangzhijian" rel="noopener" target="_blank"><i class="fa fa-fw fa-pied-piper"></i>51blog</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#在单主模式下部署组复制"><span class="nav-number">1.</span> <span class="nav-text">在单主模式下部署组复制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置mysql-server-cnf"><span class="nav-number">1.1.</span> <span class="nav-text">配置mysql-server.cnf</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置或关闭SeLinux"><span class="nav-number">1.2.</span> <span class="nav-text">配置或关闭SeLinux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Firewalls"><span class="nav-number">1.3.</span> <span class="nav-text">配置Firewalls</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动MySQL"><span class="nav-number">1.4.</span> <span class="nav-text">启动MySQL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引导节点"><span class="nav-number">1.5.</span> <span class="nav-text">引导节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动组复制"><span class="nav-number">1.6.</span> <span class="nav-text">启动组复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置其他节点"><span class="nav-number">1.7.</span> <span class="nav-text">配置其他节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库内配置"><span class="nav-number">1.8.</span> <span class="nav-text">数据库内配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启用组复制"><span class="nav-number">1.9.</span> <span class="nav-text">启用组复制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于组复制的一些配置"><span class="nav-number">2.</span> <span class="nav-text">关于组复制的一些配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看组通信地址"><span class="nav-number">2.1.</span> <span class="nav-text">查看组通信地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更改主节点"><span class="nav-number">2.2.</span> <span class="nav-text">更改主节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更改为多主模式"><span class="nav-number">2.3.</span> <span class="nav-text">更改为多主模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更改为单主模式"><span class="nav-number">2.4.</span> <span class="nav-text">更改为单主模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置写入并发"><span class="nav-number">2.5.</span> <span class="nav-text">配置写入并发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置节点延迟退出时间"><span class="nav-number">2.6.</span> <span class="nav-text">设置节点延迟退出时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置节点尝试重新连接次数"><span class="nav-number">2.7.</span> <span class="nav-text">设置节点尝试重新连接次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置节点尝试重新连接间的间隔时间"><span class="nav-number">2.8.</span> <span class="nav-text">设置节点尝试重新连接间的间隔时间</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL监控"><span class="nav-number">3.</span> <span class="nav-text">MySQL监控</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解压mysqld-exporter"><span class="nav-number">3.1.</span> <span class="nav-text">解压mysqld-exporter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加MySQL-exporter账户"><span class="nav-number">3.2.</span> <span class="nav-text">添加MySQL_exporter账户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建exporter帐号密码文件"><span class="nav-number">3.3.</span> <span class="nav-text">创建exporter帐号密码文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置启动文件"><span class="nav-number">3.4.</span> <span class="nav-text">设置启动文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置防火墙"><span class="nav-number">3.5.</span> <span class="nav-text">设置防火墙</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看启动状况"><span class="nav-number">3.6.</span> <span class="nav-text">查看启动状况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MySql启动时间"><span class="nav-number">3.7.</span> <span class="nav-text">MySql启动时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询吞吐量"><span class="nav-number">3.8.</span> <span class="nav-text">查询吞吐量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询MySql的查询次数"><span class="nav-number">3.9.</span> <span class="nav-text">查询MySql的查询次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询MySql的插入次数"><span class="nav-number">3.10.</span> <span class="nav-text">查询MySql的插入次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询MySql的更新次数"><span class="nav-number">3.11.</span> <span class="nav-text">查询MySql的更新次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询MySql的删除次数"><span class="nav-number">3.12.</span> <span class="nav-text">查询MySql的删除次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询MySQL的连接数"><span class="nav-number">3.13.</span> <span class="nav-text">查询MySQL的连接数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取当前慢查询设置"><span class="nav-number">3.14.</span> <span class="nav-text">获取当前慢查询设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取慢查询的次数"><span class="nav-number">3.15.</span> <span class="nav-text">获取慢查询的次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看连接数"><span class="nav-number">3.16.</span> <span class="nav-text">查看连接数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看当前连接数"><span class="nav-number">3.17.</span> <span class="nav-text">查看当前连接数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#当前活跃连接数-非睡眠状态"><span class="nav-number">3.18.</span> <span class="nav-text">当前活跃连接数(非睡眠状态)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询MySQL拒绝连接数"><span class="nav-number">3.19.</span> <span class="nav-text">查询MySQL拒绝连接数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询缓冲池大小-默认为128MB"><span class="nav-number">3.20.</span> <span class="nav-text">查询缓冲池大小(默认为128MB)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从缓冲池读取数据的请求数量"><span class="nav-number">3.21.</span> <span class="nav-text">从缓冲池读取数据的请求数量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#监控图表显示如下"><span class="nav-number">3.22.</span> <span class="nav-text">监控图表显示如下</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些问题"><span class="nav-number">4.</span> <span class="nav-text">一些问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题1及解决"><span class="nav-number">4.1.</span> <span class="nav-text">问题1及解决</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题2及解决"><span class="nav-number">4.2.</span> <span class="nav-text">问题2及解决</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ZhiJian</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">761k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    
+    <span title="站点阅读时长">21:09</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.5.0</div>
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'YDspHswalVwn03xuqlx5EKQF-gzGzoHsz',
+        appKey: 'pA3bP9yhf50EIhapICs6ohRC',
+        placeholder: '欢迎评论',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+     <script type="text/javascript" color="255,48,48" opacity="0.7" zindex="-2" count="150" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+</body>
+</html>
